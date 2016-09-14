@@ -40,31 +40,36 @@ DefineGlobals:
   INI_FILE = %A_ScriptDir%\%INI_FILE%
   INI_FILE := FileGetLongPath(INI_FILE)
 
-  FormatTime,Date,,yyyy.MM.dd ; Получение текущей даты (2015.11.29)
+  ; FormatTime,Date,,yyyy.MM.dd ; Получение текущей даты (2015.11.29)
 
   ; Чтение параметров из INI_FILE
   IniRead,GAME_DIR,%INI_FILE%,OPTIONS,GameDir,D:\Games\World of Warcraft\
   GAME_DIR := ParseEnvironmentVariables(GAME_DIR)
   GAME_DIR := FileGetLongPath(GAME_DIR)
 
-  IniRead,ACCOUNT_1,%INI_FILE%,OPTIONS,Account_1,""
-  IniRead,ACCOUNT_2,%INI_FILE%,OPTIONS,Account_2,""
+  IniRead,ACCOUNT_1,%INI_FILE%,OPTIONS,Account_1,%A_Space%
+  IniRead,ACCOUNT_2,%INI_FILE%,OPTIONS,Account_2,%A_Space%
 
-  IniRead,REALM_1,%INI_FILE%,OPTIONS,Realm_1,""
-  IniRead,REALM_2,%INI_FILE%,OPTIONS,Realm_2,""
+  IniRead,REALM_1,%INI_FILE%,OPTIONS,Realm_1,%A_Space%
+  IniRead,REALM_2,%INI_FILE%,OPTIONS,Realm_2,%A_Space%
 
-  IniRead,CHARACTER_1,%INI_FILE%,OPTIONS,Character_1,""
-  IniRead,CHARACTER_2,%INI_FILE%,OPTIONS,Character_2,""
+  IniRead,CHARACTER_1,%INI_FILE%,OPTIONS,Character_1,%A_Space%
+  IniRead,CHARACTER_2,%INI_FILE%,OPTIONS,Character_2,%A_Space%
 
   IniRead,COPY_TO_DIR,%INI_FILE%,OPTIONS,CopyToDir,%A_Desktop%\WoW Addons Copy\World of Warcraft
   COPY_TO_DIR := ParseEnvironmentVariables(COPY_TO_DIR)
-  COPY_TO_DIR = %COPY_TO_DIR% (%Date%)
   COPY_TO_DIR := FileGetLongPath(COPY_TO_DIR)
 
   IniRead,SEPARATE_DIRS,%INI_FILE%,OPTIONS,SeparateDirs,1
   IniRead,CONFIGS,%INI_FILE%,OPTIONS,Configs,1
 
   READ_ME_FILE := COPY_TO_DIR . "\README.txt"
+  
+  IniRead,TIMESTAMPS,%INI_FILE%,OPTIONS,Timestamps,%A_Space%
+  If (TIMESTAMPS && TIMESTAMPS != "") {
+    FormatTime,Date,,%TIMESTAMPS% ; Получение текущей даты (2015.11.29)
+    COPY_TO_DIR := COPY_TO_DIR . " (" . Date . ")"
+  }
 }
 
 ; Создание списка секций INI_FILE
@@ -105,6 +110,9 @@ GetFilesList:
       dirKey = DIR_%idNum%
       If ( SEPARATE_DIRS == "1" ) {
         dirPath := COPY_TO_DIR . "\" . %dirKey%
+        If (Date) {
+          dirPath := dirPath . " (" . Date . ")"
+        }
       } else {
         dirPath := COPY_TO_DIR
       }
@@ -162,6 +170,7 @@ ProcessFilesList:
 
   ; Копирование файлов и каталогов
   PROCESSED_FILE_SIZE := 0
+  configFileParsed := false
   for index,element in FilesList
   {
     If RegExMatch(element,"^(.*)\|(.*)$",Line,1) {
@@ -185,6 +194,19 @@ ProcessFilesList:
         find = ((.*)\["%CHARACTER_1% - %REALM_1%"\] = "(.*)",)
         replace = $1`n$2["%CHARACTER_2% - %REALM_2%"] = "$3",
         TF_RegExReplace("!" . copyTo,find,replace)
+      }
+      
+      ; Удаление персональных данных из CopyAddons.ini
+      If (not configFileParsed && RegExMatch(copyTo,".*\\Manager",filePath,1)) {
+        configFile := filePath . "\extensions\AutoHotkey\CopyAddons.ini"
+        IfExist, %configFile%
+        {
+          GuiControl,MsgBox1_:Text,MsgBox1_Text,Идет обработка...`n`n%configFile%         
+          TF_RegExReplace("!" . configFile,"m)" . "^(Account_([12])).*=.*","$1 = АККАУНТ_$2")
+          TF_RegExReplace("!" . configFile,"m)" . "^(Realm_([12])).*=.*","$1 = ИГРОВОЙ_МИР_$2")
+          TF_RegExReplace("!" . configFile,"m)" . "^(Character_([12])).*=.*","$1 = НИК_$2")
+          configFileParsed := true
+        }
       }
 
       ; Обновление прогрессбара

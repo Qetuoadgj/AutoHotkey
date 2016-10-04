@@ -56,6 +56,14 @@ DefineGlobals:
   CUR_CLIPBOARD := false
 }
 
+DOCUMENT := "D:\Google Диск\HTML\2.0.4.html"
+if (DOCUMENT) {
+  DOCUMENT := DOCUMENT . " - Notepad++"
+} else {
+  WinGetTitle, DOCUMENT, ahk_class Notepad++
+}
+MsgBox, 0, %SCRIPT_WIN_TITLE%, %DOCUMENT%, 0.5
+
 SC052:: ;Numpad0
 {
   IfWinExist, ahk_exe chrome.exe
@@ -85,7 +93,7 @@ SC052:: ;Numpad0
 
       If (Clipboard) {
         If (not inArray(itemsArray, Clipboard)) {
-          IfWinExist, ahk_class Notepad++
+          IfWinExist, %DOCUMENT% ;ahk_class Notepad++
           {
             WinActivate
             WinWaitActive

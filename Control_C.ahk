@@ -1,4 +1,6 @@
-﻿#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
+﻿; https://github.com/Qetuoadgj/AutoHotkey
+
+#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn ; Enable warnings to assist with detecting common errors.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
@@ -62,7 +64,18 @@ if (DOCUMENT) {
 } else {
   WinGetTitle, DOCUMENT, ahk_class Notepad++
 }
-MsgBox, 0, %SCRIPT_WIN_TITLE%, %DOCUMENT%, 0.5
+
+IfWinExist, %DOCUMENT%
+{
+  MsgBox, 0, %SCRIPT_WIN_TITLE%, %DOCUMENT%, 0.5
+  WinWaitClose, %DOCUMENT%
+  SoundPlay,*64
+  ExitApp
+} else {
+  SoundPlay,*16
+  MsgBox, 0, Error, Open document:`n%DOCUMENT%, 1.5
+  ExitApp
+}
 
 SC052:: ;Numpad0
 {

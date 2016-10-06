@@ -10,7 +10,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 ; SetBatchLines, -1 ; Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.0.4"
+SCRIPT_VERSION := "1.0.5"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox, 0, %SCRIPT_WIN_TITLE%, Ready!, 0.5
@@ -18,7 +18,7 @@ MsgBox, 0, %SCRIPT_WIN_TITLE%, Ready!, 0.5
 CreateLogo:
 {
   logoFile := A_ScriptDir . "\Images\" . SCRIPT_NAME . ".png"
-  logoURL := "https://upload.wikimedia.org/wikipedia/en/thumb/d/d0/Chrome_Logo.svg/64px-Chrome_Logo.svg.png"
+  logoURL := "https://raw.githubusercontent.com/Qetuoadgj/AutoHotkey/master/Images/AddURL.png" ;"https://upload.wikimedia.org/wikipedia/en/thumb/d/d0/Chrome_Logo.svg/64px-Chrome_Logo.svg.png"
   logoSize := 64
   logoAlpha := 0.95
 

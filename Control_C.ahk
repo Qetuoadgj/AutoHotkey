@@ -58,9 +58,12 @@ DefineGlobals:
   CUR_CLIPBOARD := false
 }
 
-DOCUMENT := "D:\Google Диск\HTML\2.0.4.html"
-if (DOCUMENT) {
-  DOCUMENT := DOCUMENT . " - Notepad++"
+DOCUMENT_PATH := "D:\Google Диск\HTML\2.0.4.html"
+; EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
+
+If (DOCUMENT_PATH) {
+  ; RunWait, "%EDITOR_PATH%" "%DOCUMENT_PATH%"
+  DOCUMENT := DOCUMENT_PATH . " - Notepad++"
 } else {
   WinGetTitle, DOCUMENT, ahk_class Notepad++
 }

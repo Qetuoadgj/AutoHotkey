@@ -9,8 +9,11 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #Persistent ; to make it run indefinitely
 ; SetBatchLines, -1 ; Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
+Process, Priority,, High
+DetectHiddenWindows, Off
+
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.0.5"
+SCRIPT_VERSION := "1.0.6"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox, 0, %SCRIPT_WIN_TITLE%, Ready!, 0.5
@@ -53,52 +56,69 @@ DefineGlobals:
 
   ; addNewLines := 0
   ; closeAddedWindow := 1
-  
+
   SaveClipboard := "Yes"
   CUR_CLIPBOARD := false
 }
 
-DOCUMENT_PATH := "D:\Google Диск\HTML\2.0.4.html"
-; EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
-
-If (DOCUMENT_PATH) {
-  ; RunWait, "%EDITOR_PATH%" "%DOCUMENT_PATH%"
-  DOCUMENT := DOCUMENT_PATH . " - Notepad++"
-} else {
-  WinGetTitle, DOCUMENT, ahk_class Notepad++
-}
-
-IfWinExist, %DOCUMENT%
+SetDocumentWindow:
 {
-  MsgBox, 0, %SCRIPT_WIN_TITLE%, %DOCUMENT%, 0.5
-  WinWaitClose, %DOCUMENT%
-  SoundPlay,*64
-  ExitApp
-} else {
-  SoundPlay,*16
-  MsgBox, 0, Error, Open document:`n%DOCUMENT%, 1.5
-  ExitApp
+  DOCUMENT_PATH := "D:\Google Диск\HTML\2.0.4.html"
+  DOCUMENT := DOCUMENT_PATH . " - Notepad++"
+
+  EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
+
+
+  If (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH) && not WinExist(DOCUMENT)) {
+    Run, %EDITOR_PATH% "%DOCUMENT_PATH%" -multiInst -nosession
+    WinActivate, %DOCUMENT%
+    WinWaitActive, %DOCUMENT%
+  }
+
+  If (not (DOCUMENT_PATH or WinExist(DOCUMENT))) {
+    WinGetTitle, DOCUMENT, ahk_class Notepad++
+  }
+
+  ; Center Win
+  WinActivate, %DOCUMENT%
+  WinGetPos,,, Width, Height, %DOCUMENT%
+  WinMove, %DOCUMENT%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2)
+  ;
+
+  WinGet, winPID, PID, %DOCUMENT%
+  WinGet, winID, ID, %DOCUMENT%
+  ; MsgBox, %DOCUMENT%`n%winPID%
+
+  IfWinExist, %DOCUMENT%
+  {
+    MsgBox, 0, %SCRIPT_WIN_TITLE%, Path: %DOCUMENT_PATH%`nID: %winID%`nPID: %winPID%, 1.5
+    WinWaitClose, ahk_id %winID%
+    SoundPlay,*64
+    ExitApp
+  } else {
+    SoundPlay,*16
+    MsgBox, 0, Error, Open document:`n%DOCUMENT%, 1.5
+    ExitApp
+  }
 }
 
 SC052:: ;Numpad0
 {
-  IfWinExist, ahk_exe chrome.exe
-  {
-    WinGetTitle, BrowserWinTitle
-  }
+  WinGetTitle, BrowserWinTitle, ahk_exe chrome.exe
 
   If (BrowserWinTitle) {
+    WinActivate, %BrowserWinTitle%
+    WinWaitActive, %BrowserWinTitle%
     WinGetActiveTitle, ActiveWinTitle
 
     If (Clipboard) {
       If (SaveClipboard == "Yes") {
+        Clipboard =   ; Empty the clipboard.
         CUR_CLIPBOARD := Clipboard
         Sleep, 100
       }
     }
 
-    WinActivate, %BrowserWinTitle%
-    WinWaitActive, %BrowserWinTitle%
     IfWinActive, %BrowserWinTitle%
     {
       arrayLengthBefore := itemsArray.Length()
@@ -109,7 +129,7 @@ SC052:: ;Numpad0
 
       If (Clipboard) {
         If (not inArray(itemsArray, Clipboard)) {
-          IfWinExist, %DOCUMENT% ;ahk_class Notepad++
+          IfWinExist, ahk_id %winID% ;ahk_class Notepad++
           {
             WinActivate
             WinWaitActive

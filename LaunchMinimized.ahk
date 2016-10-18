@@ -1,7 +1,7 @@
 ﻿; https://github.com/Qetuoadgj/AutoHotkey
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn  ; Enable warnings to assist with detecting common errors.
+; #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
@@ -26,7 +26,7 @@ WIN_TITLE = ahk_exe %EXE%
 
 WinWait,%WIN_TITLE%,,2
 If (ErrorLevel) {
-  MsgBox,0,Error,Could not find target: %WIN_TITLE%,1.5 
+  MsgBox,0,%SCRIPT_WIN_TITLE% Error,Could not find target: %WIN_TITLE%,1.5 
 } else {
   WinGet WIN_ID,ID,%WIN_TITLE%
   WIN_TITLE = ahk_id %WIN_ID%

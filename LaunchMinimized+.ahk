@@ -39,8 +39,8 @@ Loop,%Repetitions%
 }
 
 If (not NumberOfParameters) {
-  text = Example:`n"%A_ScriptFullPath%" %ExePath%
-  ControlSendRaw,,%text%,%WinTitle%
+  ExampleText = Example:`n"%A_ScriptFullPath%" %ExePath%
+  ControlSendRaw,,%ExampleText%,%WinTitle%
 }
 
 /*

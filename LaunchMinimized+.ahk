@@ -2,40 +2,54 @@
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+SendMode,Input  ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir,%A_ScriptDir%  ; Ensures a consistent starting directory.
 
-#SingleInstance,Force ;[force|ignore|off]
+#SingleInstance,Force ; [Force|Ignore|Off]
 Process,Priority,,High
 DetectHiddenWindows,Off
 
-If (not %0%) {
-  APP_PATH := "notepad.exe"
+NumberOfParameters = %0%
+Repetitions = 3
+Delays = 50
+
+If (not NumberOfParameters) {
+  ExePath = "notepad.exe" /W
 } else {
-  APP_PATH = %1%
+  Loop,%NumberOfParameters%
+  {
+    Parameter := %A_Index%
+    ExePath = %ExePath% %Parameter%
+  }
 }
 
-APP_EXE := RegExReplace(APP_PATH,".*\\(.*)","$1")
+Run,%ExePath%,,Min,WinPID
 
-Run,%APP_PATH%,,Min,WIN_PID
-
-WinWait,ahk_exe %APP_EXE%
-WinGet,WIN_ID,ID
-WIN_TITLE = ahk_id %WIN_ID%
+WinWait,ahk_pid %WinPID%
+WinGet,WinID,ID
+WinTitle = ahk_id %WinID%
 
 SetWinDelay,-1
 
-WinMinimize,%WIN_TITLE%
-Sleep,30
-WinMinimize,%WIN_TITLE%
+WinMinimize,%WinTitle%
+Loop,%Repetitions%
+{
+  Sleep,%Delays%
+  WinMinimize,%WinTitle%
+}
+
+If (not NumberOfParameters) {
+  text = Example:`n"%A_ScriptFullPath%" %ExePath%
+  ControlSendRaw,,%text%,%WinTitle%
+}
 
 /*
 MESSAGE =
 ( LTrim RTrim
-  %APP_PATH%
-  %APP_EXE%
-  %WIN_PID%
-  %MMX%
+  %ExePath%
+  %WinPID%
+  %WinID%
+  %WinTitle%
 )
 
 MsgBox,0,,%MESSAGE%,1.0

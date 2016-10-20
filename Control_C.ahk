@@ -5,18 +5,18 @@
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
-#SingleInstance, force
+#SingleInstance,Force
 #Persistent ; to make it run indefinitely
-; SetBatchLines, -1 ; Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
+; SetBatchLines,-1 ; Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
-Process, Priority,, High
-DetectHiddenWindows, Off
+Process,Priority,,High
+DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.0.6"
+SCRIPT_VERSION := "1.0.7"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
-MsgBox, 0, %SCRIPT_WIN_TITLE%, Ready!, 0.5
+MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
 
 CreateLogo:
 {
@@ -25,37 +25,37 @@ CreateLogo:
   logoSize := 64
   logoAlpha := 0.95
 
-  GdipCreateLogo(logoFile, logoURL, logoSize, logoAlpha)
+  GdipCreateLogo(logoFile,logoURL,logoSize,logoAlpha)
 }
 
 CreateGUI:
 {
-  Gui, %SCRIPT_NAME%_: +AlwaysOnTop
-  Gui, %SCRIPT_NAME%_: Add, Button, x5 y5 w90 h40 gResetArray, Reset Array
-  Gui, %SCRIPT_NAME%_: Add, Text, x105 y7 w55 h20, New Lines
-  Gui, %SCRIPT_NAME%_: Add, ComboBox, x160 y5 w45 h300 vNewLines, 0|1||2|3|4|5|6|7|8|9|10
-  Gui, %SCRIPT_NAME%_: Add, Text, x105 y30 w55 h20, Use Enter
-  Gui, %SCRIPT_NAME%_: Add, ComboBox, x160 y27 w45 h300 vUseEnter, Yes||No|
-  Gui, %SCRIPT_NAME%_: Add, Text, x215 y7 w80 h20, Close Window
-  Gui, %SCRIPT_NAME%_: Add, ComboBox, x290 y5 w45 h300 vCloseWindow, Yes|No||
-  Gui, %SCRIPT_NAME%_: Add, Text, x215 y30 w80 h20, Insert Counter
-  Gui, %SCRIPT_NAME%_: Add, ComboBox, x290 y27 w45 h300 vInsertCounter, Yes|No||
-  Gui, %SCRIPT_NAME%_: Submit, Hide
+  Gui,%SCRIPT_NAME%_: +AlwaysOnTop
+  Gui,%SCRIPT_NAME%_: Add,Button,x5 y5 w90 h40 gResetArray,Reset Array
+  Gui,%SCRIPT_NAME%_: Add,Text,x105 y7 w55 h20,New Lines
+  Gui,%SCRIPT_NAME%_: Add,ComboBox,x160 y5 w45 h300 vNewLines,0|1||2|3|4|5|6|7|8|9|10
+  Gui,%SCRIPT_NAME%_: Add,Text,x105 y30 w55 h20,Use Enter
+  Gui,%SCRIPT_NAME%_: Add,ComboBox,x160 y27 w45 h300 vUseEnter,Yes||No|
+  Gui,%SCRIPT_NAME%_: Add,Text,x215 y7 w80 h20,Close Window
+  Gui,%SCRIPT_NAME%_: Add,ComboBox,x290 y5 w45 h300 vCloseWindow,Yes|No||
+  Gui,%SCRIPT_NAME%_: Add,Text,x215 y30 w80 h20,Insert Counter
+  Gui,%SCRIPT_NAME%_: Add,ComboBox,x290 y27 w45 h300 vInsertCounter,Yes|No||
+  Gui,%SCRIPT_NAME%_: Submit,Hide
 }
 
 DefineGlobals:
 {
-  itemsArray := Object() ; Таблица проверки дубликатов
-  timeToWait = 0.5 ;0.1 ; 10 msec
+  ItemsArray := Object() ; Таблица проверки дубликатов
+  ClipWaitTime = 0.5 ;0.1 ; 10 msec
 
-  arrayLengthBefore := 0
-  arrayLengthAfter := 0
+  ArrayLengthBefore := 0
+  ArrayLengthAfter := 0
 
-  ; insertCounter := 1
-  ; counter := 0
+  ; InsertCounter := 1
+  ; Counter := 0
 
-  ; addNewLines := 0
-  ; closeAddedWindow := 1
+  ; AddNewLines := 0
+  ; CloseAddedWindow := 1
 
   SaveClipboard := "Yes"
   CUR_CLIPBOARD := false
@@ -64,130 +64,130 @@ DefineGlobals:
 SetDocumentWindow:
 {
   DOCUMENT_PATH := "D:\Google Диск\HTML\2.0.4.html"
-  DOCUMENT := DOCUMENT_PATH . " - Notepad++"
+  ; DOCUMENT_FILE := RegExReplace(DOCUMENT_PATH,".*\\(.*)","$1")
+  DOCUMENT_NPP_TITLE := DOCUMENT_PATH . " - Notepad++"
 
   EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
 
 
-  If (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH) && not WinExist(DOCUMENT)) {
-    Run, %EDITOR_PATH% "%DOCUMENT_PATH%" -multiInst -nosession
-    WinActivate, %DOCUMENT%
-    WinWaitActive, %DOCUMENT%
+  If (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH)) {
+    If (not WinExist(DOCUMENT_NPP_TITLE)) {
+      Run,"%EDITOR_PATH%" "%DOCUMENT_PATH%" -multiInst -nosession,,,Npp_WinPID
+      WinWait,ahk_pid %Npp_WinPID%
+      WinGet,Npp_WinID,ID
+    } else {
+      WinGet,Npp_WinID,ID,%DOCUMENT_NPP_TITLE%
+    }
+    WinActivate,ahk_id %Npp_WinID%
+    ; Center Win
+    ; ----------------------------------------
+    WinGetPos,,,Width,Height,ahk_id %Npp_WinID%
+    WinMove,ahk_id %Npp_WinID%,,(A_ScreenWidth/2)-(Width/2),(A_ScreenHeight/2)-(Height/2)
+    ; ----------------------------------------
   }
 
-  If (not (DOCUMENT_PATH or WinExist(DOCUMENT))) {
-    WinGetTitle, DOCUMENT, ahk_class Notepad++
-  }
-
-  ; Center Win
-  WinActivate, %DOCUMENT%
-  WinGetPos,,, Width, Height, %DOCUMENT%
-  WinMove, %DOCUMENT%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2)
-  ;
-
-  WinGet, winPID, PID, %DOCUMENT%
-  WinGet, winID, ID, %DOCUMENT%
-  ; MsgBox, %DOCUMENT%`n%winPID%
-
-  IfWinExist, %DOCUMENT%
+  IfWinExist,%DOCUMENT_NPP_TITLE%
   {
-    MsgBox, 0, %SCRIPT_WIN_TITLE%, Path: %DOCUMENT_PATH%`nID: %winID%`nPID: %winPID%, 1.5
-    WinWaitClose, ahk_id %winID%
+    MsgBox,0,%SCRIPT_WIN_TITLE%,Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%,1.5
+    WinWaitClose,ahk_id %Npp_WinID%
     SoundPlay,*64
     ExitApp
   } else {
     SoundPlay,*16
-    MsgBox, 0, Error, Open document:`n%DOCUMENT%, 1.5
+    MsgBox,0,Error,Open document:`n%DOCUMENT_PATH%,1.5
     ExitApp
   }
 }
 
 SC052:: ;Numpad0
 {
-  WinGetTitle, BrowserWinTitle, ahk_exe chrome.exe
+  WinGet,LastActive_WinID,ID,A
 
-  If (BrowserWinTitle) {
-    WinActivate, %BrowserWinTitle%
-    WinWaitActive, %BrowserWinTitle%
-    WinGetActiveTitle, ActiveWinTitle
+  IfWinExist,ahk_exe chrome.exe
+  {
+    WinGet,Chrome_WinID,ID
 
     If (Clipboard) {
       If (SaveClipboard == "Yes") {
         Clipboard =   ; Empty the clipboard.
         CUR_CLIPBOARD := Clipboard
-        Sleep, 100
+        Sleep,100
       }
     }
 
-    IfWinActive, %BrowserWinTitle%
+    WinActivate,ahk_id %Chrome_WinID%
+    WinWaitActive,ahk_id %Chrome_WinID%
+    IfWinActive,ahk_id %Chrome_WinID%
     {
-      arrayLengthBefore := itemsArray.Length()
+      ArrayLengthBefore := ItemsArray.Length()
 
-      Clipboard =   ; Empty the clipboard.
-      SendEvent, ^c
-      ClipWait, %timeToWait%
+      SendEvent,^c
+      ClipWait,%ClipWaitTime%
 
       If (Clipboard) {
-        If (not inArray(itemsArray, Clipboard)) {
-          IfWinExist, ahk_id %winID% ;ahk_class Notepad++
+        If (not InArray(ItemsArray,Clipboard)) {
+          IfWinExist,ahk_id %Npp_WinID%
           {
-            WinActivate
-            WinWaitActive
+            WinActivate,ahk_id %Npp_WinID%
+            WinWaitActive,ahk_id %Npp_WinID%
 
-            WinGetActiveTitle, EditorTitle
-            EditorTitle := RegExReplace(EditorTitle, ".*\\(.*)", "$1")
-            EditorTitle := RegExReplace(EditorTitle, "(.*) - Notepad\+\+", "$1")
-            EditorTitle := RegExReplace(EditorTitle, "^[?] ", "")
-            EditorTitle := RegExReplace(EditorTitle, "^[*]", "")
+            WinGetActiveTitle,Npp_EditorTitle
+            ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,".*\\(.*)","$1")
+            ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"(.*) - Notepad\+\+","$1")
+            Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[?] ","")
+            Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[*]","")
 
-            If (EditorTitle == A_ScriptName) {
-              MsgBox, 0, Error, Select another document!, 1.5
+            If (Npp_EditorTitle == A_ScriptName or Npp_EditorTitle != DOCUMENT_NPP_TITLE) {
+              MsgBox,0,Error,Select another document!,1.5
+              ; MsgBox,0,Error,A_ScriptName: %A_ScriptName%`nNpp_EditorTitle: %Npp_EditorTitle%`nDOCUMENT_NPP_TITLE: %DOCUMENT_NPP_TITLE%,3
             } else {
-              clipBody := Clipboard
-              clipText := clipBody
+              ClipBody := Clipboard
+              ClipText := ClipBody
 
               If (InsertCounter == "Yes") {
-                counter := itemsArray.Length() + 1
-                clipText := "<!-- " . counter . " -->" . "`n" . clipText
+                Counter := ItemsArray.Length() + 1
+                ClipText := "<!-- " . Counter . " -->" . "`n" . ClipText
               }
 
-              addLines := NewLines + 1
+              AddLines := NewLines + 1
               If (UseEnter == "No") {
-                Loop, %addLines% {
-                  clipText := clipText . "`n"
+                Loop,%AddLines% {
+                  ClipText := ClipText . "`n"
                 }
               }
 
               Clipboard =   ; Empty the clipboard.
-              Clipboard = %clipText%
-              ClipWait, 2
+              Clipboard = %ClipText%
+              ClipWait,3
 
-              SendEvent, {End}^v ;{Enter %newLines%} ; SendEvent, {End}^v{Enter 2}
+              SendEvent,{End}^v
               If (UseEnter == "Yes") {
-                SendEvent, {Enter %newLines%}
+                SendEvent,{Enter %NewLines%}
               }
-              If (RegExMatch(EditorTitle, ".*[.].*", match, 1)) {
-                Send, ^s
+              If (RegExMatch(Npp_EditorTitle,".*[.].*",match,1)) {
+                Send,^s
               }
-              itemsArray.Insert(clipBody) ;itemsArray.Insert(Clipboard)
+              ItemsArray.Insert(ClipBody)
             }
           }
         } else {
-          MsgBox, 0, Error, Already in array!, 0.5
+          MsgBox,0,Error,Already in array!,0.5
         }
       }
 
       If (CUR_CLIPBOARD) {
         Clipboard =   ; Empty the clipboard.
         Clipboard = %CUR_CLIPBOARD%
-        ClipWait, %timeToWait%
+        ClipWait,%ClipWaitTime%
       }
 
-      arrayLengthAfter := itemsArray.Length()
+      ArrayLengthAfter := ItemsArray.Length()
 
-      WinActivate, %ActiveWinTitle%
-      If (CloseWindow == "Yes" && arrayLengthAfter > arrayLengthBefore) {
-        SendEvent, ^{F4}
+      WinActivate,ahk_id %LastActive_WinID%
+      If (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore) {
+        WinActivate,ahk_id %Chrome_WinID%
+        WinWaitActive,ahk_id %Chrome_WinID%
+        SendEvent,^{F4}
       }
     }
   }
@@ -196,13 +196,13 @@ SC052:: ;Numpad0
 
 SC04F:: ;Numpad1
 {
-  ; itemsArray := Object() ; Сброс таблицы проверки дубликатов
+  ; ItemsArray := Object() ; Сброс таблицы проверки дубликатов
 
-  ControlGet, bool, Visible, , , %SCRIPT_NAME% From
-  If (bool) {
-    Gui, %SCRIPT_NAME%_: Submit, Hide
+  ControlGet,Bool,Visible,,,%SCRIPT_NAME% From
+  If (Bool) {
+    Gui,%SCRIPT_NAME%_: Submit,Hide
   } Else {
-    Gui, %SCRIPT_NAME%_: Show, xCenter yCenter h50 w340, %SCRIPT_NAME% From
+    Gui,%SCRIPT_NAME%_: Show,xCenter yCenter h50 w340,%SCRIPT_NAME% From
   }
 
   Return
@@ -211,14 +211,14 @@ SC04F:: ;Numpad1
 ; ------------------ GUI BUTTONS ------------------
 ResetArray:
 {
-  itemsArray := Object() ; Сброс таблицы проверки дубликатов
-  Gui, Submit, Hide
-  MsgBox, 0, %SCRIPT_WIN_TITLE%, Done!, 0.5
+  ItemsArray := Object() ; Сброс таблицы проверки дубликатов
+  Gui,Submit,Hide
+  MsgBox,0,%SCRIPT_WIN_TITLE%,Done!,0.5
   Return
 }
 
 ; ------------------ FUNCTIONS ------------------
-inArray(haystack, needle) {
+InArray(haystack,needle) {
   if(!isObject(haystack)) {
     return false
   }

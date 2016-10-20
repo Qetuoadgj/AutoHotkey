@@ -198,11 +198,11 @@ SC04F:: ;Numpad1
 {
   ; ItemsArray := Object() ; Сброс таблицы проверки дубликатов
 
-  ControlGet,Bool,Visible,,,%SCRIPT_NAME% From
+  ControlGet,Bool,Visible,,,%SCRIPT_NAME%
   If (Bool) {
     Gui,%SCRIPT_NAME%_: Submit,Hide
   } Else {
-    Gui,%SCRIPT_NAME%_: Show,xCenter yCenter h50 w340,%SCRIPT_NAME% From
+    Gui,%SCRIPT_NAME%_: Show,xCenter yCenter h50 w340,%SCRIPT_NAME%
   }
 
   Return

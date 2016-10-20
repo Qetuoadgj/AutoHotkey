@@ -105,7 +105,7 @@ SC052:: ;Numpad0
 
   IfWinExist,ahk_exe chrome.exe
   {
-    WinGet,Chrome_WinID,ID
+    WinGet,Chrome_WinID,ID,ahk_exe chrome.exe
 
     If (Clipboard) {
       If (SaveClipboard == "Yes") {

@@ -10,18 +10,35 @@ Process,Priority,,High
 DetectHiddenWindows,Off
 
 NumberOfParameters = %0%
-Repetitions = 3
-Delays = 50
+
+Delays := 100 ; --minimize-delays=Integer
+MaxTimeToTry := 3000 ; --minimize-time=Integer
 
 If (not NumberOfParameters) {
   ExePath = "notepad.exe" /W
 } else {
+  ExePath = %1%
   Loop,%NumberOfParameters%
   {
+    IfEqual,A_Index,1,Continue
     Parameter := %A_Index%
-    ExePath = %ExePath% %Parameter%
+
+    If RegExMatch(Parameter,"i)" . "--minimize-delays=(\d+)",DelaysMatch,1) {
+      Delays := DelaysMatch1
+      Continue
+    }
+    If RegExMatch(Parameter,"i)" . "--minimize-time=(\d+)",TimeMatch,1) {
+      MaxTimeToTry := TimeMatch1
+      Continue
+    }
+
+    Parameters = %Parameters% %Parameter%
   }
+  ExePath = %ExePath% %Parameters%
 }
+
+Delays := (Delays < 10) ? 10 : Delays ; Normalize
+Repetitions := floor(MaxTimeToTry / Delays)
 
 Run,%ExePath%,,Min,WinPID
 
@@ -39,7 +56,7 @@ Loop,%Repetitions%
 }
 
 If (not NumberOfParameters) {
-  ExampleText = Example:`n"%A_ScriptFullPath%" %ExePath%
+  ExampleText = Example:`n"%A_ScriptFullPath%" %ExePath% --Minimize-Delays=%Delays% --Minimize-Time=%MaxTimeToTry%
   ControlSendRaw,,%ExampleText%,%WinTitle%
 }
 
@@ -50,6 +67,7 @@ MESSAGE =
   %WinPID%
   %WinID%
   %WinTitle%
+  %Repetitions%
 )
 
 MsgBox,0,,%MESSAGE%,1.0

@@ -1,9 +1,9 @@
 ; https://github.com/Qetuoadgj/AutoHotkey v1.0.0
 
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-; #Warn  ; Enable warnings to assist with detecting common errors.
-SendMode,Input  ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir,%A_ScriptDir%  ; Ensures a consistent starting directory.
+#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
+; #Warn ; Enable warnings to assist with detecting common errors.
+SendMode,Input ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance,Force ; [Force|Ignore|Off]
 Process,Priority,,High
@@ -94,10 +94,10 @@ If (not NumberOfParameters) {
   Clipboard = %HelpText%
   ClipWait,0.5
 
-  ; SetKeyDelay,1,1
-  ; ControlSend,,% Clipboard,%WinTitle%
+ ; SetKeyDelay,1,1
+ ; ControlSend,,% Clipboard,%WinTitle%
   WinActivateBottom,%WinTitle%
-  ; ControlSendRaw,,% Clipboard,%WinTitle%
+ ; ControlSendRaw,,% Clipboard,%WinTitle%
   ControlSend,,^v,%WinTitle%
 
   Clipboard = ; Empty the clipboard.

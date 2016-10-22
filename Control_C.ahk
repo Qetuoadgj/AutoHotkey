@@ -1,4 +1,5 @@
 ﻿; https://github.com/Qetuoadgj/AutoHotkey
+; https://github.com/Qetuoadgj/AutoHotkey/raw/master/Control_C.ahk | v1.0.0
 
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn ; Enable warnings to assist with detecting common errors.
@@ -30,17 +31,18 @@ CreateLogo:
 
 CreateGUI:
 {
-  Gui,%SCRIPT_NAME%_: +AlwaysOnTop
-  Gui,%SCRIPT_NAME%_: Add,Button,x5 y5 w90 h40 gResetArray,Reset Array
-  Gui,%SCRIPT_NAME%_: Add,Text,x105 y7 w55 h20,New Lines
-  Gui,%SCRIPT_NAME%_: Add,ComboBox,x160 y5 w45 h300 vNewLines,0|1||2|3|4|5|6|7|8|9|10
-  Gui,%SCRIPT_NAME%_: Add,Text,x105 y30 w55 h20,Use Enter
-  Gui,%SCRIPT_NAME%_: Add,ComboBox,x160 y27 w45 h300 vUseEnter,Yes||No|
-  Gui,%SCRIPT_NAME%_: Add,Text,x215 y7 w80 h20,Close Window
-  Gui,%SCRIPT_NAME%_: Add,ComboBox,x290 y5 w45 h300 vCloseWindow,Yes|No||
-  Gui,%SCRIPT_NAME%_: Add,Text,x215 y30 w80 h20,Insert Counter
-  Gui,%SCRIPT_NAME%_: Add,ComboBox,x290 y27 w45 h300 vInsertCounter,Yes|No||
-  Gui,%SCRIPT_NAME%_: Submit,Hide
+  MainGUI := SCRIPT_NAME . "_"
+  Gui,%MainGUI%: +AlwaysOnTop
+  Gui,%MainGUI%: Add,Button,x5 y5 w90 h40 gResetArray,Reset Array
+  Gui,%MainGUI%: Add,Text,x105 y7 w55 h20,New Lines
+  Gui,%MainGUI%: Add,ComboBox,x160 y5 w45 h300 vNewLines,0|1||2|3|4|5|6|7|8|9|10
+  Gui,%MainGUI%: Add,Text,x105 y30 w55 h20,Use Enter
+  Gui,%MainGUI%: Add,ComboBox,x160 y27 w45 h300 vUseEnter,Yes||No|
+  Gui,%MainGUI%: Add,Text,x215 y7 w80 h20,Close Window
+  Gui,%MainGUI%: Add,ComboBox,x290 y5 w45 h300 vCloseWindow,Yes|No||
+  Gui,%MainGUI%: Add,Text,x215 y30 w80 h20,Insert Counter
+  Gui,%MainGUI%: Add,ComboBox,x290 y27 w45 h300 vInsertCounter,Yes|No||
+  Gui,%MainGUI%: Submit,Hide
 }
 
 DefineGlobals:
@@ -68,7 +70,6 @@ SetDocumentWindow:
   DOCUMENT_NPP_TITLE := DOCUMENT_PATH . " - Notepad++"
 
   EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
-
 
   If (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH)) {
     If (not WinExist(DOCUMENT_NPP_TITLE)) {
@@ -109,8 +110,8 @@ SC052:: ;Numpad0
 
     If (Clipboard) {
       If (SaveClipboard == "Yes") {
-        Clipboard =   ; Empty the clipboard.
         CUR_CLIPBOARD := Clipboard
+        Clipboard = ; Empty the clipboard.
         Sleep,100
       }
     }
@@ -156,7 +157,7 @@ SC052:: ;Numpad0
                 }
               }
 
-              Clipboard =   ; Empty the clipboard.
+              Clipboard = ; Empty the clipboard.
               Clipboard = %ClipText%
               ClipWait,3
 
@@ -176,7 +177,7 @@ SC052:: ;Numpad0
       }
 
       If (CUR_CLIPBOARD) {
-        Clipboard =   ; Empty the clipboard.
+        Clipboard = ; Empty the clipboard.
         Clipboard = %CUR_CLIPBOARD%
         ClipWait,%ClipWaitTime%
       }
@@ -198,11 +199,11 @@ SC04F:: ;Numpad1
 {
   ; ItemsArray := Object() ; Сброс таблицы проверки дубликатов
 
-  ControlGet,Bool,Visible,,,%SCRIPT_NAME%
+  ControlGet,Bool,Visible,,,%SCRIPT_WIN_TITLE%
   If (Bool) {
-    Gui,%SCRIPT_NAME%_: Submit,Hide
+    Gui,%MainGUI%: Submit,Hide
   } Else {
-    Gui,%SCRIPT_NAME%_: Show,xCenter yCenter h50 w340,%SCRIPT_NAME%
+    Gui,%MainGUI%: Show,xCenter yCenter h50 w340,%SCRIPT_WIN_TITLE%
   }
 
   Return

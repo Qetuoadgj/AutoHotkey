@@ -1,4 +1,5 @@
-; https://github.com/Qetuoadgj/AutoHotkey v1.0.0
+; https://github.com/Qetuoadgj/AutoHotkey
+; https://github.com/Qetuoadgj/AutoHotkey/raw/master/LaunchMinimized%2B.ahk | v1.0.0
 
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn ; Enable warnings to assist with detecting common errors.

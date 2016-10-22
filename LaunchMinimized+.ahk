@@ -1,4 +1,4 @@
-; https://github.com/Qetuoadgj/AutoHotkey
+; https://github.com/Qetuoadgj/AutoHotkey v1.0.0
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
@@ -68,16 +68,15 @@ If (not NumberOfParameters) {
   Clipboard = ; Empty the clipboard.
 
   HelpText =
-  ( LTrim RTrim Join`r`n ; or perhaps just `n for your app)   
+  ( LTrim RTrim Join`r`n ; or perhaps just `n for your app)
     Example:
-    
+
     "%A_ScriptFullPath%" %ExePath% --Minimize-Time=%TimeToTry% --Minimize-Delays=%Delays% --Minimize-Msg=%PrintMessage%
-    
-    ----------
+
     Explanation:
-    
+
     "%A_ScriptFullPath%" - path to this application.
-    
+
     %ExePath% - path to the target application (including it's command line switches).
 
     --Minimize-Time=%TimeToTry% - max time given for minimization tries (%TimeToTry% msec)
@@ -88,10 +87,10 @@ If (not NumberOfParameters) {
 
     --Minimize-Msg=%PrintMessage% - print debug messages on screen (%PrintMessage%)
     %A_Space%%A_Space%0 - off,%A_Space%1 - done,%A_Space%2 - all,%A_Space%default = 0.
-    
-    ----------
+
   )
 
+  /*
   Clipboard = %HelpText%
   ClipWait,0.5
 
@@ -104,6 +103,9 @@ If (not NumberOfParameters) {
   Clipboard = ; Empty the clipboard.
   Clipboard := SavedClipboard
   ClipWait,0.5
+  */
+
+  ControlSetText,,%HelpText%,%WinTitle%
 }
 
 If (PrintMessage=1 or PrintMessage=2) {

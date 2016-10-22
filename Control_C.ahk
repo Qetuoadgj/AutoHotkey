@@ -29,6 +29,14 @@ CreateLogo:
   GdipCreateLogo(logoFile,logoURL,logoSize,logoAlpha)
 }
 
+SetTrayIcon:
+{
+  icoFile := A_ScriptDir . "\Images\" . SCRIPT_NAME . ".ico"
+  If FileExist(icoFile) {
+   Menu,Tray,Icon,%icoFile%
+  }
+}
+
 CreateGUI:
 {
   MainGUI := SCRIPT_NAME . "_"

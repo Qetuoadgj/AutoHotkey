@@ -12,7 +12,7 @@ DetectHiddenWindows,Off
 NumberOfParameters = %0%
 
 Delays := 100 ; --minimize-delays=Integer
-MaxTimeToTry := 3000 ; --minimize-time=Integer
+TimeToTry := 3000 ; --minimize-time=Integer
 PrintMessage := false
 
 If (not NumberOfParameters) {
@@ -29,7 +29,7 @@ If (not NumberOfParameters) {
       Continue
     }
     If RegExMatch(Parameter,"i)" . "--Minimize-Time=(\d+)",TimeMatch,1) {
-      MaxTimeToTry := TimeMatch1
+      TimeToTry := TimeMatch1
       Continue
     }
 
@@ -44,7 +44,7 @@ If (not NumberOfParameters) {
 }
 
 Delays := (Delays < 10) ? 10 : Delays ; Normalize
-Repetitions := floor(MaxTimeToTry / Delays)
+Repetitions := floor(TimeToTry / Delays)
 
 Run,%ExePath%,,Min,WinPID
 
@@ -68,11 +68,19 @@ If (not NumberOfParameters) {
   Clipboard = ; Empty the clipboard.
 
   HelpText =
-  ( LTrim RTrim Join`r`n ; or perhaps just `n for your app)
+  ( LTrim RTrim Join`r`n ; or perhaps just `n for your app)   
     Example:
-    %A_Space%%A_Space%"%A_ScriptFullPath%" %ExePath% --Minimize-Time=%MaxTimeToTry% --Minimize-Delays=%Delays% --Minimize-Msg=%PrintMessage%
+    
+    "%A_ScriptFullPath%" %ExePath% --Minimize-Time=%TimeToTry% --Minimize-Delays=%Delays% --Minimize-Msg=%PrintMessage%
+    
+    ----------
+    Explanation:
+    
+    "%A_ScriptFullPath%" - path to this application.
+    
+    %ExePath% - path to the target application (including it's command line switches).
 
-    --Minimize-Time=%MaxTimeToTry% - max time given for minimization tries (%MaxTimeToTry% msec)
+    --Minimize-Time=%TimeToTry% - max time given for minimization tries (%TimeToTry% msec)
     %A_Space%%A_Space%min = 0,%A_Space%default = 3000 msec.
 
     --Minimize-Delays=%Delays% - delay between window minimization tries (%Delays% msec)
@@ -80,6 +88,8 @@ If (not NumberOfParameters) {
 
     --Minimize-Msg=%PrintMessage% - print debug messages on screen (%PrintMessage%)
     %A_Space%%A_Space%0 - off,%A_Space%1 - done,%A_Space%2 - all,%A_Space%default = 0.
+    
+    ----------
   )
 
   Clipboard = %HelpText%

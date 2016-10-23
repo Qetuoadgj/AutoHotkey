@@ -32,7 +32,8 @@ If not FileExist(ExePath) {
       }
       DownloadURL := "http://singularlabs.com/download/10350/"
       UrlDownloadToFile,%DownloadURL%,%DefaultExePath%
-      Run,explorer "%DefaultExeDir%"
+      Run,"explorer" "%DefaultExeDir%"
+      Sleep,1000
     }
 }
 

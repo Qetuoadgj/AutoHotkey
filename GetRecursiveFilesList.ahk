@@ -40,7 +40,7 @@ Loop,Files,%1%\*,FR
 
 Clipboard = ; Empty the clipboard.
 Clipboard := FilesList
-ClipWait,2.0
+ClipWait ;,2.0
 
 ; MsgBox,0,,Done!,0.5
 MsgBox,0,,%FilesList%,1.5

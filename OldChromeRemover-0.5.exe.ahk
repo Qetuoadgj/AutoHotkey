@@ -1,7 +1,11 @@
-﻿#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
+﻿; https://singularlabs.com/forums/topic/oldchromeremover-remove-obsolete-google-chrome-versions/
+; https://github.com/Qetuoadgj/AutoHotkey
+; https://github.com/Qetuoadgj/AutoHotkey/raw/master/OldChromeRemover-0.5.exe.ahk | v1.0.0
+  
+#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn ; Enable warnings to assist with detecting common errors.
 SendMode,Input ; Recommended for new scripts due to its superior speed and reliability.
-; SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
+SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance,Force ; [Force|Ignore|Off]
 Process,Priority,,High
@@ -10,17 +14,31 @@ Process,Priority,,High
 ; #Persistent ; to make it run indefinitely
 ; SetBatchLines,-1 ; Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
-If !A_IsAdmin
-{
-  Run *RunAs "%A_ScriptFullPath%"
+global NumberOfParameters
+NumberOfParameters = %0%
+
+ExePath := GetLaunchParameters("OldChromeRemover-0.5.exe")
+If not FileExist(ExePath) {
   ExitApp
 }
 
-Y_Key = {SC015}
+If !A_IsAdmin
+{
+  SavedClipboard := Clipboardall
+  Clipboard = ; Empty the clipboard.
+  Clipboard := ExePath
+  ClipWait,0.5
 
-ExePath := "OldChromeRemover-0.5.exe"
+  Run *RunAs "%A_ScriptFullPath%" "%ExePath%"
+  ExitApp
+}
+
+ExePath := GetLaunchParameters("OldChromeRemover-0.5.exe")
+
 ExeFile := RegExReplace(ExePath,".*\\(.*)","$1")
 WinSelector := "ahk_exe " . ExeFile
+
+Y_Key = {SC015}
 
 If FileExist(ExePath) {
   If (not WinExist(WinSelector)) {
@@ -35,3 +53,18 @@ If FileExist(ExePath) {
 }
 
 ExitApp
+
+; ------------------ FUNCTIONS ------------------
+
+GetLaunchParameters(DefaultParameters) {
+  If (not NumberOfParameters) {
+    Parameters := DefaultParameters
+  } else {
+  Loop,%NumberOfParameters%
+    {
+      Parameter := %A_Index%
+      Parameters = %Parameters% %Parameter%
+    }
+  }
+  Return %Parameters%
+}

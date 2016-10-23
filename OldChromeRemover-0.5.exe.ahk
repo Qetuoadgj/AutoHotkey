@@ -53,7 +53,7 @@ ExePath := GetLaunchParameters("OldChromeRemover-0.5.exe")
 ExeFile := RegExReplace(ExePath,".*\\(.*)","$1")
 WinSelector := "ahk_exe " . ExeFile
 
-Y_Key = {SC015}
+Y_Key = {Y} ;{SC015}
 
 If FileExist(ExePath) {
   If (not WinExist(WinSelector)) {

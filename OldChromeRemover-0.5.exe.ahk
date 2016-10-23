@@ -1,7 +1,7 @@
 ﻿; https://singularlabs.com/forums/topic/oldchromeremover-remove-obsolete-google-chrome-versions/
 ; https://github.com/Qetuoadgj/AutoHotkey
 ; https://github.com/Qetuoadgj/AutoHotkey/raw/master/OldChromeRemover-0.5.exe.ahk | v1.0.0
-  
+
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn ; Enable warnings to assist with detecting common errors.
 SendMode,Input ; Recommended for new scripts due to its superior speed and reliability.
@@ -18,8 +18,22 @@ global NumberOfParameters
 NumberOfParameters = %0%
 
 ExePath := GetLaunchParameters("OldChromeRemover-0.5.exe")
+
 If not FileExist(ExePath) {
-  ExitApp
+    ; ExitApp
+
+    ; If the image we want to work with does not exist on disk,then download it...
+    DefaultExePath := A_ScriptDir . "\" . ExePath
+    If !FileExist(DefaultExePath) {
+      SplitPath,DefaultExePath,,DefaultExeDir
+      IfNotExist,DefaultExeDir
+      {
+        FileCreateDir,% DefaultExeDir
+      }
+      DownloadURL := "http://singularlabs.com/download/10350/"
+      UrlDownloadToFile,%DownloadURL%,%DefaultExePath%
+      Run,explorer "%DefaultExeDir%"
+    }
 }
 
 If !A_IsAdmin

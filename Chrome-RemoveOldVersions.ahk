@@ -1,3 +1,4 @@
+; Source: http://www.gameplayinside.com/optimize/cleaning-old-google-chrome-versions-to-save-disk-space/
 ; https://github.com/Qetuoadgj/AutoHotkey
 ; https://github.com/Qetuoadgj/AutoHotkey/raw/master/Chrome-RemoveOldVersions.ahk | v1.0.0
 
@@ -11,7 +12,12 @@ SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 UseSingleInstance()
 
 If (not A_IsAdmin) {
-  Run *RunAs "%A_ScriptFullPath%"
+  Try
+  {
+    Run,*RunAs "%A_AhkPath%" "%A_ScriptFullPath%"
+  } Catch {
+    ; MsgBox,You cancelled when asked to elevate to admin!
+  }
   ExitApp
 }
 

@@ -14,7 +14,7 @@ UseSingleInstance()
 If (not A_IsAdmin) {
   Try
   {
-    Run,*RunAs "%A_AhkPath%" "%A_ScriptFullPath%"
+    Run,*RunAs "%A_ScriptFullPath%"
   } Catch {
     ; MsgBox,You cancelled when asked to elevate to admin!
   }

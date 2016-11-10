@@ -118,7 +118,7 @@ SC052:: ;Numpad0
 
     If (Clipboard) {
       If (SaveClipboard == "Yes") {
-        CUR_CLIPBOARD := Clipboard
+        CUR_CLIPBOARD := Clipboardall
         Clipboard = ; Empty the clipboard.
         Sleep,100
       }

@@ -14,7 +14,7 @@ Process,Priority,,High
 DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.0.7"
+SCRIPT_VERSION := "1.0.8"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -55,7 +55,7 @@ CreateGUI:
 
 DefineGlobals:
 {
-  ItemsArray := Object() ; Таблица проверки дубликатов
+  ItemsArray := [] ;Object() ; Таблица проверки дубликатов
   ClipWaitTime = 0.5 ;0.1 ; 10 msec
 
   ArrayLengthBefore := 0
@@ -130,11 +130,19 @@ SC052:: ;Numpad0
     {
       ArrayLengthBefore := ItemsArray.Length()
 
-      SendEvent,^c
-      ClipWait,%ClipWaitTime%
+      ; SendEvent,^c
+      ; ClipWait,%ClipWaitTime%
+      
+      Loop,3
+      {
+        Clipboard = ; Empty the clipboard.
+        Sleep,100
+        SendEvent,^c
+        ClipWait,%ClipWaitTime%
+      }
 
       If (Clipboard) {
-        If (not InArray(ItemsArray,Clipboard)) {
+        If (not InArray(ItemsArray,Clipboard) and not (Clipboard == CUR_CLIPBOARD)) {
           IfWinExist,ahk_id %Npp_WinID%
           {
             WinActivate,ahk_id %Npp_WinID%
@@ -155,13 +163,13 @@ SC052:: ;Numpad0
 
               If (InsertCounter == "Yes") {
                 Counter := ItemsArray.Length() + 1
-                ClipText := "<!-- " . Counter . " -->" . "`n" . ClipText
+                ClipText := "<!-- " . Counter . " -->" . "`r`n" . ClipText
               }
 
               AddLines := NewLines + 1
               If (UseEnter == "No") {
                 Loop,%AddLines% {
-                  ClipText := ClipText . "`n"
+                  ClipText := ClipText . "`r`n"
                 }
               }
 
@@ -184,7 +192,7 @@ SC052:: ;Numpad0
         }
       }
 
-      If (CUR_CLIPBOARD) {
+      If (CUR_CLIPBOARD and not (Clipboard == CUR_CLIPBOARD)) {
         Clipboard = ; Empty the clipboard.
         Clipboard = %CUR_CLIPBOARD%
         ClipWait,%ClipWaitTime%
@@ -205,7 +213,7 @@ SC052:: ;Numpad0
 
 SC04F:: ;Numpad1
 {
-  ; ItemsArray := Object() ; Сброс таблицы проверки дубликатов
+  ; ItemsArray := [] ;Object() ; Сброс таблицы проверки дубликатов
 
   ControlGet,Bool,Visible,,,%SCRIPT_WIN_TITLE%
   If (Bool) {
@@ -220,7 +228,7 @@ SC04F:: ;Numpad1
 ; ------------------ GUI BUTTONS ------------------
 ResetArray:
 {
-  ItemsArray := Object() ; Сброс таблицы проверки дубликатов
+  ItemsArray := [] ;Object() ; Сброс таблицы проверки дубликатов
   Gui,Submit,Hide
   MsgBox,0,%SCRIPT_WIN_TITLE%,Done!,0.5
   Return
@@ -228,16 +236,16 @@ ResetArray:
 
 ; ------------------ FUNCTIONS ------------------
 InArray(haystack,needle) {
-  if(!isObject(haystack)) {
-    return false
+  If(not isObject(haystack)) {
+    Return,False
   }
-  if(haystack.Length()==0) {
-    return false
+  If(haystack.Length() == 0) {
+    Return,False
   }
-  for k,v in haystack {
-    if(v==needle){
-      return true
+  For k,v in haystack {
+    If(v == needle){
+      Return,True
     }
   }
-  return false
+  Return,False
 }

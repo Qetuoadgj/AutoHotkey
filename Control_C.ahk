@@ -14,7 +14,7 @@ Process,Priority,,High
 DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.0.8"
+SCRIPT_VERSION := "1.0.9"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -56,7 +56,7 @@ CreateGUI:
 DefineGlobals:
 {
   ItemsArray := [] ;Object() ; Таблица проверки дубликатов
-  ClipWaitTime = 0.5 ;0.1 ; 10 msec
+  ClipWaitTime = 3.0 ;0.1 ; 10 msec
 
   ArrayLengthBefore := 0
   ArrayLengthAfter := 0
@@ -67,7 +67,7 @@ DefineGlobals:
   ; AddNewLines := 0
   ; CloseAddedWindow := 1
 
-  SaveClipboard := "Yes"
+  SaveClipboard := "No"
   CUR_CLIPBOARD := false
 }
 
@@ -77,15 +77,19 @@ SetDocumentWindow:
   ; DOCUMENT_FILE := RegExReplace(DOCUMENT_PATH,".*\\(.*)","$1")
   DOCUMENT_NPP_TITLE := DOCUMENT_PATH . " - Notepad++"
 
+  If (WinExist("*" . DOCUMENT_NPP_TITLE) || WinExist(DOCUMENT_NPP_TITLE)) {
+    WinGet,Npp_WinID,ID
+  }
+
   EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
 
   If (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH)) {
-    If (not WinExist(DOCUMENT_NPP_TITLE)) {
+    If (not Npp_WinID) {
       Run,"%EDITOR_PATH%" "%DOCUMENT_PATH%" -multiInst -nosession,,,Npp_WinPID
       WinWait,ahk_pid %Npp_WinPID%
       WinGet,Npp_WinID,ID
     } else {
-      WinGet,Npp_WinID,ID,%DOCUMENT_NPP_TITLE%
+      ; WinGet,Npp_WinID,ID,%DOCUMENT_NPP_TITLE%
     }
     WinActivate,ahk_id %Npp_WinID%
     ; Center Win
@@ -95,7 +99,7 @@ SetDocumentWindow:
     ; ----------------------------------------
   }
 
-  IfWinExist,%DOCUMENT_NPP_TITLE%
+  IfWinExist,ahk_id %Npp_WinID%
   {
     MsgBox,0,%SCRIPT_WIN_TITLE%,Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%,1.5
     WinWaitClose,ahk_id %Npp_WinID%
@@ -111,102 +115,111 @@ SetDocumentWindow:
 SC052:: ;Numpad0
 {
   WinGet,LastActive_WinID,ID,A
+  WinGet,Chrome_WinID,ID,ahk_exe chrome.exe
 
-  IfWinExist,ahk_exe chrome.exe
+  ArrayLengthBefore := ItemsArray.Length()
+
+  IfWinExist,ahk_id %Chrome_WinID%
   {
-    WinGet,Chrome_WinID,ID,ahk_exe chrome.exe
-
     If (Clipboard) {
       If (SaveClipboard == "Yes") {
-        CUR_CLIPBOARD := Clipboardall
-        Clipboard = ; Empty the clipboard.
+        CUR_CLIPBOARD := Clipboard
         Sleep,100
       }
     }
+    
+    Clipboard := ; Empty the clipboard.
+    Loop {
+      Sleep,100
+    } Until (not Clipboard)
 
-    WinActivate,ahk_id %Chrome_WinID%
-    WinWaitActive,ahk_id %Chrome_WinID%
-    IfWinActive,ahk_id %Chrome_WinID%
-    {
-      ArrayLengthBefore := ItemsArray.Length()
+    WinActivate
+    WinWaitActive
+    SendEvent,^c
+    ClipWait,%ClipWaitTime%
+  }
 
-      ; SendEvent,^c
-      ; ClipWait,%ClipWaitTime%
-      
-      Loop,3
+  If (Clipboard) {
+    If (not InArray(ItemsArray,Clipboard)) {
+      IfWinExist,ahk_id %Npp_WinID%
       {
-        Clipboard = ; Empty the clipboard.
-        Sleep,100
-        SendEvent,^c
-        ClipWait,%ClipWaitTime%
-      }
+        WinActivate
+        WinWaitActive
+        WinGetActiveTitle,Npp_EditorTitle
+        ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,".*\\(.*)","$1")
+        ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"(.*) - Notepad\+\+","$1")
+        Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[?] ","")
+        Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[*]","")
 
-      If (Clipboard) {
-        If (not InArray(ItemsArray,Clipboard) and not (Clipboard == CUR_CLIPBOARD)) {
-          IfWinExist,ahk_id %Npp_WinID%
-          {
-            WinActivate,ahk_id %Npp_WinID%
-            WinWaitActive,ahk_id %Npp_WinID%
+        If (Npp_EditorTitle == A_ScriptName or Npp_EditorTitle != DOCUMENT_NPP_TITLE) {
+          MsgBox,0,Error,Select another document!,1.5
+          ; MsgBox,0,Error,A_ScriptName: %A_ScriptName%`nNpp_EditorTitle: %Npp_EditorTitle%`nDOCUMENT_NPP_TITLE: %DOCUMENT_NPP_TITLE%,3
+        } else {
+          ClipBody := Clipboard
+          ClipText := ClipBody
 
-            WinGetActiveTitle,Npp_EditorTitle
-            ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,".*\\(.*)","$1")
-            ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"(.*) - Notepad\+\+","$1")
-            Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[?] ","")
-            Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[*]","")
+          If (InsertCounter == "Yes") {
+            Counter := ItemsArray.Length() + 1
+            ClipText := "<!-- " . Counter . " -->" . "`r`n" . ClipText
+          }
 
-            If (Npp_EditorTitle == A_ScriptName or Npp_EditorTitle != DOCUMENT_NPP_TITLE) {
-              MsgBox,0,Error,Select another document!,1.5
-              ; MsgBox,0,Error,A_ScriptName: %A_ScriptName%`nNpp_EditorTitle: %Npp_EditorTitle%`nDOCUMENT_NPP_TITLE: %DOCUMENT_NPP_TITLE%,3
-            } else {
-              ClipBody := Clipboard
-              ClipText := ClipBody
-
-              If (InsertCounter == "Yes") {
-                Counter := ItemsArray.Length() + 1
-                ClipText := "<!-- " . Counter . " -->" . "`r`n" . ClipText
-              }
-
-              AddLines := NewLines + 1
-              If (UseEnter == "No") {
-                Loop,%AddLines% {
-                  ClipText := ClipText . "`r`n"
-                }
-              }
-
-              Clipboard = ; Empty the clipboard.
-              Clipboard = %ClipText%
-              ClipWait,3
-
-              SendEvent,{End}^v
-              If (UseEnter == "Yes") {
-                SendEvent,{Enter %NewLines%}
-              }
-              If (RegExMatch(Npp_EditorTitle,".*[.].*",match,1)) {
-                Send,^s
-              }
-              ItemsArray.Insert(ClipBody)
+          AddLines := NewLines + 1
+          If (UseEnter == "No") {
+            Loop,%AddLines% {
+              ClipText := ClipText . "`r`n"
             }
           }
-        } else {
-          MsgBox,0,Error,Already in array!,0.5
+
+          Clipboard := ; Empty the clipboard.
+          Loop {
+            Sleep,100
+          } Until (not Clipboard)
+          Clipboard := ClipText
+          ClipWait,%ClipWaitTime%
+
+          If ((not Clipboard) or (Clipboard == CUR_CLIPBOARD)) {
+            MsgBox,0,Error,Plaease, retry!,0.5
+            Return
+          }
+          
+          MsgBox,0,,%Clipboard%,0.1
+
+          WinActivate
+          WinWaitActive
+          Send,{End}
+          Sleep,100
+          Send,^v
+          If (UseEnter == "Yes") {
+            SendEvent,{Enter %NewLines%}
+          }
+          If (RegExMatch(Npp_EditorTitle,".*[.].*",match,1)) {
+            Send,^s
+          }
+          ItemsArray.Insert(ClipBody)
         }
       }
-
-      If (CUR_CLIPBOARD and not (Clipboard == CUR_CLIPBOARD)) {
-        Clipboard = ; Empty the clipboard.
-        Clipboard = %CUR_CLIPBOARD%
-        ClipWait,%ClipWaitTime%
-      }
-
-      ArrayLengthAfter := ItemsArray.Length()
-
-      WinActivate,ahk_id %LastActive_WinID%
-      If (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore) {
-        WinActivate,ahk_id %Chrome_WinID%
-        WinWaitActive,ahk_id %Chrome_WinID%
-        SendEvent,^{F4}
-      }
+    } else {
+      MsgBox,0,Error,Already in array!,0.5
     }
+
+    If (CUR_CLIPBOARD and (Clipboard != CUR_CLIPBOARD)) {
+      Clipboard = ; Empty the clipboard.
+      Loop {
+        Sleep,100
+      } Until (not Clipboard)
+      Clipboard := CUR_CLIPBOARD
+      ClipWait,%ClipWaitTime%
+    }
+    
+    ArrayLengthAfter := ItemsArray.Length()
+
+    If (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore) {
+      WinActivate,ahk_id %Chrome_WinID%
+      WinWaitActive
+      SendEvent,^{F4}
+    }
+    
+    WinActivate,ahk_id %LastActive_WinID%
   }
   Return
 }
@@ -249,3 +262,15 @@ InArray(haystack,needle) {
   }
   Return,False
 }
+
+
+/*
+ClipboardEmpty(TimeLimit) {
+  Delay := 10
+  Clipboard = ; Empty the clipboard.
+  Loop {
+    Sleep,%Delay%
+  } Until ((not Clipboard) or (TimeLimit*1000 < Delay*A_Index))
+}
+*/
+

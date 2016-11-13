@@ -127,7 +127,7 @@ SC052:: ;Numpad0
         Sleep,100
       }
     }
-    
+
     Clipboard := ; Empty the clipboard.
     Loop {
       Sleep,100
@@ -181,7 +181,7 @@ SC052:: ;Numpad0
             MsgBox,0,Error,Plaease, retry!,0.5
             Return
           }
-          
+
           MsgBox,0,,%Clipboard%,0.1
 
           WinActivate
@@ -210,7 +210,7 @@ SC052:: ;Numpad0
       Clipboard := CUR_CLIPBOARD
       ClipWait,%ClipWaitTime%
     }
-    
+
     ArrayLengthAfter := ItemsArray.Length()
 
     If (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore) {
@@ -218,7 +218,7 @@ SC052:: ;Numpad0
       WinWaitActive
       SendEvent,^{F4}
     }
-    
+
     WinActivate,ahk_id %LastActive_WinID%
   }
   Return
@@ -262,15 +262,3 @@ InArray(haystack,needle) {
   }
   Return,False
 }
-
-
-/*
-ClipboardEmpty(TimeLimit) {
-  Delay := 10
-  Clipboard = ; Empty the clipboard.
-  Loop {
-    Sleep,%Delay%
-  } Until ((not Clipboard) or (TimeLimit*1000 < Delay*A_Index))
-}
-*/
-

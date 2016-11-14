@@ -3,8 +3,8 @@
 
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn ; Enable warnings to assist with detecting common errors.
-SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
+SendMode,Input ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance,Force
 #Persistent ; to make it run indefinitely
@@ -14,7 +14,7 @@ Process,Priority,,High
 DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.0.9"
+SCRIPT_VERSION := "1.1.0"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -31,9 +31,9 @@ CreateLogo:
 
 SetTrayIcon:
 {
-  icoFile := A_ScriptDir . "\Images\" . SCRIPT_NAME . ".ico"
-  If FileExist(icoFile) {
-   Menu,Tray,Icon,%icoFile%
+  IcoFile := A_ScriptDir . "\Images\" . SCRIPT_NAME . ".ico"
+  If FileExist(IcoFile) {
+   Menu,Tray,Icon,%IcoFile%
   }
 }
 
@@ -56,7 +56,11 @@ CreateGUI:
 DefineGlobals:
 {
   ItemsArray := [] ;Object() ; Таблица проверки дубликатов
-  ClipWaitTime = 3.0 ;0.1 ; 10 msec
+
+  ClipWaitTime := 3.0 ; sec
+  ClipTimeout := Round(ClipWaitTime*1000)
+
+  #ClipboardTimeout,%ClipTimeout%
 
   ArrayLengthBefore := 0
   ArrayLengthAfter := 0
@@ -87,6 +91,7 @@ SetDocumentWindow:
     If (not Npp_WinID) {
       Run,"%EDITOR_PATH%" "%DOCUMENT_PATH%" -multiInst -nosession,,,Npp_WinPID
       WinWait,ahk_pid %Npp_WinPID%
+      WinRestore
       WinGet,Npp_WinID,ID
     } else {
       ; WinGet,Npp_WinID,ID,%DOCUMENT_NPP_TITLE%
@@ -137,6 +142,10 @@ SC052:: ;Numpad0
     WinWaitActive
     SendEvent,^c
     ClipWait,%ClipWaitTime%
+    If ((not Clipboard) or (Clipboard == CUR_CLIPBOARD)) {
+      MsgBox,0,Error,Plaease`, RETRY!,0.5
+      Return
+    }
   }
 
   If (Clipboard) {
@@ -178,7 +187,7 @@ SC052:: ;Numpad0
           ClipWait,%ClipWaitTime%
 
           If ((not Clipboard) or (Clipboard == CUR_CLIPBOARD)) {
-            MsgBox,0,Error,Plaease, retry!,0.5
+            MsgBox,0,Error,Plaease`, RETRY!,0.5
             Return
           }
 

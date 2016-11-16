@@ -14,7 +14,7 @@ Process,Priority,,High
 DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.1.0"
+SCRIPT_VERSION := "1.1.2"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -57,13 +57,13 @@ DefineGlobals:
 {
   ItemsArray := [] ;Object() ; Таблица проверки дубликатов
 
-  ClipWaitTime := 3.0 ; sec
+  ClipWaitTime := 1.5 ; sec
   ClipTimeout := Round(ClipWaitTime*1000)
 
   #ClipboardTimeout,%ClipTimeout%
 
-  ArrayLengthBefore := 0
-  ArrayLengthAfter := 0
+  ; ArrayLengthBefore := 0
+  ; ArrayLengthAfter := 0
 
   ; InsertCounter := 1
   ; Counter := 0
@@ -71,8 +71,8 @@ DefineGlobals:
   ; AddNewLines := 0
   ; CloseAddedWindow := 1
 
-  SaveClipboard := "No"
-  CUR_CLIPBOARD := false
+  SaveClipboard := True
+  ; CUR_CLIPBOARD := False
 }
 
 SetDocumentWindow:
@@ -91,10 +91,7 @@ SetDocumentWindow:
     If (not Npp_WinID) {
       Run,"%EDITOR_PATH%" "%DOCUMENT_PATH%" -multiInst -nosession,,,Npp_WinPID
       WinWait,ahk_pid %Npp_WinPID%
-      WinRestore
       WinGet,Npp_WinID,ID
-    } else {
-      ; WinGet,Npp_WinID,ID,%DOCUMENT_NPP_TITLE%
     }
     WinActivate,ahk_id %Npp_WinID%
     ; Center Win
@@ -106,6 +103,7 @@ SetDocumentWindow:
 
   IfWinExist,ahk_id %Npp_WinID%
   {
+    WinRestore,ahk_id %Npp_WinID%
     MsgBox,0,%SCRIPT_WIN_TITLE%,Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%,1.5
     WinWaitClose,ahk_id %Npp_WinID%
     SoundPlay,*64
@@ -126,110 +124,114 @@ SC052:: ;Numpad0
 
   IfWinExist,ahk_id %Chrome_WinID%
   {
-    If (Clipboard) {
-      If (SaveClipboard == "Yes") {
-        CUR_CLIPBOARD := Clipboard
-        Sleep,100
-      }
+    If (Clipboard and SaveClipboard) {
+      CUR_CLIPBOARD := ClipboardAll
     }
 
-    Clipboard := ; Empty the clipboard.
-    Loop {
-      Sleep,100
-    } Until (not Clipboard)
+    WinActivate,ahk_id %Chrome_WinID%
+    WinWaitActive,ahk_id %Chrome_WinID%
 
-    WinActivate
-    WinWaitActive
-    SendEvent,^c
-    ClipWait,%ClipWaitTime%
-    If ((not Clipboard) or (Clipboard == CUR_CLIPBOARD)) {
-      MsgBox,0,Error,Plaease`, RETRY!,0.5
+    Clipboard =  ; Start off empty to allow ClipWait to detect when the text has arrived.
+    Send,^c ; Send Ctrl+C
+    ClipWait,%ClipWaitTime% ; Wait for the clipboard to contain text.
+
+    If (not Clipboard or (Clipboard == CUR_CLIPBOARD)) {
+      MsgBox,0,Error,There is nothing to paste!,0.5
       Return
     }
-  }
 
-  If (Clipboard) {
-    If (not InArray(ItemsArray,Clipboard)) {
-      IfWinExist,ahk_id %Npp_WinID%
-      {
-        WinActivate
-        WinWaitActive
-        WinGetActiveTitle,Npp_EditorTitle
-        ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,".*\\(.*)","$1")
-        ; Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"(.*) - Notepad\+\+","$1")
-        Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[?] ","")
-        Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[*]","")
+    If (InArray(ItemsArray,Clipboard)) {
+      MsgBox,0,Error,Already in array!,0.5
+      Return
+    }
 
-        If (Npp_EditorTitle == A_ScriptName or Npp_EditorTitle != DOCUMENT_NPP_TITLE) {
-          MsgBox,0,Error,Select another document!,1.5
-          ; MsgBox,0,Error,A_ScriptName: %A_ScriptName%`nNpp_EditorTitle: %Npp_EditorTitle%`nDOCUMENT_NPP_TITLE: %DOCUMENT_NPP_TITLE%,3
-        } else {
-          ClipBody := Clipboard
-          ClipText := ClipBody
+    IfWinExist,ahk_id %Npp_WinID%
+    {
+      WinRestore,ahk_id %Npp_WinID%
+      WinActivate,ahk_id %Npp_WinID%
+      WinWaitActive,ahk_id %Npp_WinID%
 
-          If (InsertCounter == "Yes") {
-            Counter := ItemsArray.Length() + 1
-            ClipText := "<!-- " . Counter . " -->" . "`r`n" . ClipText
-          }
+      WinGetActiveTitle,Npp_EditorTitle
+      Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[?] ","")
+      Npp_EditorTitle := RegExReplace(Npp_EditorTitle,"^[*]","")
 
-          AddLines := NewLines + 1
-          If (UseEnter == "No") {
-            Loop,%AddLines% {
-              ClipText := ClipText . "`r`n"
-            }
-          }
+      If (Npp_EditorTitle == A_ScriptName or Npp_EditorTitle != DOCUMENT_NPP_TITLE) {
+        MsgBox,0,Error,Select another document!,1.5
+        Return
+      }
 
-          Clipboard := ; Empty the clipboard.
-          Loop {
-            Sleep,100
-          } Until (not Clipboard)
-          Clipboard := ClipText
-          ClipWait,%ClipWaitTime%
+      ClipBody := Clipboard
+      ClipText := Clipboard
 
-          If ((not Clipboard) or (Clipboard == CUR_CLIPBOARD)) {
-            MsgBox,0,Error,Plaease`, RETRY!,0.5
-            Return
-          }
+      If (InsertCounter == "Yes") {
+        Counter := ItemsArray.Length() + 1
+        ClipText := "<!-- " . Counter . " -->" . "`r`n" . ClipText
+      }
 
-          MsgBox,0,,%Clipboard%,0.1
-
-          WinActivate
-          WinWaitActive
-          Send,{End}
-          Sleep,100
-          Send,^v
-          If (UseEnter == "Yes") {
-            SendEvent,{Enter %NewLines%}
-          }
-          If (RegExMatch(Npp_EditorTitle,".*[.].*",match,1)) {
-            Send,^s
-          }
-          ItemsArray.Insert(ClipBody)
+      AddLines := NewLines + 1
+      If (UseEnter == "No") {
+        Loop,%AddLines% {
+          ClipText := ClipText . "`r`n"
         }
       }
-    } else {
-      MsgBox,0,Error,Already in array!,0.5
-    }
 
-    If (CUR_CLIPBOARD and (Clipboard != CUR_CLIPBOARD)) {
-      Clipboard = ; Empty the clipboard.
-      Loop {
-        Sleep,100
-      } Until (not Clipboard)
-      Clipboard := CUR_CLIPBOARD
+      Clipboard =
+      Clipboard := ClipText
       ClipWait,%ClipWaitTime%
-    }
 
-    ArrayLengthAfter := ItemsArray.Length()
+      If ((not Clipboard) or (Clipboard == CUR_CLIPBOARD)) {
+        MsgBox,0,Error,Plaease`,%A_Space%RETRY!,0.5
+        Return
+      }
+
+      MsgBox,0,,%Clipboard%,0.1
+
+      WinActivate,ahk_id %Npp_WinID%
+      WinWaitActive,ahk_id %Npp_WinID%
+
+      Send,{End}
+      Sleep,100
+      Send,^v
+      Sleep,100
+
+      If (UseEnter == "Yes") {
+        Send,{Enter %NewLines%}
+      }
+
+      If RegExMatch(Npp_EditorTitle,".*[.].*",match,1) {
+        Send,^s
+      }
+
+      ItemsArray.Insert(ClipBody)
+      ArrayLengthAfter := ItemsArray.Length()
+    }
 
     If (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore) {
       WinActivate,ahk_id %Chrome_WinID%
-      WinWaitActive
-      SendEvent,^{F4}
+      WinWaitActive,ahk_id %Chrome_WinID%
+      Send,^{F4}
     }
-
-    WinActivate,ahk_id %LastActive_WinID%
   }
+
+  If (CUR_CLIPBOARD and (Clipboard != CUR_CLIPBOARD)) {
+    Clipboard =
+    Clipboard := CUR_CLIPBOARD
+    ClipWait,%ClipWaitTime%
+  }
+
+  WinActivate,ahk_id %LastActive_WinID%
+
+  ; Clear all temporary variables
+  VarSetCapacity(CUR_CLIPBOARD, 0)
+  VarSetCapacity(Npp_EditorTitle, 0)
+  VarSetCapacity(ClipBody, 0)
+  VarSetCapacity(ClipText, 0)
+  VarSetCapacity(Counter, 0)
+  VarSetCapacity(AddLines, 0)
+  VarSetCapacity(ArrayLengthAfter, 0)
+  VarSetCapacity(Counter, 0)
+  ;
+  
   Return
 }
 
@@ -270,4 +272,25 @@ InArray(haystack,needle) {
     }
   }
   Return,False
+}
+
+EmptyClipboard(Delay := 10) {
+  Clipboard := ; Empty the clipboard.
+  Loop {
+    Sleep,% Delay
+  } Until (not Clipboard or (A_Index * Delay > TimeLimit * 1000))
+}
+
+PasteString(String,TimeLimit := 2,Delay := 10) {
+  ClipSaved := ClipboardAll ; Save clipboard
+  EmptyClipboard(Delay)
+  Clipboard := String
+  ClipWait,% TimeLimit
+  Send,^v
+  If (ClipSaved) {
+    EmptyClipboard(Delay)
+    Clipboard := ClipSaved ; Restore original clipboard
+    ClipWait,% TimeLimit
+  }
+  Return
 }

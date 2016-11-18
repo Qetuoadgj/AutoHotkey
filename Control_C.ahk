@@ -7,11 +7,11 @@ SendMode,Input ; Recommended for new scripts due to its superior speed and relia
 SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance,Force
-#Persistent ; to make it run indefinitely
+; #Persistent ; to make it run indefinitely
 ; SetBatchLines,-1 ; Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
-Process,Priority,,High
-DetectHiddenWindows,Off
+; Process,Priority,,High
+; DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
 SCRIPT_VERSION := "1.1.2"
@@ -22,7 +22,8 @@ MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
 CreateLogo:
 {
   logoFile := A_ScriptDir . "\Images\" . SCRIPT_NAME . ".png"
-  logoURL := "https://raw.githubusercontent.com/Qetuoadgj/AutoHotkey/master/Images/AddURL.png" ;"https://upload.wikimedia.org/wikipedia/en/thumb/d/d0/Chrome_Logo.svg/64px-Chrome_Logo.svg.png"
+  logoURL := "https://raw.githubusercontent.com/Qetuoadgj/AutoHotkey/master/Images/AddURL.png"
+  ; "https://upload.wikimedia.org/wikipedia/en/thumb/d/d0/Chrome_Logo.svg/64px-Chrome_Logo.svg.png"
   logoSize := 64
   logoAlpha := 0.95
 
@@ -33,29 +34,29 @@ SetTrayIcon:
 {
   IcoFile := A_ScriptDir . "\Images\" . SCRIPT_NAME . ".ico"
   If FileExist(IcoFile) {
-   Menu,Tray,Icon,%IcoFile%
+    Menu,Tray,Icon,%IcoFile%
   }
 }
 
 CreateGUI:
 {
   MainGUI := SCRIPT_NAME . "_"
-  Gui,%MainGUI%: +AlwaysOnTop
-  Gui,%MainGUI%: Add,Button,x5 y5 w90 h40 gResetArray,Reset Array
-  Gui,%MainGUI%: Add,Text,x105 y7 w55 h20,New Lines
-  Gui,%MainGUI%: Add,ComboBox,x160 y5 w45 h300 vNewLines,0|1||2|3|4|5|6|7|8|9|10
-  Gui,%MainGUI%: Add,Text,x105 y30 w55 h20,Use Enter
-  Gui,%MainGUI%: Add,ComboBox,x160 y27 w45 h300 vUseEnter,Yes||No|
-  Gui,%MainGUI%: Add,Text,x215 y7 w80 h20,Close Window
-  Gui,%MainGUI%: Add,ComboBox,x290 y5 w45 h300 vCloseWindow,Yes|No||
-  Gui,%MainGUI%: Add,Text,x215 y30 w80 h20,Insert Counter
-  Gui,%MainGUI%: Add,ComboBox,x290 y27 w45 h300 vInsertCounter,Yes|No||
-  Gui,%MainGUI%: Submit,Hide
+  Gui,%MainGUI%:+AlwaysOnTop
+  Gui,%MainGUI%:Add,Button,x5 y5 w90 h40 gResetArray,Reset Array
+  Gui,%MainGUI%:Add,Text,x105 y7 w55 h20,New Lines
+  Gui,%MainGUI%:Add,ComboBox,x160 y5 w45 h300 vNewLines,0|1||2|3|4|5|6|7|8|9|10
+  Gui,%MainGUI%:Add,Text,x105 y30 w55 h20,Use Enter
+  Gui,%MainGUI%:Add,ComboBox,x160 y27 w45 h300 vUseEnter,Yes||No|
+  Gui,%MainGUI%:Add,Text,x215 y7 w80 h20,Close Window
+  Gui,%MainGUI%:Add,ComboBox,x290 y5 w45 h300 vCloseWindow,Yes|No||
+  Gui,%MainGUI%:Add,Text,x215 y30 w80 h20,Insert Counter
+  Gui,%MainGUI%:Add,ComboBox,x290 y27 w45 h300 vInsertCounter,Yes|No||
+  Gui,%MainGUI%:Submit,Hide
 }
 
 DefineGlobals:
 {
-  ItemsArray := [] ;Object() ; Таблица проверки дубликатов
+  ItemsArray := [] ; Object() ; Таблица проверки дубликатов
 
   ClipWaitTime := 1.5 ; sec
   ClipTimeout := Round(ClipWaitTime*1000)
@@ -93,12 +94,14 @@ SetDocumentWindow:
       WinWait,ahk_pid %Npp_WinPID%
       WinGet,Npp_WinID,ID
     }
+
     WinActivate,ahk_id %Npp_WinID%
+
     ; Center Win
-    ; ----------------------------------------
+    ; --------------------
     WinGetPos,,,Width,Height,ahk_id %Npp_WinID%
     WinMove,ahk_id %Npp_WinID%,,(A_ScreenWidth/2)-(Width/2),(A_ScreenHeight/2)-(Height/2)
-    ; ----------------------------------------
+    ; --------------------
   }
 
   IfWinExist,ahk_id %Npp_WinID%
@@ -115,7 +118,7 @@ SetDocumentWindow:
   }
 }
 
-SC052:: ;Numpad0
+SC052:: ; Numpad0
 {
   WinGet,LastActive_WinID,ID,A
   WinGet,Chrome_WinID,ID,ahk_exe chrome.exe
@@ -222,43 +225,43 @@ SC052:: ;Numpad0
   WinActivate,ahk_id %LastActive_WinID%
 
   ; Clear all temporary variables
-  VarSetCapacity(CUR_CLIPBOARD, 0)
-  VarSetCapacity(Npp_EditorTitle, 0)
-  VarSetCapacity(ClipBody, 0)
-  VarSetCapacity(ClipText, 0)
-  VarSetCapacity(Counter, 0)
-  VarSetCapacity(AddLines, 0)
-  VarSetCapacity(ArrayLengthAfter, 0)
-  VarSetCapacity(Counter, 0)
+  VarSetCapacity(CUR_CLIPBOARD,0)
+  VarSetCapacity(Npp_EditorTitle,0)
+  VarSetCapacity(ClipBody,0)
+  VarSetCapacity(ClipText,0)
+  VarSetCapacity(Counter,0)
+  VarSetCapacity(AddLines,0)
+  VarSetCapacity(ArrayLengthAfter,0)
+  VarSetCapacity(Counter,0)
   ;
-  
+
   Return
 }
 
-SC04F:: ;Numpad1
+SC04F:: ; Numpad1
 {
-  ; ItemsArray := [] ;Object() ; Сброс таблицы проверки дубликатов
+  ; ItemsArray := [] ; Object() ; Сброс таблицы проверки дубликатов
 
   ControlGet,Bool,Visible,,,%SCRIPT_WIN_TITLE%
   If (Bool) {
-    Gui,%MainGUI%: Submit,Hide
+    Gui,%MainGUI%:Submit,Hide
   } Else {
-    Gui,%MainGUI%: Show,xCenter yCenter h50 w340,%SCRIPT_WIN_TITLE%
+    Gui,%MainGUI%:Show,xCenter yCenter h50 w340,%SCRIPT_WIN_TITLE%
   }
 
   Return
 }
 
-; ------------------ GUI BUTTONS ------------------
+; -------------------- GUI BUTTONS --------------------
 ResetArray:
 {
-  ItemsArray := [] ;Object() ; Сброс таблицы проверки дубликатов
+  ItemsArray := [] ; Object() ; Сброс таблицы проверки дубликатов
   Gui,Submit,Hide
   MsgBox,0,%SCRIPT_WIN_TITLE%,Done!,0.5
   Return
 }
 
-; ------------------ FUNCTIONS ------------------
+; -------------------- FUNCTIONS --------------------
 InArray(haystack,needle) {
   If(not isObject(haystack)) {
     Return,False
@@ -272,25 +275,4 @@ InArray(haystack,needle) {
     }
   }
   Return,False
-}
-
-EmptyClipboard(Delay := 10) {
-  Clipboard := ; Empty the clipboard.
-  Loop {
-    Sleep,% Delay
-  } Until (not Clipboard or (A_Index * Delay > TimeLimit * 1000))
-}
-
-PasteString(String,TimeLimit := 2,Delay := 10) {
-  ClipSaved := ClipboardAll ; Save clipboard
-  EmptyClipboard(Delay)
-  Clipboard := String
-  ClipWait,% TimeLimit
-  Send,^v
-  If (ClipSaved) {
-    EmptyClipboard(Delay)
-    Clipboard := ClipSaved ; Restore original clipboard
-    ClipWait,% TimeLimit
-  }
-  Return
 }

@@ -146,7 +146,7 @@ SC052:: ; Numpad0
       Return
     }
 
-    If (Clipboard and Pattern and not RegExMatch(Clipboard,Pattern,,1)) {
+    If (Pattern and Clipboard and not RegExMatch(Clipboard,Pattern,,1)) {
       MsgBox,0,Error,Text not match pattern!,0.5
       Return
     }

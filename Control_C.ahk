@@ -14,7 +14,7 @@ SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 ; DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.1.2"
+SCRIPT_VERSION := "1.1.3"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -58,10 +58,12 @@ DefineGlobals:
 {
   ItemsArray := [] ; Object() ; Таблица проверки дубликатов
 
-  ClipWaitTime := 1.5 ; sec
-  ClipTimeout := Round(ClipWaitTime*1000)
+  ClipWaitTime := 0.5 ; sec
+  ; ClipTimeout := Round(ClipWaitTime > 1 ? ClipWaitTime*1000 : 1000)
 
-  #ClipboardTimeout,%ClipTimeout%
+  If (ClipTimeout) {
+    #ClipboardTimeout,%ClipTimeout%
+  }
 
   ; ArrayLengthBefore := 0
   ; ArrayLengthAfter := 0
@@ -74,6 +76,7 @@ DefineGlobals:
 
   SaveClipboard := True
   ; CUR_CLIPBOARD := False
+  Pattern := "<div class="".*?"" .*?><\/div>"
 }
 
 SetDocumentWindow:
@@ -98,10 +101,10 @@ SetDocumentWindow:
     WinActivate,ahk_id %Npp_WinID%
 
     ; Center Win
-    ; --------------------
+    ; --------------------------------------
     WinGetPos,,,Width,Height,ahk_id %Npp_WinID%
     WinMove,ahk_id %Npp_WinID%,,(A_ScreenWidth/2)-(Width/2),(A_ScreenHeight/2)-(Height/2)
-    ; --------------------
+    ; --------------------------------------
   }
 
   IfWinExist,ahk_id %Npp_WinID%
@@ -140,6 +143,11 @@ SC052:: ; Numpad0
 
     If (not Clipboard or (Clipboard == CUR_CLIPBOARD)) {
       MsgBox,0,Error,There is nothing to paste!,0.5
+      Return
+    }
+
+    If (Clipboard and Pattern and not RegExMatch(Clipboard,Pattern,,1)) {
+      MsgBox,0,Error,Text not match pattern!,0.5
       Return
     }
 
@@ -201,7 +209,7 @@ SC052:: ; Numpad0
         Send,{Enter %NewLines%}
       }
 
-      If RegExMatch(Npp_EditorTitle,".*[.].*",match,1) {
+      If RegExMatch(Npp_EditorTitle,".*[.].*",,1) {
         Send,^s
       }
 
@@ -252,7 +260,7 @@ SC04F:: ; Numpad1
   Return
 }
 
-; -------------------- GUI BUTTONS --------------------
+; ------------ GUI BUTTONS ------------
 ResetArray:
 {
   ItemsArray := [] ; Object() ; Сброс таблицы проверки дубликатов
@@ -261,7 +269,7 @@ ResetArray:
   Return
 }
 
-; -------------------- FUNCTIONS --------------------
+; ------------- FUNCTIONS -------------
 InArray(haystack,needle) {
   If(not isObject(haystack)) {
     Return,False

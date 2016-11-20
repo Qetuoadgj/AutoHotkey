@@ -2,16 +2,16 @@
 ; 											ФУНКЦИЯ ПРОВЕРКИ НАЛИЧИЯ ЗНАЧЕНЯ ВО МНОЖЕСТВЕ
 ; ===================================================================================
 InArray(haystack,needle) {
-  if(!isObject(haystack)) {
-    return false
+  If(not isObject(haystack)) {
+    Return,False
   }
-  if(haystack.Length()==0) {
-    return false
+  If(haystack.Length() == 0) {
+    Return,False
   }
-  for k,v in haystack {
-    if(v==needle){
-      return true
+  For k,v in haystack {
+    If(v == needle){
+      Return,True
     }
   }
-  return false
+  Return,False
 }

@@ -81,7 +81,7 @@ DefineGlobals:
 
 SetDocumentWindow:
 {
-  DOCUMENT_PATH := "D:\Google Диск\HTML\2.0.4.html"
+  DOCUMENT_PATH := "D:\Google Диск\HTML\html\2.0.4.html"
   ; DOCUMENT_FILE := RegExReplace(DOCUMENT_PATH,".*\\(.*)","$1")
   DOCUMENT_NPP_TITLE := DOCUMENT_PATH . " - Notepad++"
 
@@ -109,6 +109,8 @@ SetDocumentWindow:
 
   IfWinExist,ahk_id %Npp_WinID%
   {
+    WinActivate,ahk_id %Npp_WinID%
+    WinWaitActive,ahk_id %Npp_WinID%
     WinRestore,ahk_id %Npp_WinID%
     MsgBox,0,%SCRIPT_WIN_TITLE%,Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%,1.5
     WinWaitClose,ahk_id %Npp_WinID%
@@ -199,7 +201,11 @@ SC052:: ; Numpad0
 
       WinActivate,ahk_id %Npp_WinID%
       WinWaitActive,ahk_id %Npp_WinID%
-
+      
+      Send,{F2}
+      Sleep,100
+      Send,{Up}
+      Sleep,100
       Send,{End}
       Sleep,100
       Send,^v

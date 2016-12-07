@@ -14,7 +14,7 @@ SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 ; DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.1.3"
+SCRIPT_VERSION := "1.1.4"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -59,7 +59,7 @@ DefineGlobals:
   ItemsArray := [] ; Object() ; Таблица проверки дубликатов
 
   ClipWaitTime := 0.5 ; sec
-  ; ClipTimeout := Round(ClipWaitTime > 1 ? ClipWaitTime*1000 : 1000)
+  ClipTimeout := Round(ClipWaitTime > 1 ? ClipWaitTime*1000 : 5000)
 
   If (ClipTimeout) {
     #ClipboardTimeout,%ClipTimeout%
@@ -138,9 +138,12 @@ SC052:: ; Numpad0
 
     WinActivate,ahk_id %Chrome_WinID%
     WinWaitActive,ahk_id %Chrome_WinID%
+    DllCall("SetForegroundWindow", UInt, Chrome_WinID) 
 
     Clipboard =  ; Start off empty to allow ClipWait to detect when the text has arrived.
-    Send,^c ; Send Ctrl+C
+    ; Send,^c ; Send Ctrl+C
+    ControlSend,,^C,ahk_id %Chrome_WinID%
+    ControlSend,,^C,ahk_id %Chrome_WinID%
     ClipWait,%ClipWaitTime% ; Wait for the clipboard to contain text.
 
     If (not Clipboard or (Clipboard == CUR_CLIPBOARD)) {

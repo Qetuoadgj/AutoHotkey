@@ -14,7 +14,7 @@ SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 ; DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.1.4"
+SCRIPT_VERSION := "1.1.5"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -74,14 +74,15 @@ DefineGlobals:
   ; AddNewLines := 0
   ; CloseAddedWindow := 1
 
-  SaveClipboard := True
+  ; SaveClipboard := True
   ; CUR_CLIPBOARD := False
   Pattern := "<div class="".*?"" .*?><\/div>"
+  MsgTime := 10
 }
 
 SetDocumentWindow:
 {
-  DOCUMENT_PATH := "D:\Google Диск\HTML\html\2.0.4.html"
+  DOCUMENT_PATH := %0% ? %0% : "D:\Google Диск\HTML\html\2.0.4.html"
   ; DOCUMENT_FILE := RegExReplace(DOCUMENT_PATH,".*\\(.*)","$1")
   DOCUMENT_NPP_TITLE := DOCUMENT_PATH . " - Notepad++"
 
@@ -134,16 +135,21 @@ SC052:: ; Numpad0
   {
     If (Clipboard and SaveClipboard) {
       CUR_CLIPBOARD := ClipboardAll
+      VarSetCapacity(ClipboardAll,0)
     }
 
     WinActivate,ahk_id %Chrome_WinID%
+    DllCall("SetForegroundWindow",UInt,Chrome_WinID)
     WinWaitActive,ahk_id %Chrome_WinID%
-    DllCall("SetForegroundWindow", UInt, Chrome_WinID) 
+
+    Sleep,10
+    MouseClick,Left,0,0,1,50,U,R
+    Sleep,10
 
     Clipboard =  ; Start off empty to allow ClipWait to detect when the text has arrived.
     ; Send,^c ; Send Ctrl+C
-    ControlSend,,^C,ahk_id %Chrome_WinID%
-    ControlSend,,^C,ahk_id %Chrome_WinID%
+    ; ControlSend,,^C,ahk_id %Chrome_WinID%
+    Send,^c ; Send Ctrl+C
     ClipWait,%ClipWaitTime% ; Wait for the clipboard to contain text.
 
     If (not Clipboard or (Clipboard == CUR_CLIPBOARD)) {
@@ -200,19 +206,20 @@ SC052:: ; Numpad0
         Return
       }
 
-      MsgBox,0,,%Clipboard%,0.1
+      If (MsgTime > 0) {
+        MsgBox,0,,%Clipboard%,% Round(MsgTime/1000,3)
+      }
 
       WinActivate,ahk_id %Npp_WinID%
       WinWaitActive,ahk_id %Npp_WinID%
-      
+
       Send,{F2}
-      Sleep,100
+      Sleep,10
       Send,{Up}
-      Sleep,100
+      Sleep,10
       Send,{End}
-      Sleep,100
+      Sleep,10
       Send,^v
-      Sleep,100
 
       If (UseEnter == "Yes") {
         Send,{Enter %NewLines%}
@@ -231,15 +238,15 @@ SC052:: ; Numpad0
       WinWaitActive,ahk_id %Chrome_WinID%
       Send,^{F4}
     }
-  }
 
-  If (CUR_CLIPBOARD and (Clipboard != CUR_CLIPBOARD)) {
-    Clipboard =
-    Clipboard := CUR_CLIPBOARD
-    ClipWait,%ClipWaitTime%
-  }
+    If (CUR_CLIPBOARD and (Clipboard != CUR_CLIPBOARD)) {
+      Clipboard =
+      Clipboard := CUR_CLIPBOARD
+      ClipWait,%ClipWaitTime%
+    }
 
-  WinActivate,ahk_id %LastActive_WinID%
+    WinActivate,ahk_id %LastActive_WinID%
+  }
 
   ; Clear all temporary variables
   VarSetCapacity(CUR_CLIPBOARD,0)

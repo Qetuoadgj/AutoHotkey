@@ -141,8 +141,10 @@ DebugMsgText =
   NewArchiveNumeration = %NewArchiveNumeration%
   LockArchive = %LockArchive%
 )
-MsgBox,%DebugMsgText%
-
+MsgBox,1,,%DebugMsgText%
+IfMsgBox,Cancel
+  ExitApp  ; User pressed the "No" button.
+  
 If (!FileExist(SevenZip) && InStr(ArchiveType,"7z")) {
   MsgBox,0,Error,Not found:`n%SevenZip%,1.5
 }

@@ -77,7 +77,7 @@ SetWorkingDir %SourceFileDir%
 
 ; Получение переменных из файла-источника
 IniRead,Name,%SourceFile%,Description,Name,%SourceFileName% ; GetValue(SourceFile,"^Name[\s+]?=[\s+]?(.*)") ; Имя
-Name := RegExReplace(Name,"^(.*=.*?) `;","$1")
+Name := RegExReplace(Name,"[ \t]+;.*$","")
 
 If (Name == "") {
   MsgBox,ОШИБКА:`nОтсутствует параметр "Name"
@@ -85,23 +85,23 @@ If (Name == "") {
 }
 
 IniRead,Password,%SourceFile%,Description,Password,%A_Space% ; GetValue(SourceFile,"^Password[\s+]?=[\s+]?(.*)") ; Пароль
-Password := RegExReplace(Password,"^(.*=.*?) `;","$1")
+Password := RegExReplace(Password,"[ \t]+;.*$","")
 
 IniRead,RootDir,%SourceFile%,Description,RootDir,%A_Space%      ; GetValue(SourceFile,"^RootDir[\s+]?=[\s+]?(.*)") ; Корневая папка
-RootDir := RegExReplace(RootDir,"^(.*=.*?) `;","$1")
+RootDir := RegExReplace(RootDir,"[ \t]+;.*$","")
 RootDir := ParseEnvironmentVariables(RootDir)                   ; Обработка переменных среды
 RootDir := FileGetLongPath(RootDir)                             ; Получение длинного пути
 global RootDir := RootDir                                       ; Назначение глобальной переменной для применения во всех функциях
 
 IniRead,TimeStamp,%SourceFile%,Description,TimeStamp,yyyy.MM.dd ; Временной штамп
-TimeStamp := RegExReplace(TimeStamp,"^(.*=.*?) `;","$1")
+TimeStamp := RegExReplace(TimeStamp,"[ \t]+;.*$","")
 IniRead,CreateNewArchives,%SourceFile%,Description,CreateNewArchives,%A_Space% ; Создавать новый архив вместо синхронизации
-CreateNewArchives := RegExReplace(CreateNewArchives,"^(.*=.*?) `;","$1")
+CreateNewArchives := RegExReplace(CreateNewArchives,"[ \t]+;.*$","")
 IniRead,NewArchiveNumeration,%SourceFile%,Description,NewArchiveNumeration,0.2d ; Нумерация архивов
-NewArchiveNumeration := RegExReplace(NewArchiveNumeration,"^(.*=.*?) `;","$1")
+NewArchiveNumeration := RegExReplace(NewArchiveNumeration,"[ \t]+;.*$","")
 
 IniRead,LockArchive,%SourceFile%,Description,LockArchive,%A_Space% ; Запретить изменение архива
-LockArchive := RegExReplace(LockArchive,"^(.*=.*?) `;","$1")
+LockArchive := RegExReplace(LockArchive,"[ \t]+;.*$","")
 
 ; Определение имени будущего архива
 If (RegExMatch(TimeStamp,"false")) {
@@ -115,17 +115,17 @@ If (RegExMatch(TimeStamp,"false")) {
 }
 
 IniRead,SevenZip,%SourceFile%,Description,SevenZip,%ProgramFiles%\7-Zip\7z.exe  ; GetValue(SourceFile,"^SevenZip[\s+]?=[\s+]?(.*)") ; 7-Zip
-SevenZip := RegExReplace(SevenZip,"^(.*=.*?) `;","$1")
+SevenZip := RegExReplace(SevenZip,"[ \t]+;.*$","")
 SevenZip := ParseEnvironmentVariables(SevenZip)                                 ; Обработка переменных среды
 SevenZip := FileGetLongPath(SevenZip)                                           ; Получение длинного пути
 
 IniRead,WinRAR,%SourceFile%,Description,WinRAR,%ProgramFiles%\WinRAR\Rar.exe    ; GetValue(SourceFile,"^WinRAR[\s+]?=[\s+]?(.*)") ; WinRAR
-WinRAR := RegExReplace(WinRAR,"^(.*=.*?) `;","$1")
+WinRAR := RegExReplace(WinRAR,"[ \t]+;.*$","")
 WinRAR := ParseEnvironmentVariables(WinRAR)                                     ; Обработка переменных среды
 WinRAR := FileGetLongPath(WinRAR)                                               ; Получение длинного пути
 
 IniRead,ArchiveType,%SourceFile%,Description,ArchiveType,7z                     ; GetValue(SourceFile,"^ArchiveType[\s+]?=[\s+]?(.*)") ; Типы архивов
-ArchiveType := RegExReplace(ArchiveType,"^(.*=.*?) `;","$1")
+ArchiveType := RegExReplace(ArchiveType,"[ \t]+;.*$","")
 ; ArchiveType := Trim(ArchiveType," " . "`t" . """")
 
 DebugMsgText =

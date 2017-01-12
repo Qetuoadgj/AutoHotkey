@@ -138,13 +138,19 @@ SC052:: ; Numpad0
       VarSetCapacity(ClipboardAll,0)
     }
 
-    WinActivate,ahk_id %Chrome_WinID%
-    DllCall("SetForegroundWindow",UInt,Chrome_WinID)
-    WinWaitActive,ahk_id %Chrome_WinID%
+    If (not WinActive("ahk_id " . Chrome_WinID)) {
+      WinActivate,ahk_id %Chrome_WinID%
+      DllCall("SetForegroundWindow",UInt,Chrome_WinID)
+      WinWaitActive,ahk_id %Chrome_WinID%
 
-    Sleep,10
-    MouseClick,Left,0,0,1,50,U,R
-    Sleep,10
+      ; Sleep,10
+      ; MouseClick,Left,0,0,1,50,U,R
+      ; Sleep,10
+      
+      Sleep,10
+      ControlClick,Chrome Legacy Window,ahk_id %Chrome_WinID%,,,,NA
+      Sleep,10
+    }
 
     Clipboard =  ; Start off empty to allow ClipWait to detect when the text has arrived.
     ; Send,^c ; Send Ctrl+C

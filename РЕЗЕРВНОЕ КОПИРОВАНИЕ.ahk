@@ -22,11 +22,11 @@ If (not %0%) {
 
     IfExist,%EmptyFile%
       FileDelete,%EmptyFile%
-      
+
     MsgText =
     ( LTrim RTrim Join`r`n
       ; ДЛЯ ПРАВИЛЬНОГО ЧТЕНИЯ СИМВОЛОВ КОДИРОВКА ЭТОГО ФАЙЛА ОБЯЗАТЕЛЬНО ДОЛЖНА БЫТЬ: WIN-1251 | CP1251
-      
+
       [Description]
       ; Name = ;Имя Файла (в кавычках)
       ; Password = ;Пароль (без кавычек)
@@ -35,9 +35,9 @@ If (not %0%) {
       ; WinRAR = "`%ProgramFiles`%\WinRAR\Rar.exe" ;архиватор WinRAR (в кавычках)
       ArchiveType = 7z,rar ;Типы создаваемых архивов (7z,rar) (без кавычек)
       ; TimeStamp = yyyy.MM.dd ;Формат временного штампа архива (без кавычек)
-      ; CreateNewArchives = false ;Создание новых архивов вместо обновления существующей копии (true, false) (без кавычек)
+      ; CreateNewArchives = false ;Создание новых архивов вместо обновления существующей копии (true,false) (без кавычек)
       ; NewArchiveNumeration = 0.2d ;Формат нумерации новых архивов (без кавычек)
-      ; LockArchive = true ;Запретить дальнейшее изменение архива (true, false) (без кавычек)
+      ; LockArchive = true ;Запретить дальнейшее изменение архива (true,false) (без кавычек)
 
       [IncludeList]
       ; Включаемые файлы (без кавычек)
@@ -45,7 +45,7 @@ If (not %0%) {
       [ExcludeList]
       ; Исключаемые файлы (без кавычек)
       *Thumbs.db
-      
+
     )
     FileAppend,%MsgText%,%EmptyFile%,%Encoding%
   }
@@ -73,7 +73,7 @@ SourceFile := FullPath
 SplitPath,SourceFile,SourceFileShort,SourceFileDir,SourceFileExtension,SourceFileName,SourceFileDrive
 
 ; Назначение рабочего каталога программы
-SetWorkingDir %SourceFileDir%
+SetWorkingDir,%SourceFileDir%
 
 ; Получение переменных из файла-источника
 IniRead,Name,%SourceFile%,Description,Name,%SourceFileName% ; GetValue(SourceFile,"^Name[\s+]?=[\s+]?(.*)") ; Имя
@@ -144,7 +144,7 @@ DebugMsgText =
 MsgBox,1,,%DebugMsgText%
 IfMsgBox,Cancel
   ExitApp  ; User pressed the "No" button.
-  
+
 If (!FileExist(SevenZip) && InStr(ArchiveType,"7z")) {
   MsgBox,0,Error,Not found:`n%SevenZip%,1.5
 }
@@ -204,20 +204,22 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
 
   ; Если корневой каталог архивации задан:
   } else {
-    SetWorkingDir %RootDir% ; Назначение корневого каталога архивации рабочим каталогом программы
+    SetWorkingDir,%RootDir% ; Назначение корневого каталога архивации рабочим каталогом программы
+		SourceCopy := RootDir . "\" . SourceFileShort
+
     ; Копирование файла-источника в корневуой каталог архивации
-    If ("%RootDir%\%SourceFileShort%"!="%SourceFile%") { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
-      FileCopy,%SourceFile%,%RootDir%\%SourceFileShort%,1 ; Копирование / перезапесь файла в корневой каталог архивации
+    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+      FileCopy,%SourceFile%,%SourceCopy%,1 ; Копирование / перезапесь файла в корневой каталог архивации
     }
 
     ; RunWait,%Command% ; Выполнение команды архивации
     ; Выполнение команды архивации в командной строке
     RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-    If ("%RootDir%\%SourceFileShort%"!="%SourceFile%") { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
-      FileDelete,%RootDir%\%SourceFileShort% ;,1 ; Удаление скопированого ранее файла-источника из корневого каталога архивации
+    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+      FileDelete,%SourceCopy% ; Удаление скопированого ранее файла-источника из корневого каталога архивации
     }
-    SetWorkingDir %SourceFileDir% ; Восстановление рабочего каталога программы
+    SetWorkingDir,%SourceFileDir% ; Восстановление рабочего каталога программы
   }
 
   ; Удаление файлов-списков
@@ -256,20 +258,22 @@ If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
 
   ; Если корневой каталог архивации задан:
   } else {
-    SetWorkingDir %RootDir% ; Назначение корневого каталога архивации рабочим каталогом программы
+    SetWorkingDir,%RootDir% ; Назначение корневого каталога архивации рабочим каталогом программы
+		SourceCopy := RootDir . "\" . SourceFileShort
+
     ; Копирование файла-источника в корневуой каталог архивации
-    If ("%RootDir%\%SourceFileShort%"!="%SourceFile%") { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
-      FileCopy,%SourceFile%,%RootDir%\%SourceFileShort%,1 ; Копирование / перезапесь файла в корневой каталог архивации
+    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+      FileCopy,%SourceFile%,%SourceCopy%,1 ; Копирование / перезапесь файла в корневой каталог архивации
     }
 
     ; RunWait,%Command% ; Выполнение команды архивации
     ; Выполнение команды архивации в командной строке
     RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-    If ("%RootDir%\%SourceFileShort%"!="%SourceFile%") { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
-      FileDelete,%RootDir%\%SourceFileShort%,1 ; Удаление скопированого ранее файла-источника из корневого каталога архивации
+    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+      FileDelete,%SourceCopy% ; Удаление скопированого ранее файла-источника из корневого каталога архивации
     }
-    SetWorkingDir %SourceFileDir% ; Восстановление рабочего каталога программы
+    SetWorkingDir,%SourceFileDir% ; Восстановление рабочего каталога программы
   }
 
   ; Удаление файлов-списков

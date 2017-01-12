@@ -206,6 +206,7 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
   } else {
     SetWorkingDir,%RootDir% ; Назначение корневого каталога архивации рабочим каталогом программы
 		SourceCopy := RootDir . "\" . SourceFileShort
+		NoDelete := FileExist(SourceCopy)
 
     ; Копирование файла-источника в корневуой каталог архивации
     If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
@@ -216,7 +217,7 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
     ; Выполнение команды архивации в командной строке
     RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+    If (SourceCopy != SourceFile && not NoDelete) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
       FileDelete,%SourceCopy% ; Удаление скопированого ранее файла-источника из корневого каталога архивации
     }
     SetWorkingDir,%SourceFileDir% ; Восстановление рабочего каталога программы
@@ -260,6 +261,7 @@ If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
   } else {
     SetWorkingDir,%RootDir% ; Назначение корневого каталога архивации рабочим каталогом программы
 		SourceCopy := RootDir . "\" . SourceFileShort
+		NoDelete := FileExist(SourceCopy)
 
     ; Копирование файла-источника в корневуой каталог архивации
     If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
@@ -270,7 +272,7 @@ If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
     ; Выполнение команды архивации в командной строке
     RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+    If (SourceCopy != SourceFile && not NoDelete) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
       FileDelete,%SourceCopy% ; Удаление скопированого ранее файла-источника из корневого каталога архивации
     }
     SetWorkingDir,%SourceFileDir% ; Восстановление рабочего каталога программы

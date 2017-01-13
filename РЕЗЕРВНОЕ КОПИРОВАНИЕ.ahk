@@ -38,6 +38,7 @@ If (not %0%) {
       ; CreateNewArchives = false ;Создание новых архивов вместо обновления существующей копии (true,false) (без кавычек)
       ; NewArchiveNumeration = 0.2d ;Формат нумерации новых архивов (без кавычек)
       ; LockArchive = true ;Запретить дальнейшее изменение архива (true,false) (без кавычек)
+			; IncludeThisFile = false ;Не включать этот файл резервного копирования в архив резервной копии (true,false) (без кавычек)
 
       [IncludeList]
       ; Включаемые файлы (без кавычек)
@@ -95,20 +96,28 @@ global RootDir := RootDir                                       ; Назначе
 
 IniRead,TimeStamp,%SourceFile%,Description,TimeStamp,yyyy.MM.dd ; Временной штамп
 TimeStamp := RegExReplace(TimeStamp,"[ \t]+;.*$","")
+
 IniRead,CreateNewArchives,%SourceFile%,Description,CreateNewArchives,%A_Space% ; Создавать новый архив вместо синхронизации
 CreateNewArchives := RegExReplace(CreateNewArchives,"[ \t]+;.*$","")
+CreateNewArchives := StrToBool(CreateNewArchives) ; to boolean
+CreateNewArchivesStr := BoolToStr(CreateNewArchives) ; to string
+
 IniRead,NewArchiveNumeration,%SourceFile%,Description,NewArchiveNumeration,0.2d ; Нумерация архивов
 NewArchiveNumeration := RegExReplace(NewArchiveNumeration,"[ \t]+;.*$","")
 
 IniRead,LockArchive,%SourceFile%,Description,LockArchive,%A_Space% ; Запретить изменение архива
 LockArchive := RegExReplace(LockArchive,"[ \t]+;.*$","")
+LockArchive := StrToBool(LockArchive) ; to boolean
+LockArchiveStr := BoolToStr(LockArchive) ; to string
+
+IniRead,IncludeThisFile,%SourceFile%,Description,IncludeThisFile,true ; Включить в архив файл текущий резервного копирования
+IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+IncludeThisFile := StrToBool(IncludeThisFile) ; to boolean
+IncludeThisFileStr := BoolToStr(IncludeThisFile) ; to string
 
 ; Определение имени будущего архива
-If (RegExMatch(TimeStamp,"false")) {
+If (RegExMatch(TimeStamp,"^false$")) {
   Name = %Name%
-} else if (TimeStamp == "") {
-  FormatTime,Date,,yyyy.MM.dd ; Получение текущей даты (2015.11.29)
-  Name = %Name% (%Date%)
 } else {
   FormatTime,Date,,%TimeStamp% ; Получение текущей даты (2015.11.29)
   Name = %Name% (%Date%)
@@ -128,23 +137,6 @@ IniRead,ArchiveType,%SourceFile%,Description,ArchiveType,7z                     
 ArchiveType := RegExReplace(ArchiveType,"[ \t]+;.*$","")
 ; ArchiveType := Trim(ArchiveType," " . "`t" . """")
 
-DebugMsgText =
-( LTrim RTrim Join`r`n
-  Name = %Name%
-  Password = %Password%
-  RootDir = %RootDir%
-  SevenZip = %SevenZip%
-  WinRAR = %WinRAR%
-  ArchiveType = %ArchiveType%
-  TimeStamp = %TimeStamp%
-  CreateNewArchives = %CreateNewArchives%
-  NewArchiveNumeration = %NewArchiveNumeration%
-  LockArchive = %LockArchive%
-)
-MsgBox,1,,%DebugMsgText%
-IfMsgBox,Cancel
-  ExitApp  ; User pressed the "No" button.
-
 If (!FileExist(SevenZip) && InStr(ArchiveType,"7z")) {
   MsgBox,0,Error,Not found:`n%SevenZip%,1.5
 }
@@ -161,7 +153,7 @@ ExcludeList=%A_Temp%\ExcludeList.txt ;%SourceFileDir%\ExcludeList.txt
 
 ArchiveName := Name
 
-If (CreateNewArchives == "true") {
+If (CreateNewArchives) {
   ArchiveCount := 0
   Loop,Files,%Archive%*%ArchiveType%,F
   {
@@ -175,6 +167,24 @@ If (CreateNewArchives == "true") {
 }
 
 Archive=%SourceFileDir%\%ArchiveName%
+
+DebugMsgText =
+( LTrim RTrim Join`r`n
+  Name = %ArchiveName%
+  Password = %Password%
+  RootDir = %RootDir%
+  SevenZip = %SevenZip%
+  WinRAR = %WinRAR%
+  ArchiveType = %ArchiveType%
+  TimeStamp = %TimeStamp%
+  CreateNewArchives = %CreateNewArchivesStr%
+  NewArchiveNumeration = %NewArchiveNumeration%
+  LockArchive = %LockArchiveStr%
+	IncludeThisFile = %IncludeThisFileStr%
+)
+MsgBox,1,,%DebugMsgText%
+IfMsgBox,Cancel
+  ExitApp  ; User pressed the "No" button.
 
 ; Создание архива с помощью 7-Zip
 If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
@@ -194,7 +204,11 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
   Incrimental:="p1q1r0x1y2z1w2"   ; Ключ создания инкриментного архива
 
   ; Определение команды на выполнение архивации
-  Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%" -spf2 -w"%A_Temp%"
+	If (IncludeThisFile) {
+    Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%" -spf2 -w"%A_Temp%"
+	} Else {
+    Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% -spf2 -w"%A_Temp%"
+	}
 
   ; Проверка наличия параметра %RootDir% (определение корневого каталога архивации)
   ; Если корневой каталог архивации не задан:
@@ -209,7 +223,7 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
 		NoDelete := FileExist(SourceCopy)
 
     ; Копирование файла-источника в корневуой каталог архивации
-    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+    If (SourceCopy!=SourceFile and IncludeThisFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
       FileCopy,%SourceFile%,%SourceCopy%,1 ; Копирование / перезапесь файла в корневой каталог архивации
     }
 
@@ -217,7 +231,7 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
     ; Выполнение команды архивации в командной строке
     RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-    If (SourceCopy != SourceFile && not NoDelete) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+    If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
       FileDelete,%SourceCopy% ; Удаление скопированого ранее файла-источника из корневого каталога архивации
     }
     SetWorkingDir,%SourceFileDir% ; Восстановление рабочего каталога программы
@@ -246,7 +260,11 @@ If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
   Incrimental:="p1q1r0x1y2z1w2"   ; Ключ создания инкриментного архива
 
   ; Определение команды на выполнение архивации
-  Command="%WinRAR%" u -u%Synchronize% %Compression% -r0 %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%"
+	If (IncludeThisFile) {
+    Command="%WinRAR%" u -u%Synchronize% %Compression% -r0 %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%"
+	} Else {
+		Command="%WinRAR%" u -u%Synchronize% %Compression% -r0 %Password% "%Archive%.%Type%" %Exclude% %Include%
+	}
   If (LockArchive) {
     Command = %Command% & "%WinRAR%" k "%Archive%.%Type%"
   }
@@ -264,7 +282,7 @@ If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
 		NoDelete := FileExist(SourceCopy)
 
     ; Копирование файла-источника в корневуой каталог архивации
-    If (SourceCopy != SourceFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+    If (SourceCopy!=SourceFile and IncludeThisFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
       FileCopy,%SourceFile%,%SourceCopy%,1 ; Копирование / перезапесь файла в корневой каталог архивации
     }
 
@@ -272,7 +290,7 @@ If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
     ; Выполнение команды архивации в командной строке
     RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-    If (SourceCopy != SourceFile && not NoDelete) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+    If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
       FileDelete,%SourceCopy% ; Удаление скопированого ранее файла-источника из корневого каталога архивации
     }
     SetWorkingDir,%SourceFileDir% ; Восстановление рабочего каталога программы
@@ -347,4 +365,20 @@ SplitTextFile(SourceFile,OutputFile,StartString,EndString = "",Encoding = "")
       FileAppend,%CurrentString%`n,%OutputFile%,%Encoding%
     }
   }
+}
+
+; ===================================================================================
+;                 ФУНКЦИЯ ПЕРЕВОДА ЗНАЧЕНИЙ BOOOLEAN В STRING
+; ===================================================================================
+BoolToStr(v) {
+	If (v and (v == "true" or v = 1)) {
+	  Return,"true"
+	} else {
+		Return,"false"
+	}
+}
+StrToBool(v) {
+	v := Trim(v)
+  b := (v == "true" or v = 1)
+  Return,b
 }

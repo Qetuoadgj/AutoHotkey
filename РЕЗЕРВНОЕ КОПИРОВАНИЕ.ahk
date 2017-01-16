@@ -127,19 +127,19 @@ IncludeThisFile := StrToBool(IncludeThisFile) ; to boolean
 IncludeThisFileStr := BoolToStr(IncludeThisFile) ; to string
 
 IniRead,ZipMethod,%SourceFile%,Zip_Options,Method,Deflate
-IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+ZipMethod := RegExReplace(ZipMethod,"[ \t]+;.*$","")
 IniRead,ZipCompression,%SourceFile%,Zip_Options,Compression,9
-IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+ZipCompression := RegExReplace(ZipCompression,"[ \t]+;.*$","")
 
 IniRead,7zMethod,%SourceFile%,7z_Options,Method,LZMA2
-IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+7zMethod := RegExReplace(7zMethod,"[ \t]+;.*$","")
 IniRead,7zCompression,%SourceFile%,7z_Options,Compression,9
-IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+7zCompression := RegExReplace(7zCompression,"[ \t]+;.*$","")
 
 ; IniRead,RarMethod,%SourceFile%,Rar_Options,Method,Deflate
-; IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+; RarMethod := RegExReplace(RarMethod,"[ \t]+;.*$","")
 IniRead,RarCompression,%SourceFile%,Rar_Options,Compression,5
-IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+RarCompression := RegExReplace(RarCompression,"[ \t]+;.*$","")
 
 ; Определение имени будущего архива
 If (RegExMatch(TimeStamp,"^false$")) {

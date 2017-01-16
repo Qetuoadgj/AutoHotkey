@@ -279,7 +279,6 @@ If (FileExist(SevenZip) && InStr(ArchiveType,"zip")) {
 	} Else {
     Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% -spf2 -w"%A_Temp%"
 	}
-	MsgBox,%Command%
 
   ; Проверка наличия параметра %RootDir% (определение корневого каталога архивации)
   ; Если корневой каталог архивации не задан:

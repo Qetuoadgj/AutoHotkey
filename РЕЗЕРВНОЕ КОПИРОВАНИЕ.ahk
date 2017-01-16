@@ -33,12 +33,23 @@ If (not %0%) {
       RootDir = ;Корневая Папка (в кавычках)
       ; SevenZip = "`%ProgramFiles`%\7-Zip\7z.exe" ;архиватор 7-Zip (в кавычках)
       ; WinRAR = "`%ProgramFiles`%\WinRAR\Rar.exe" ;архиватор WinRAR (в кавычках)
-      ArchiveType = 7z,rar ;Типы создаваемых архивов (7z,rar) (без кавычек)
+      ArchiveType = zip,7z,rar ;Типы создаваемых архивов (zip,7z,rar) (без кавычек)
       ; TimeStamp = yyyy.MM.dd ;Формат временного штампа архива (без кавычек)
       ; CreateNewArchives = false ;Создание новых архивов вместо обновления существующей копии (true,false) (без кавычек)
       ; NewArchiveNumeration = 0.2d ;Формат нумерации новых архивов (без кавычек)
       ; LockArchive = true ;Запретить дальнейшее изменение архива (true,false) (без кавычек)
 			; IncludeThisFile = false ;Не включать этот файл резервного копирования в архив резервной копии (true,false) (без кавычек)
+
+			[Zip_Options]
+			Method = Deflate ; Copy,Deflate,Deflate64,BZip2,LZMA,PPMd
+			Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
+
+			[7z_Options]
+			Method = LZMA2  ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
+			Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
+
+			[Rar_Options]
+			Compression = 5 ; 0 | 1 | 3 | 5
 
       [IncludeList]
       ; Включаемые файлы (без кавычек)
@@ -115,6 +126,21 @@ IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
 IncludeThisFile := StrToBool(IncludeThisFile) ; to boolean
 IncludeThisFileStr := BoolToStr(IncludeThisFile) ; to string
 
+IniRead,ZipMethod,%SourceFile%,Zip_Options,Method,Deflate
+IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+IniRead,ZipCompression,%SourceFile%,Zip_Options,Compression,9
+IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+
+IniRead,7zMethod,%SourceFile%,7z_Options,Method,LZMA2
+IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+IniRead,7zCompression,%SourceFile%,7z_Options,Compression,9
+IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+
+; IniRead,RarMethod,%SourceFile%,Rar_Options,Method,Deflate
+; IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+IniRead,RarCompression,%SourceFile%,Rar_Options,Compression,5
+IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
+
 ; Определение имени будущего архива
 If (RegExMatch(TimeStamp,"^false$")) {
   Name = %Name%
@@ -133,10 +159,13 @@ WinRAR := RegExReplace(WinRAR,"[ \t]+;.*$","")
 WinRAR := ParseEnvironmentVariables(WinRAR)                                     ; Обработка переменных среды
 WinRAR := FileGetLongPath(WinRAR)                                               ; Получение длинного пути
 
-IniRead,ArchiveType,%SourceFile%,Description,ArchiveType,7z                     ; GetValue(SourceFile,"^ArchiveType[\s+]?=[\s+]?(.*)") ; Типы архивов
+IniRead,ArchiveType,%SourceFile%,Description,ArchiveType,zip                    ; GetValue(SourceFile,"^ArchiveType[\s+]?=[\s+]?(.*)") ; Типы архивов
 ArchiveType := RegExReplace(ArchiveType,"[ \t]+;.*$","")
 ; ArchiveType := Trim(ArchiveType," " . "`t" . """")
 
+If (!FileExist(SevenZip) && InStr(ArchiveType,"zip")) {
+  MsgBox,0,Error,Not found:`n%SevenZip%,1.5
+}
 If (!FileExist(SevenZip) && InStr(ArchiveType,"7z")) {
   MsgBox,0,Error,Not found:`n%SevenZip%,1.5
 }
@@ -168,8 +197,10 @@ If (CreateNewArchives) {
 
 Archive=%SourceFileDir%\%ArchiveName%
 
+/*
 DebugMsgText =
 ( LTrim RTrim Join`r`n
+  [Description]
   Name = %ArchiveName%
   Password = %Password%
   RootDir = %RootDir%
@@ -182,12 +213,108 @@ DebugMsgText =
   LockArchive = %LockArchiveStr%
 	IncludeThisFile = %IncludeThisFileStr%
 )
+*/
+
+DebugMsgText := "[Description]"
+DebugMsgText := DebugMsgText . "`r`n" . "Name = " . ArchiveName
+If (Password) {
+ DebugMsgText := DebugMsgText . "`r`n" . "Password = " . Password
+}
+DebugMsgText := DebugMsgText . "`r`n" . "RootDir = " . RootDir
+If (InStr(ArchiveType,"zip") or InStr(ArchiveType,"7z")) {
+ DebugMsgText := DebugMsgText . "`r`n" . "SevenZip = " . SevenZip
+}
+If InStr(ArchiveType,"rar") {
+	DebugMsgText := DebugMsgText . "`r`n" . "WinRAR = " . WinRAR
+}
+DebugMsgText := DebugMsgText . "`r`n" . "ArchiveType = " . ArchiveType
+DebugMsgText := DebugMsgText . "`r`n" . "TimeStamp = " . TimeStamp
+DebugMsgText := DebugMsgText . "`r`n" . "CreateNewArchives = " . CreateNewArchivesStr
+DebugMsgText := DebugMsgText . "`r`n" . "NewArchiveNumeration = " . NewArchiveNumeration
+If (InStr(ArchiveType,"rar")) {
+	DebugMsgText := DebugMsgText . "`r`n" . "LockArchive = " . LockArchiveStr
+}
+DebugMsgText := DebugMsgText . "`r`n" . "IncludeThisFile = " . IncludeThisFileStr
+
+If InStr(ArchiveType,"zip") {
+	DebugMsgText := DebugMsgText . "`r`n" . "`r`n[Zip_Options]"
+	DebugMsgText := DebugMsgText . "`r`n" . "Method = " . ZipMethod
+	DebugMsgText := DebugMsgText . "`r`n" . "Compression = " . ZipCompression
+}
+If InStr(ArchiveType,"7z") {
+	DebugMsgText := DebugMsgText . "`r`n" . "`r`n[7z_Options]"
+	DebugMsgText := DebugMsgText . "`r`n" . "Method = " . 7zMethod
+	DebugMsgText := DebugMsgText . "`r`n" . "Compression = " . 7zCompression
+}
+If InStr(ArchiveType,"rar") {
+	DebugMsgText := DebugMsgText . "`r`n" . "`r`n[Rar_Options]"
+	DebugMsgText := DebugMsgText . "`r`n" . "Compression = " . RarCompression
+}
+
+
 MsgBox,1,,%DebugMsgText%
 IfMsgBox,Cancel
   ExitApp  ; User pressed the "No" button.
 
+; Создание zip архива с помощью 7-Zip
+If (FileExist(SevenZip) && InStr(ArchiveType,"zip")) {
+  ; Разделение файла-источника на файлы-списки включаемых и исключаемых файлов (кодировка UTF-8)
+  SplitTextFile(SourceFile,IncludeList,"[IncludeList]","[ExcludeList]","UTF-8")
+  SplitTextFile(SourceFile,ExcludeList,"[ExcludeList]","","UTF-8")
+
+  Type:="zip"                     ; Тип архива
+  ; Если пароль задан
+  If (Password != "") {
+    Password=-p%Password%         ; Пароль на архив
+  }
+  Compression=-mm=%ZipMethod% -mx%ZipCompression% ; Алгоритм сжатия
+  Include=-i@"%IncludeList%"      ; Файл-список включений
+  Exclude=-x@"%ExcludeList%"      ; Файл-список исключений
+  Synchronize:="p0q0r2x1y2z1w2"   ; Ключ синхронизации
+  Incrimental:="p1q1r0x1y2z1w2"   ; Ключ создания инкриментного архива
+
+  ; Определение команды на выполнение архивации
+	If (IncludeThisFile) {
+    Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%" -spf2 -w"%A_Temp%"
+	} Else {
+    Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% -spf2 -w"%A_Temp%"
+	}
+	MsgBox,%Command%
+
+  ; Проверка наличия параметра %RootDir% (определение корневого каталога архивации)
+  ; Если корневой каталог архивации не задан:
+  If (RootDir == "") {
+    ; RunWait,%Command% ; Выполнение команды архивации в командной строке
+    RunWait,%comspec% /k cd /d "%SourceFileDir%" & %Command% & pause & exit
+
+  ; Если корневой каталог архивации задан:
+  } else {
+    SetWorkingDir,%RootDir% ; Назначение корневого каталога архивации рабочим каталогом программы
+		SourceCopy := RootDir . "\" . SourceFileShort
+		NoDelete := FileExist(SourceCopy)
+
+    ; Копирование файла-источника в корневуой каталог архивации
+    If (SourceCopy!=SourceFile and IncludeThisFile) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+      FileCopy,%SourceFile%,%SourceCopy%,1 ; Копирование / перезапесь файла в корневой каталог архивации
+    }
+
+    ; RunWait,%Command% ; Выполнение команды архивации
+    ; Выполнение команды архивации в командной строке
+    RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
+
+    If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; Проверка совпадения пути файла-источника с путём копирования файла-источника
+      FileDelete,%SourceCopy% ; Удаление скопированого ранее файла-источника из корневого каталога архивации
+    }
+    SetWorkingDir,%SourceFileDir% ; Восстановление рабочего каталога программы
+  }
+
+  ; Удаление файлов-списков
+  FileDelete,%IncludeList%
+  FileDelete,%ExcludeList%
+}
+
 ; Создание архива с помощью 7-Zip
-If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
+If (FileExist(SevenZip) && InStr(ArchiveType,"7z")) {
   ; Разделение файла-источника на файлы-списки включаемых и исключаемых файлов (кодировка UTF-8)
   SplitTextFile(SourceFile,IncludeList,"[IncludeList]","[ExcludeList]","UTF-8")
   SplitTextFile(SourceFile,ExcludeList,"[ExcludeList]","","UTF-8")
@@ -197,7 +324,7 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
   If (Password != "") {
     Password=-p%Password%         ; Пароль на архив
   }
-  Compression:="-m0=LZMA2 -mx9"   ; Алгоритм сжатия
+  Compression=-mm=%7zMethod% -mx%7zCompression%   ; Алгоритм сжатия
   Include=-i@"%IncludeList%"      ; Файл-список включений
   Exclude=-x@"%ExcludeList%"      ; Файл-список исключений
   Synchronize:="p0q0r2x1y2z1w2"   ; Ключ синхронизации
@@ -243,7 +370,7 @@ If (FileExist(SevenZip) && (InStr(ArchiveType,"7z") or ArchiveType = "")) {
 }
 
 ; Создание архива с помощью WinRAR
-If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
+If (FileExist(WinRAR) && InStr(ArchiveType,"rar")) {
   ; Разделение файла-источника на файлы-списки включаемых и исключаемых файлов (кодировка Windows-1251)
   SplitTextFile(SourceFile,IncludeList,"[IncludeList]","[ExcludeList]","CP1251")
   SplitTextFile(SourceFile,ExcludeList,"[ExcludeList]","","CP1251")
@@ -253,7 +380,7 @@ If (FileExist(WinRAR) && (InStr(ArchiveType,"rar") or ArchiveType = "")) {
   If (Password != "") {
     Password=-p%Password%         ; Пароль на архив
   }
-  Compression:="-m5 -rr5p"        ; Алгоритм сжатия
+  Compression=-m%RarCompression% -rr5p        ; Алгоритм сжатия
   Include=@"%IncludeList%"        ; Файл-список включений
   Exclude=-x@"%ExcludeList%"      ; Файл-список исключений
   Synchronize:=" -as"             ; Ключ синхронизации

@@ -14,7 +14,7 @@ SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 ; DetectHiddenWindows,Off
 
 SCRIPT_NAME := GetScriptName()
-SCRIPT_VERSION := "1.1.5"
+SCRIPT_VERSION := "1.1.6"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 MsgBox,0,%SCRIPT_WIN_TITLE%,Ready!,0.5
@@ -112,6 +112,7 @@ SetDocumentWindow:
   {
     WinActivate,ahk_id %Npp_WinID%
     WinWaitActive,ahk_id %Npp_WinID%
+		WinMaximize,ahk_id %Npp_WinID%
     WinRestore,ahk_id %Npp_WinID%
     MsgBox,0,%SCRIPT_WIN_TITLE%,Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%,1.5
     WinWaitClose,ahk_id %Npp_WinID%
@@ -133,29 +134,18 @@ SC052:: ; Numpad0
 
   IfWinExist,ahk_id %Chrome_WinID%
   {
-    If (Clipboard and SaveClipboard) {
+    If (SaveClipboard and Clipboard) {
       CUR_CLIPBOARD := ClipboardAll
-      VarSetCapacity(ClipboardAll,0)
+      ClipboardEmpty()
     }
 
     If (not WinActive("ahk_id " . Chrome_WinID)) {
       WinActivate,ahk_id %Chrome_WinID%
-      DllCall("SetForegroundWindow",UInt,Chrome_WinID)
       WinWaitActive,ahk_id %Chrome_WinID%
-
-      ; Sleep,10
-      ; MouseClick,Left,0,0,1,50,U,R
-      ; Sleep,10
-      
-      Sleep,10
-      ControlClick,Chrome Legacy Window,ahk_id %Chrome_WinID%,,,,NA
-      Sleep,10
     }
 
-    Clipboard =  ; Start off empty to allow ClipWait to detect when the text has arrived.
-    ; Send,^c ; Send Ctrl+C
-    ; ControlSend,,^C,ahk_id %Chrome_WinID%
-    Send,^c ; Send Ctrl+C
+    ClipboardEmpty()
+    Send,^{SC02E} ; Send Ctrl+C
     ClipWait,%ClipWaitTime% ; Wait for the clipboard to contain text.
 
     If (not Clipboard or (Clipboard == CUR_CLIPBOARD)) {
@@ -203,7 +193,7 @@ SC052:: ; Numpad0
         }
       }
 
-      Clipboard =
+      ClipboardEmpty()
       Clipboard := ClipText
       ClipWait,%ClipWaitTime%
 
@@ -225,14 +215,15 @@ SC052:: ; Numpad0
       Sleep,10
       Send,{End}
       Sleep,10
-      Send,^v
+      ; Send,^v
+      Send,^{SC02F} ; Send Ctrl+V
 
       If (UseEnter == "Yes") {
         Send,{Enter %NewLines%}
       }
 
       If RegExMatch(Npp_EditorTitle,".*[.].*",,1) {
-        Send,^s
+        Send,^{SC01F} ; Send Ctrl+S
       }
 
       ItemsArray.Insert(ClipBody)
@@ -242,19 +233,24 @@ SC052:: ; Numpad0
     If (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore) {
       WinActivate,ahk_id %Chrome_WinID%
       WinWaitActive,ahk_id %Chrome_WinID%
-      Send,^{F4}
+      Send,^{F4} ; Send Control+F4
     }
 
     If (CUR_CLIPBOARD and (Clipboard != CUR_CLIPBOARD)) {
-      Clipboard =
+      ClipboardEmpty()
       Clipboard := CUR_CLIPBOARD
       ClipWait,%ClipWaitTime%
+    }
+
+    If (not SaveClipboard) {
+      ClipboardEmpty()
     }
 
     WinActivate,ahk_id %LastActive_WinID%
   }
 
   ; Clear all temporary variables
+  ; --------------------------------------
   VarSetCapacity(CUR_CLIPBOARD,0)
   VarSetCapacity(Npp_EditorTitle,0)
   VarSetCapacity(ClipBody,0)
@@ -263,7 +259,8 @@ SC052:: ; Numpad0
   VarSetCapacity(AddLines,0)
   VarSetCapacity(ArrayLengthAfter,0)
   VarSetCapacity(Counter,0)
-  ;
+  Sleep,100
+  ; --------------------------------------
 
   Return
 }
@@ -305,4 +302,12 @@ InArray(haystack,needle) {
     }
   }
   Return,False
+}
+
+ClipboardEmpty(t:=100) {
+  local empty
+  Clipboard := empty
+  If (t > 0) {
+    Sleep,%t%
+  }
 }

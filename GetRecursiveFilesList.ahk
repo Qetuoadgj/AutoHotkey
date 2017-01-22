@@ -44,4 +44,3 @@ ClipWait ;,2.0
 
 ; MsgBox,0,,Done!,0.5
 MsgBox,0,,%FilesList%,1.5
-

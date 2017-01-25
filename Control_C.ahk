@@ -65,17 +65,8 @@ DefineGlobals:
     #ClipboardTimeout,%ClipTimeout%
   }
 
-  ; ArrayLengthBefore := 0
-  ; ArrayLengthAfter := 0
-
-  ; InsertCounter := 1
-  ; Counter := 0
-
-  ; AddNewLines := 0
-  ; CloseAddedWindow := 1
-
   ; SaveClipboard := True
-  ; CUR_CLIPBOARD := False
+
   Pattern := "<div class="".*?"" .*?><\/div>"
   MsgTime := 10
 }
@@ -258,8 +249,7 @@ SC052:: ; Numpad0
   VarSetCapacity(Counter,0)
   VarSetCapacity(AddLines,0)
   VarSetCapacity(ArrayLengthAfter,0)
-  VarSetCapacity(Counter,0)
-  Sleep,100
+  Sleep,500
   ; --------------------------------------
 
   Return
@@ -267,22 +257,19 @@ SC052:: ; Numpad0
 
 SC04F:: ; Numpad1
 {
-  ; ItemsArray := [] ; Object() ; Сброс таблицы проверки дубликатов
-
   ControlGet,Bool,Visible,,,%SCRIPT_WIN_TITLE%
   If (Bool) {
     Gui,%MainGUI%:Submit,Hide
   } Else {
     Gui,%MainGUI%:Show,xCenter yCenter h50 w340,%SCRIPT_WIN_TITLE%
   }
-
   Return
 }
 
 ; ------------ GUI BUTTONS ------------
 ResetArray:
 {
-  ItemsArray := [] ; Object() ; Сброс таблицы проверки дубликатов
+  ItemsArray := [] ; Сброс таблицы проверки дубликатов
   Gui,Submit,Hide
   MsgBox,0,%SCRIPT_WIN_TITLE%,Done!,0.5
   Return
@@ -306,7 +293,12 @@ InArray(haystack,needle) {
 
 ClipboardEmpty(t:=100) {
   local empty
-  Clipboard := empty
+  Try {
+    Clipboard := empty ; if there is an error wait for one second and try again
+	} Catch {
+    Sleep,500
+    Clipboard := empty
+	}
   If (t > 0) {
     Sleep,%t%
   }

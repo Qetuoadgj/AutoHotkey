@@ -30,7 +30,7 @@ If (not %0%) {
       [Description]
       ; Name = ;Имя Файла (в кавычках)
       ; Password = ;Пароль (без кавычек)
-      RootDir = ;Корневая Папка (в кавычках)
+      ; RootDir = "`%AppData`%" ;Корневая Папка (в кавычках)
       ; SevenZip = "`%ProgramFiles`%\7-Zip\7z.exe" ;архиватор 7-Zip (в кавычках)
       ; WinRAR = "`%ProgramFiles`%\WinRAR\Rar.exe" ;архиватор WinRAR (в кавычках)
       ArchiveType = zip,7z,rar ;Типы создаваемых архивов (zip,7z,rar) (без кавычек)
@@ -220,7 +220,9 @@ DebugMsgText := DebugMsgText . "`r`n" . "Name = " . ArchiveName
 If (Password) {
  DebugMsgText := DebugMsgText . "`r`n" . "Password = " . Password
 }
-DebugMsgText := DebugMsgText . "`r`n" . "RootDir = " . RootDir
+If (RootDir) {
+  DebugMsgText := DebugMsgText . "`r`n" . "RootDir = " . RootDir
+}
 If (InStr(ArchiveType,"zip") or InStr(ArchiveType,"7z")) {
  DebugMsgText := DebugMsgText . "`r`n" . "SevenZip = " . SevenZip
 }

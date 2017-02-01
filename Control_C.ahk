@@ -103,7 +103,7 @@ SetDocumentWindow:
   {
     WinActivate,ahk_id %Npp_WinID%
     WinWaitActive,ahk_id %Npp_WinID%
-		WinMaximize,ahk_id %Npp_WinID%
+    WinMaximize,ahk_id %Npp_WinID%
     WinRestore,ahk_id %Npp_WinID%
     MsgBox,0,%SCRIPT_WIN_TITLE%,Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%,1.5
     WinWaitClose,ahk_id %Npp_WinID%
@@ -184,9 +184,11 @@ SC052:: ; Numpad0
         }
       }
 
-      ClipboardEmpty()
-      Clipboard := ClipText
-      ClipWait,%ClipWaitTime%
+      ; ClipboardEmpty()
+      ; Clipboard := ClipText
+      ; ClipWait,%ClipWaitTime%
+
+      ClipboardSet(ClipText)
 
       If ((not Clipboard) or (Clipboard == CUR_CLIPBOARD)) {
         MsgBox,0,Error,Plaease`,%A_Space%RETRY!,0.5
@@ -201,13 +203,15 @@ SC052:: ; Numpad0
       WinWaitActive,ahk_id %Npp_WinID%
 
       Send,{F2}
-      Sleep,10
+      Sleep,100
       Send,{Up}
-      Sleep,10
+      Sleep,100
       Send,{End}
-      Sleep,10
+      Sleep,100
       ; Send,^v
       Send,^{SC02F} ; Send Ctrl+V
+
+      Sleep,500
 
       If (UseEnter == "Yes") {
         Send,{Enter %NewLines%}
@@ -228,9 +232,11 @@ SC052:: ; Numpad0
     }
 
     If (CUR_CLIPBOARD and (Clipboard != CUR_CLIPBOARD)) {
-      ClipboardEmpty()
-      Clipboard := CUR_CLIPBOARD
-      ClipWait,%ClipWaitTime%
+      ; ClipboardEmpty()
+      ; Clipboard := CUR_CLIPBOARD
+      ; ClipWait,%ClipWaitTime%
+
+      ClipboardSet(CUR_CLIPBOARD)
     }
 
     If (not SaveClipboard) {
@@ -295,11 +301,22 @@ ClipboardEmpty(t:=100) {
   local empty
   Try {
     Clipboard := empty ; if there is an error wait for one second and try again
-	} Catch {
+  } Catch {
     Sleep,500
     Clipboard := empty
-	}
+  }
   If (t > 0) {
     Sleep,%t%
+  }
+}
+
+ClipboardSet(v,t1:=100,t2:=500) {
+  ; t2 := t2 / 1000
+  ClipboardEmpty(t1)
+  Try {
+    Clipboard := v ; if there is an error wait for one second and try again
+  } Catch {
+    Sleep,%t2%
+    Clipboard := v
   }
 }

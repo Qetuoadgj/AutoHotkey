@@ -63,15 +63,15 @@ DefineGlobals:
 		IniWrite,%LANG_UKR%,%INI_FILE%,LANGUAGES,UKR
 	}
 	If (not DICT_ENG) {
-		DICT_ENG := "~QWERTYUIOP{}ASDFGHJKL:""ZXCVBNM<>``qwertyuiop[]asdfghjkl;'zxcvbnm,.?&@#"
+		DICT_ENG := "``1234567890-=qwertyuiop[]asdfghjkl;'\zxcvbnm,./~!@#$`%^&*()_+QWERTYUIOP{}ASDFGHJKL:""|ZXCVBNM<>?" ;"~QWERTYUIOP{}ASDFGHJKL:""ZXCVBNM<>``qwertyuiop[]asdfghjkl;'zxcvbnm,.?&@#"
 		IniWrite,%DICT_ENG%,%INI_FILE%,DICTIONARIES,%LANG_ENG%
 	}
 	If (not DICT_RUS) {
-		DICT_RUS := "ЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮёйцукенгшщзхъфывапролджэячсмитьбю,?""№"
+		DICT_RUS := "ё1234567890-=йцукенгшщзхъфывапролджэ\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ," ;"ЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮёйцукенгшщзхъфывапролджэячсмитьбю,?""№"
 		IniWrite,%DICT_RUS%,%INI_FILE%,DICTIONARIES,%LANG_RUS%
 	}
 	If (not DICT_UKR) {
-		DICT_UKR := "ЁЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄЯЧСМИТЬБЮёйцукенгшщзхїфівапролджєячсмитьбю.?""№"
+		DICT_UKR := "ё1234567890-=йцукенгшщзхїфівапролджє\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ЯЧСМИТЬБЮ," ;"ЁЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄЯЧСМИТЬБЮёйцукенгшщзхїфівапролджєячсмитьбю,?""№"
 		IniWrite,%DICT_UKR%,%INI_FILE%,DICTIONARIES,%LANG_UKR%
 	}
 }

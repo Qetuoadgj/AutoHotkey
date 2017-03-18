@@ -65,7 +65,12 @@ CreateGUI:
     ;~ WinMove,ahk_id %GUIWinID%,,(A_ScreenWidth/2)-(SizeX/2),(A_ScreenHeight/2)-(SizeY/2)
     WinMove,ahk_id %GUIWinID%,,%PosX%,%PosY%
 	OnMessage(0x201,"WM_LBUTTONDOWN")
-	;~ Return
+	;~ Menu,Tray,NoStandard ;remove standard Menu items
+	;~ Menu,Tray,Add,E&xit,CloseApp ;add a item named Exit that goes to the ButtonExit label
+	Menu,Tray,Add,Fix Position,Menu_ToggleFixPosition
+	If (FixPosition) {
+		Menu,Tray,Check,Fix Position
+	}
 }
 
 PreviousLocaleID:=false
@@ -101,6 +106,10 @@ GetCurrrentLang() {
 }
 
 WM_LBUTTONDOWN() {
+	global FixPosition
+	If (FixPosition) {
+		Return
+	}
 	PostMessage,0xA1,2
 	GoSub,SaveConfig
 }
@@ -114,9 +123,6 @@ GuiContextMenu:
 SaveConfig:
 {
 	FixPosition:=FixPosition?FixPosition:0
-	If (FixPosition) {
-		Return
-	}
 	Borders:=Borders?Borders:0
 	WinGetPos,PosX,PosY,SizeX,SizeY,ahk_id %GUIWinID%
 	;~ IniWrite,%SizeX%,%INI_FILE%,OPTIONS,SizeX
@@ -125,7 +131,6 @@ SaveConfig:
 	;~ IniWrite,%PosY%,%INI_FILE%,OPTIONS,PosY
 	;~ IniWrite,%Borders%,%INI_FILE%,OPTIONS,Borders
 	;~ IniWrite,%BordersColor%,%INI_FILE%,OPTIONS,BordersColor
-	CurrentSettings:=[]
 	For index,element in CurrentVariables
 	{
 		Key=%element%
@@ -145,6 +150,15 @@ CloseApp:
 {
 	GoSub,SaveConfig
 	ExitApp
+}
+
+Menu_ToggleFixPosition:
+{
+	FixPosition:=!FixPosition
+	FixPosition:=FixPosition?FixPosition:0
+	GoSub,SaveConfig
+	Menu,Tray,ToggleCheck,Fix Position
+	Return
 }
 
 ; ===================================================================================

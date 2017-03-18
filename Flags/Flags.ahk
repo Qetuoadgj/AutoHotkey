@@ -51,27 +51,27 @@ DefineGlobals:
 	IniRead,DICT_UKR,%INI_FILE%,DICTIONARIES,%LANG_UKR%,%A_Space%
 	
 	If (not LANG_ENG) {
-		LANG_ENG:="0409"
+		LANG_ENG := "0409"
 		IniWrite,%LANG_ENG%,%INI_FILE%,LANGUAGES,ENG
 	}
 	If (not LANG_RUS) {
-		LANG_RUS:="0419"
+		LANG_RUS := "0419"
 		IniWrite,%LANG_RUS%,%INI_FILE%,LANGUAGES,RUS
 	}
 	If (not LANG_UKR) {
-		LANG_UKR:="0422"
+		LANG_UKR := "0422"
 		IniWrite,%LANG_UKR%,%INI_FILE%,LANGUAGES,UKR
 	}
 	If (not DICT_ENG) {
-		DICT_ENG:="~QWERTYUIOP{}ASDFGHJKL:""ZXCVBNM<>``qwertyuiop[]asdfghjkl;'zxcvbnm,.?&@#"
+		DICT_ENG := "~QWERTYUIOP{}ASDFGHJKL:""ZXCVBNM<>``qwertyuiop[]asdfghjkl;'zxcvbnm,.?&@#"
 		IniWrite,%DICT_ENG%,%INI_FILE%,DICTIONARIES,%LANG_ENG%
 	}
 	If (not DICT_RUS) {
-		DICT_RUS:="ЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮёйцукенгшщзхъфывапролджэячсмитьбю,?""№"
+		DICT_RUS := "ЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮёйцукенгшщзхъфывапролджэячсмитьбю,?""№"
 		IniWrite,%DICT_RUS%,%INI_FILE%,DICTIONARIES,%LANG_RUS%
 	}
 	If (not DICT_UKR) {
-		DICT_UKR:="ЁЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄЯЧСМИТЬБЮёйцукенгшщзхїфівапролджєячсмитьбю.?""№"
+		DICT_UKR := "ЁЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄЯЧСМИТЬБЮёйцукенгшщзхїфівапролджєячсмитьбю.?""№"
 		IniWrite,%DICT_UKR%,%INI_FILE%,DICTIONARIES,%LANG_UKR%
 	}
 }
@@ -142,7 +142,7 @@ GetCurrrentLang() {
 	WinGet,WinID,,A
 	ThreadID:=DllCall("GetWindowThreadProcessId","UInt",WinID,"UInt",0)
 	InputLocaleID:=DllCall("GetKeyboardLayout","UInt",ThreadID,"UInt")
-	InputLocaleID:=SubStr(InputLocaleID,-3)
+	InputLocaleID:=SubStr(InputLocaleID, -3)
 	Return,InputLocaleID
 }
 
@@ -211,9 +211,9 @@ Menu_ToggleBorders:
 	Reload
 }
 
-;===================================================================================
+; ===================================================================================
 ;   ФУНКЦИЯ АВТОМАТИЧЕСКОГО ЗАВЕРШЕНИЯ ВСЕХ КОПИЙ ТЕКУЩЕГО ПРОЦЕССА (КРОМЕ АКТИВНОЙ)
-;===================================================================================
+; ===================================================================================
 ForceSingleInstance() {
   DetectHiddenWindows,On
   #SingleInstance,Off
@@ -239,75 +239,75 @@ $~Break::SwitchKeysLocale()
 SwitchKeysLocale()
 {
 	Critical
-	SetBatchLines,-1
-	SetKeyDelay,0
+	SetBatchLines, -1
+	SetKeyDelay, 0
 
-	TempClipboard:=ClipboardAll
-	Clipboard=
-	SendInput,^{vk43}   ; Ctrl + C
-	ClipWait,0
-	; если буфер обмена пуст (ничего не выделено),определяем и выделяем
+	TempClipboard := ClipboardAll
+	Clipboard =
+	SendInput, ^{vk43}   ; Ctrl + C
+	ClipWait, 0
+	; если буфер обмена пуст (ничего не выделено), определяем и выделяем
 	; с помощью ф-ции GetWord() последнее слово слева от курсора
-	SelText:=ErrorLevel ? GetWord() : Clipboard
-	pResult:=ConvertText(SelText)   ; получаем конвертированный текст и раскладку последней найденной буквы
+	SelText := ErrorLevel ? GetWord() : Clipboard
+	pResult := ConvertText(SelText)   ; получаем конвертированный текст и раскладку последней найденной буквы
 
-	Clipboard:=StrGet(pResult + A_PtrSize)
-	SendInput,^{vk56}   ; Ctrl + V
+	Clipboard := StrGet(pResult + A_PtrSize)
+	SendInput, ^{vk56}   ; Ctrl + V
 	; переключаем раскладку клавиатуры в зависимости от раскладки последней найденной буквы
-	Sleep,200
-	SwitchLocale(NumGet(pResult+0,"UInt"))
-	Sleep,200
-	Clipboard:=TempClipboard
+	Sleep, 200
+	SwitchLocale(NumGet(pResult+0, "UInt"))
+	Sleep, 200
+	Clipboard := TempClipboard
 }
 
 GetWord()
 {
 	While A_Index < 10
 	{
-		Clipboard=
-		SendInput,^+{Left}^{vk43}
-		ClipWait,1
+		Clipboard =
+		SendInput, ^+{Left}^{vk43}
+		ClipWait, 1
 		if ErrorLevel
 			Return
 
-		if RegExMatch(Clipboard,"P).*([ \t])",Found)
+		if RegExMatch(Clipboard, "P).*([ \t])", Found)
 		{
-			SendInput,^+{Right}
-			Return SubStr(Clipboard,FoundPos1 + 1)
+			SendInput, ^+{Right}
+			Return SubStr(Clipboard, FoundPos1 + 1)
 		}
 
-		PrevClipboard:=Clipboard
-		Clipboard=
-		SendInput,+{Left}^{vk43}
-		ClipWait,1
+		PrevClipboard := Clipboard
+		Clipboard =
+		SendInput, +{Left}^{vk43}
+		ClipWait, 1
 		if ErrorLevel
 			Return
 
-		if (StrLen(Clipboard)=StrLen(PrevClipboard))
+		if (StrLen(Clipboard) = StrLen(PrevClipboard))
 		{
-			Clipboard=
-			SendInput,+{Left}^{vk43}
-			ClipWait,1
+			Clipboard =
+			SendInput, +{Left}^{vk43}
+			ClipWait, 1
 			if ErrorLevel
 				Return
 
-			if (StrLen(Clipboard)=StrLen(PrevClipboard))
+			if (StrLen(Clipboard) = StrLen(PrevClipboard))
 				Return Clipboard
 			Else
 			{
-				SendInput,+{Right 2}
+				SendInput, +{Right 2}
 				Return PrevClipboard
 			}
 		}
 
-		SendInput,+{Right}
+		SendInput, +{Right}
 
-		s:=SubStr(Clipboard,1,1)
+		s := SubStr(Clipboard, 1, 1)
 		if s in %A_Space%,%A_Tab%,`n,`r
 		{
-			Clipboard=
-			SendInput,+{Left}^{vk43}
-			ClipWait,1
+			Clipboard =
+			SendInput, +{Left}^{vk43}
+			ClipWait, 1
 			if ErrorLevel
 				Return
 
@@ -338,49 +338,49 @@ ConvertText(Text)
 	
 	;~ MsgBox,%LANG_ENG%`n%DICT_ENG%
 
-	If (GetCurrrentLang()==LANG_ENG) {
-		Loop,parse,Text
+	If (GetCurrrentLang() == LANG_ENG) {
+		Loop, parse, Text
 		{
-			found=
-			if found:=InStr(DICT_ENG,A_LoopField,1)
-				NewText.=SubStr(DICT_RUS,found,1),lastfound:=2
+			found =
+			if found := InStr(DICT_ENG, A_LoopField, 1)
+				NewText .= SubStr(DICT_RUS, found, 1), lastfound := 2
 
 			if !found
-				if found:=InStr(DICT_UKR,A_LoopField,1)
-					NewText.=SubStr(DICT_RUS,found,1),lastfound:=2
+				if found := InStr(DICT_UKR, A_LoopField, 1)
+					NewText .= SubStr(DICT_RUS, found, 1), lastfound := 2
 
 			if !found
-				NewText.=A_LoopField
+				NewText .= A_LoopField
 		}
 	} else {
-		Loop,parse,Text
+		Loop, parse, Text
 		{
-			found=
-			if found:=InStr(DICT_RUS,A_LoopField,1)
-				NewText.=SubStr(DICT_ENG,found,1),lastfound:=1
+			found =
+			if found := InStr(DICT_RUS, A_LoopField, 1)
+				NewText .= SubStr(DICT_ENG, found, 1), lastfound := 1
 
 			if !found
-				if found:=InStr(DICT_UKR,A_LoopField,1)
-					NewText.=SubStr(DICT_ENG,found,1),lastfound:=1
+				if found := InStr(DICT_UKR, A_LoopField, 1)
+					NewText .= SubStr(DICT_ENG, found, 1), lastfound := 1
 
 			if !found
-				NewText.=A_LoopField
+				NewText .= A_LoopField
 		}
 	}
 
-	VarSetCapacity(Result,A_PtrSize + StrPut(NewText)*(A_IsUnicode ? 2 : 1))
-	NumPut(lastfound,&Result),StrPut(NewText,&Result + A_PtrSize)
+	VarSetCapacity(Result, A_PtrSize + StrPut(NewText)*(A_IsUnicode ? 2 : 1))
+	NumPut(lastfound, &Result), StrPut(NewText, &Result + A_PtrSize)
 	Return &Result
 }
 
 SwitchLocale(lastfound)
 {
-	SetFormat,IntegerFast,H
-	VarSetCapacity(List,A_PtrSize*2)
-	DllCall("GetKeyboardLayoutList",Int,2,Ptr,&List)
-	Locale1:=NumGet(List)
-	b:=SubStr(Locale2:=NumGet(List,A_PtrSize),-3)=0409
-	En:=b ? Locale2 : Locale1
-	Ru:=b ? Locale1 : Locale2
-	SendMessage,WM_INPUTLANGCHANGEREQUEST:=0x50,,lastfound=1 ? En : Ru,,A
+	SetFormat, IntegerFast, H
+	VarSetCapacity(List, A_PtrSize*2)
+	DllCall("GetKeyboardLayoutList", Int, 2, Ptr, &List)
+	Locale1 := NumGet(List)
+	b := SubStr(Locale2 := NumGet(List, A_PtrSize), -3) = 0409
+	En := b ? Locale2 : Locale1
+	Ru := b ? Locale1 : Locale2
+	SendMessage, WM_INPUTLANGCHANGEREQUEST := 0x50,, lastfound = 1 ? En : Ru,, A
 }

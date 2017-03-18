@@ -18,6 +18,7 @@ ForceSingleInstance()
 SCRIPT_NAME := GetScriptName()
 SCRIPT_VERSION := "1.0.0"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION . " (by Ægir)"
+SCRIPT_WIN_TITLE_SHORT := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
 DefineGlobals:
 {
@@ -77,8 +78,11 @@ process_watcher:
 			Image := Image . ".png"
 		} else if FileExist(Image . ".jpg") {
 			Image := Image . ".jpg"
+		} else {
+			SoundPlay,*16
+			MsgBox,0,%SCRIPT_WIN_TITLE_SHORT% - Error,There is no image for:`n%LocaleID%,3.0
 		}
-		GuiControl,, Flag, %Image%
+		GuiControl,, Flag, *w%PicSizeX% *h%PicSizeY% %Image%
 		PreviousLocaleID := LocaleID
     }
 	Return

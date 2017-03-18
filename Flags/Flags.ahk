@@ -29,7 +29,7 @@ DefineGlobals:
 	IniRead,SizeX,%INI_FILE%,OPTIONS,SizeX,32
 	IniRead,SizeY,%INI_FILE%,OPTIONS,SizeY,22
 
-	PosX:=A_ScreenWidth - SizeX - 100
+	PosX:=A_ScreenWidth-SizeX-100
 	PosY:=100
 
 	IniRead,PosX,%INI_FILE%,OPTIONS,PosX,%PosX%
@@ -47,19 +47,21 @@ CreateGUI:
 {
 	Gui,Margin,0,0
 	GUI,+AlwaysOnTop -Border -SysMenu +Owner -Caption +ToolWindow
+	WinSizeX:=SizeX
+	WinSizey:=Sizey
 	PicSizeX:=SizeX
 	PicSizeY:=SizeY
 	If (Borders) {
 		;~ Gui,+Border
 		Gui,Color,%BordersColor%
-		SizeX:=SizeX + Borders*2
-		SizeY:=SizeY + Borders*2
-		PicSizeX:=SizeX - Borders*2
-		PicSizeY:=SizeY - Borders*2
+		WinSizeX:=SizeX+Borders*2
+		WinSizeY:=SizeY+Borders*2
+		PicSizeX:=WinSizeX-Borders*2
+		PicSizeY:=WinSizeY-Borders*2
 		Gui,Margin,%Borders%,%Borders%
 	}
 	Gui,Add,Picture,w%PicSizeX% h%PicSizeY% vFlag
-	Gui,Show,w%SizeX% h%SizeY%,%SCRIPT_WIN_TITLE%
+	Gui,Show,w%WinSizeX% h%WinSizey%,%SCRIPT_WIN_TITLE%
 	Gui,+LastFound
 	WinGet,GUIWinID,ID
     ;~ WinMove,ahk_id %GUIWinID%,,(A_ScreenWidth/2)-(SizeX/2),(A_ScreenHeight/2)-(SizeY/2)
@@ -67,9 +69,14 @@ CreateGUI:
 	OnMessage(0x201,"WM_LBUTTONDOWN")
 	;~ Menu,Tray,NoStandard ;remove standard Menu items
 	;~ Menu,Tray,Add,E&xit,CloseApp ;add a item named Exit that goes to the ButtonExit label
+	Menu,Tray,Add
 	Menu,Tray,Add,Fix Position,Menu_ToggleFixPosition
 	If (FixPosition) {
 		Menu,Tray,Check,Fix Position
+	}
+	Menu,Tray,Add,Borders,Menu_ToggleBorders
+	If (Borders) {
+		Menu,Tray,Check,Borders
 	}
 }
 
@@ -124,13 +131,15 @@ SaveConfig:
 {
 	FixPosition:=FixPosition?FixPosition:0
 	Borders:=Borders?Borders:0
-	WinGetPos,PosX,PosY,SizeX,SizeY,ahk_id %GUIWinID%
+	WinGetPos,WinPosX,WinPosY,WinSizeX,WinSizeY,ahk_id %GUIWinID%
 	;~ IniWrite,%SizeX%,%INI_FILE%,OPTIONS,SizeX
 	;~ IniWrite,%SizeY%,%INI_FILE%,OPTIONS,SizeY
 	;~ IniWrite,%PosX%,%INI_FILE%,OPTIONS,PosX
 	;~ IniWrite,%PosY%,%INI_FILE%,OPTIONS,PosY
 	;~ IniWrite,%Borders%,%INI_FILE%,OPTIONS,Borders
 	;~ IniWrite,%BordersColor%,%INI_FILE%,OPTIONS,BordersColor
+	PosX:=Borders?WinPosX-Borders:WinPosX
+	PosY:=Borders?WinPosY-Borders:WinPosY
 	For index,element in CurrentVariables
 	{
 		Key=%element%
@@ -155,10 +164,17 @@ CloseApp:
 Menu_ToggleFixPosition:
 {
 	FixPosition:=!FixPosition
-	FixPosition:=FixPosition?FixPosition:0
 	GoSub,SaveConfig
 	Menu,Tray,ToggleCheck,Fix Position
 	Return
+}
+
+Menu_ToggleBorders:
+{
+	Borders:=!Borders
+	GoSub,SaveConfig
+	Menu,Tray,ToggleCheck,Borders
+	Reload
 }
 
 ; ===================================================================================

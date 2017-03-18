@@ -138,8 +138,8 @@ SaveConfig:
 	;~ IniWrite,%PosY%,%INI_FILE%,OPTIONS,PosY
 	;~ IniWrite,%Borders%,%INI_FILE%,OPTIONS,Borders
 	;~ IniWrite,%BordersColor%,%INI_FILE%,OPTIONS,BordersColor
-	PosX:=Borders?WinPosX-Borders:WinPosX
-	PosY:=Borders?WinPosY-Borders:WinPosY
+	PosX:=WinPosX ;Borders?WinPosX-Borders:WinPosX
+	PosY:=WinPosY ;Borders?WinPosY-Borders:WinPosY
 	For index,element in CurrentVariables
 	{
 		Key=%element%

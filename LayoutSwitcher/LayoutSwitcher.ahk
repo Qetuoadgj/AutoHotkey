@@ -160,6 +160,9 @@ CloseApp:
 ChangeGUIImage:
 {
 	CurrentLocale := CurrentKeyboardLayout("A")[1].Locale
+	if (not CurrentLocale or CurrentLocale == "") {
+		CurrentLocale := "English"
+	}
 	If (PreviousLocale != CurrentLocale) {
 		Image := A_WorkingDir "\Images\" CurrentLocale
 		If FileExist(Image ".png") {

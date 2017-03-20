@@ -34,6 +34,7 @@ CreateLocalization:
 	L["Generate Dictionary"] := "Generate Dictionary"
 	L["Open project site"] := "Open project site"
 	L["Predict Layout"] := "Predict Layout"
+	L["Tray Icon"] := "Tray Icon"
 	
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
@@ -43,6 +44,7 @@ CreateLocalization:
 		L["Generate Dictionary"] := "Создать словари"
 		L["Open project site"] := "Открыть сайт программы"
 		L["Predict Layout"] := "Определять раскладку текста"
+		L["Tray Icon"] := "Иконка в трее"
 	}
 }
 
@@ -89,6 +91,9 @@ ReadConfigFile:
 	
 	PredictLayout := 1
 	IniRead,PredictLayout,%INI_FILE%,OPTIONS,PredictLayout,%PredictLayout%
+	
+	TrayIcon := 1
+	IniRead,TrayIcon,%INI_FILE%,OPTIONS,TrayIcon,%TrayIcon%
 }
 
 ;~ ===================================================================================
@@ -124,6 +129,14 @@ AddMenuItems:
 	Menu, Tray, Add, % L["Fix Position"], Menu_ToggleFixPosition
 	If FixPosition
 		Menu, Tray, Check, % L["Fix Position"]
+	
+	Menu, Tray, Add, % L["Tray Icon"], Menu_ToggleTrayIcon
+	If (TrayIcon) {
+		Menu, Tray, Icon
+		Menu, Tray, Check, % L["Tray Icon"]
+	} Else {
+		Menu, Tray, NoIcon
+	}
 	
 	Menu, Tray, Add
 	Menu, Tray, Add, % L["Predict Layout"],  Menu_TogglePredictLayout
@@ -187,6 +200,8 @@ WriteConfigFile:
 	IniWrite("Ukrainian", INI_FILE, "DICTIONARIES", Ukrainian)
 	
 	IniWrite("PredictLayout", INI_FILE, "OPTIONS", PredictLayout)
+
+	IniWrite("TrayIcon", INI_FILE, "OPTIONS", TrayIcon)
 	
 	return
 }
@@ -204,18 +219,26 @@ ChangeGUIImage:
 		CurrentLocale := "English"
 	}
 	If (PreviousLocale != CurrentLocale) {
-		Image := A_WorkingDir "\Images\" CurrentLocale
-		If FileExist(Image ".png") {
-			Image := Image ".png"
-		} else if FileExist(Image ".jpg") {
-			Image := Image ".jpg"
+		ImageFile := A_WorkingDir "\Images\" CurrentLocale
+		If FileExist(ImageFile ".png") {
+			ImageFile := ImageFile ".png"
+		} else if FileExist(ImageFile ".jpg") {
+			ImageFile := ImageFile ".jpg"
 		} else {
 			SoundPlay, *16
 			MsgBox, 0, %SCRIPT_WIN_TITLE_SHORT% - Error, There is no image for:`n%CurrentLocale%, 3.0
 		}
-		GuiControl,, FlagTexture, *w%SizeX% *h%SizeY% %Image%
+		GuiControl,, FlagTexture, *w%SizeX% *h%SizeY% %ImageFile%
 		PreviousLocale := CurrentLocale
 		NextLocale := CurrentKeyboardLayout("A")[2].Locale
+		If (TrayIcon) {
+			IconFile := A_WorkingDir "\Icons\" CurrentLocale ".ico"
+			If FileExist(IconFile) {
+				Menu, Tray, Icon, %IconFile%
+			}
+		} else {
+			Menu, Tray, NoIcon
+		}
 	}
 	return
 }
@@ -257,6 +280,16 @@ Menu_ToggleFixPosition:
 	return
 }
 
+Menu_ToggleTrayIcon:
+{
+	TrayIcon := !TrayIcon
+	IniWrite("TrayIcon", INI_FILE, "OPTIONS", TrayIcon)
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	If TrayIcon
+		Menu, Tray, Icon
+	return
+}
+
 Menu_TogglePredictLayout:
 {
 	PredictLayout := !PredictLayout
@@ -265,13 +298,11 @@ Menu_TogglePredictLayout:
 	return
 }
 
-
 Menu_GenerateDictionary:
 {
 	GenerateDictionary()
 	return
 }
-
 
 Menu_EditConfig:
 {

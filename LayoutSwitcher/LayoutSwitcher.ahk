@@ -266,6 +266,8 @@ Menu_ToggleBorders:
 	else
 		Gui, -Border
 	
+	Gui, Show, w%SizeX% h%SizeY%, %SCRIPT_WIN_TITLE_SHORT%
+	
 	IniWrite("Borders", INI_FILE, "OPTIONS", Borders)
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	return

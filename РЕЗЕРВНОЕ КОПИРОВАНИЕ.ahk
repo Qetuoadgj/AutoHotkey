@@ -500,7 +500,7 @@ SplitTextFile(SourceFile,OutputFile,StartString,EndString = "",Encoding = "")
 		global SourceFileName
 		global SourceFileExtension
 		FileAppend,%SourceFileName%.%SourceFileExtension%`n,%OutputFile%,%Encoding%
-		MsgBox, %SourceFile%
+		;~ MsgBox, %SourceFile%
 	}
 }
 

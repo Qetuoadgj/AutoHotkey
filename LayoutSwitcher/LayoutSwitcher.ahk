@@ -79,13 +79,9 @@ ReadConfigFile:
 	FixPosition := 0
 	IniRead,FixPosition,%INI_FILE%,OPTIONS,FixPosition,%FixPosition%
 	
-	;~ English := "``1234567890-=qwertyuiop[]asdfghjkl;'\zxcvbnm,./~!@#$`%^&*()_+QWERTYUIOP{}ASDFGHJKL:""|ZXCVBNM<>?"
-	;~ Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
-	;~ Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ЯЧСМИТЬБЮ,"
-	
-	English := "``1234567890-=qwertyuiop[]asdfghjkl;'\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""|ZXCVBNM<>?"
-	Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
-	Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ЯЧСМИТЬБЮ,"
+	Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
+	English := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
+	Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	
 	IniRead,English,%INI_FILE%,DICTIONARIES,English,%English%
 	IniRead,Russian,%INI_FILE%,DICTIONARIES,Russian,%Russian%
@@ -256,6 +252,7 @@ Menu_ToggleFixPosition:
 {
 	FixPosition := !FixPosition
 	IniWrite("FixPosition", INI_FILE, "OPTIONS", FixPosition)
+	SaveWinPosition()
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	return
 }
@@ -278,6 +275,7 @@ Menu_GenerateDictionary:
 
 Menu_EditConfig:
 {
+	gosub WriteConfigFile
 	Run, notepad.exe "%INI_FILE%"
 	return
 }
@@ -313,7 +311,7 @@ GenerateDictionary()
 	
 	Critical
 	
-	Keys:=["SC029","SC002","SC003","SC004","SC005","SC006","SC007","SC008","SC009","SC00A","SC00B","SC00C","SC00D","SC010","SC011","SC012","SC013","SC014","SC015","SC016","SC017","SC018","SC019","SC01A","SC01B","SC01E","SC01F","SC020","SC021","SC022","SC023","SC024","SC025","SC026","SC027","SC028","SC02B","SC02C","SC02D","SC02E","SC02F","SC030","SC031","SC032","SC033","SC034","SC035"]
+	Keys:=["SC029","SC002","SC003","SC004","SC005","SC006","SC007","SC008","SC009","SC00A","SC00B","SC00C","SC00D","SC010","SC011","SC012","SC013","SC014","SC015","SC016","SC017","SC018","SC019","SC01A","SC01B","SC01E","SC01F","SC020","SC021","SC022","SC023","SC024","SC025","SC026","SC027","SC028","SC02B","SC056","SC02C","SC02D","SC02E","SC02F","SC030","SC031","SC032","SC033","SC034","SC035"]
 		
 	Sleep, 500
 	PostMessage, 0x50, 0, 0x4090409,, A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.

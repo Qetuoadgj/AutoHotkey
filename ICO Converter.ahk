@@ -1,4 +1,7 @@
 #NoEnv
+#SingleInstance, Force
+
+SetWorkingDir, %A_ScriptDir% ;Ensures a consistent starting directory.
 SetBatchLines,-1
 Ptr := A_PtrSize ? "Ptr" : "UInt"
 
@@ -13,9 +16,13 @@ Loop, Parse, Files, `n
 		Directory := A_LoopField
 	Else
 		All_Files .= Directory . "\" A_LoopField "`r`n"
+	
+	File := Directory . "\" A_LoopField
+	SplitPath,File,,,,FileName
+	Generate_Icon(File, Directory . "\" FileName ".ico")
 }
 
-Generate_Icon(All_Files, A_ScriptDir "\new icon.ico")
+;~ Generate_Icon(All_Files, A_ScriptDir "\new icon.ico")
 
 Generate_Icon(_Files, _OutputName, _Sizes = "")
 {

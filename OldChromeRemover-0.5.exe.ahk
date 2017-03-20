@@ -37,14 +37,17 @@ If not FileExist(ExePath) {
     }
 }
 
-If !A_IsAdmin
-{
+If (not A_IsAdmin) {
   SavedClipboard := Clipboardall
   Clipboard = ; Empty the clipboard.
   Clipboard := ExePath
   ClipWait,0.5
-
-  Run *RunAs "%A_ScriptFullPath%" "%ExePath%"
+  Try
+  {
+    Run,*RunAs "%A_ScriptFullPath%"
+  } Catch {
+    ; MsgBox,You cancelled when asked to elevate to admin!
+  }
   ExitApp
 }
 

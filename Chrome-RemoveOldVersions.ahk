@@ -9,7 +9,7 @@ SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance,Force ; [Force|Ignore|Off]
 
-UseSingleInstance()
+ForceSingleInstance()
 
 If (not A_IsAdmin) {
   Try
@@ -189,8 +189,7 @@ GetFileFolderSize(fPath="") {
 ; ===================================================================================
 ;   ФУНКЦИЯ АВТОМАТИЧЕСКОГО ЗАВЕРШЕНИЯ ВСЕХ КОПИЙ ТЕКУЩЕГО ПРОЦЕССА (КРОМЕ АКТИВНОЙ)
 ; ===================================================================================
-UseSingleInstance()
-{
+ForceSingleInstance() {
   DetectHiddenWindows,On
   #SingleInstance,Off
 

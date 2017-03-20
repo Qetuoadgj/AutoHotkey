@@ -494,6 +494,14 @@ SplitTextFile(SourceFile,OutputFile,StartString,EndString = "",Encoding = "")
 			FileAppend,%CurrentString%`n,%OutputFile%,%Encoding%
 		}
 	}
+	
+	global IncludeThisFile
+	If (!IncludeThisFile and StartString == "[ExcludeList]") {
+		global SourceFileName
+		global SourceFileExtension
+		FileAppend,%SourceFileName%.%SourceFileExtension%`n,%OutputFile%,%Encoding%
+		MsgBox, %SourceFile%
+	}
 }
 
 ; ===================================================================================

@@ -15,11 +15,15 @@ IfNotExist,Bin\Blade.exe
   ExitApp
 }
 
-UseSingleInstance()
+ForceSingleInstance()
 
-If !A_IsAdmin
-{
-  Run *RunAs "%A_ScriptFullPath%"
+If (not A_IsAdmin) {
+  Try
+  {
+    Run,*RunAs "%A_ScriptFullPath%"
+  } Catch {
+    ; MsgBox,You cancelled when asked to elevate to admin!
+  }
   ExitApp
 }
 

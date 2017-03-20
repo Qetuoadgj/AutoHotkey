@@ -8,11 +8,15 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; Process,Priority,,High
 ; DetectHiddenWindows,On
 
-UseSingleInstance()
+ForceSingleInstance()
 
-If !A_IsAdmin
-{
-  Run *RunAs "%A_ScriptFullPath%"
+If (not A_IsAdmin) {
+  Try
+  {
+    Run,*RunAs "%A_ScriptFullPath%"
+  } Catch {
+    ; MsgBox,You cancelled when asked to elevate to admin!
+  }
   ExitApp
 }
 

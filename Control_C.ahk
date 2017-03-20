@@ -300,7 +300,7 @@ InArray(haystack,needle) {
 ClipboardEmpty(t:=100) {
   local empty
   Try {
-    Clipboard := empty ; if there is an error wait for one second and try again
+    Clipboard := empty ; if there is an error wait and try again
   } Catch {
     Sleep,500
     Clipboard := empty
@@ -314,7 +314,7 @@ ClipboardSet(v,t1:=100,t2:=500) {
   ; t2 := t2 / 1000
   ClipboardEmpty(t1)
   Try {
-    Clipboard := v ; if there is an error wait for one second and try again
+    Clipboard := v ; if there is an error wait and try again
   } Catch {
     Sleep,%t2%
     Clipboard := v

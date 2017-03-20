@@ -23,6 +23,29 @@ SCRIPT_VERSION := "1.0.0"
 SCRIPT_WIN_TITLE := SCRIPT_NAME " v" SCRIPT_VERSION " (by Ægir)"
 SCRIPT_WIN_TITLE_SHORT := SCRIPT_NAME " v" SCRIPT_VERSION
 
+CreateLocalization:
+{
+	L := {}
+	
+	L["Show Borders"] := "Show Borders"
+	L["Fix Position"] := "Fix Position"
+	L["Edit Config"] := "Edit Config"
+	L["Save Config"] := "Save Config"
+	L["Generate Dictionary"] := "Generate Dictionary"
+	L["Open project site"] := "Open project site"
+	L["Predict Layout"] := "Predict Layout"
+	
+	If (A_Language = "0419") {
+		L["Show Borders"] := "Показать границы"
+		L["Fix Position"] := "Зафиксировать"
+		L["Save Config"] := "Сохранить настройки"
+		L["Edit Config"] := "Открыть настройки"
+		L["Generate Dictionary"] := "Создать словари"
+		L["Open project site"] := "Открыть сайт программы"
+		L["Predict Layout"] := "Определять раскладку текста"
+	}
+}
+
 ;~ ===================================================================================
 ;~ ОПРЕДЕЛЕНИЕ ОСНОВНЫХ ПЕРЕМЕННЫХ
 ;~ ===================================================================================
@@ -31,6 +54,8 @@ DefineGlobals:
 	INI_FILE := SCRIPT_NAME ".ini"
 	INI_FILE := A_ScriptDir "\" INI_FILE
 	INI_FILE := FileGetLongPath(INI_FILE)
+	
+	SITE := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/LayoutSwitcher"
 }
 
 ;~ ===================================================================================
@@ -54,13 +79,20 @@ ReadConfigFile:
 	FixPosition := 0
 	IniRead,FixPosition,%INI_FILE%,OPTIONS,FixPosition,%FixPosition%
 	
-	English := "``1234567890-=qwertyuiop[]asdfghjkl;'\zxcvbnm,./~!@#$`%^&*()_+QWERTYUIOP{}ASDFGHJKL:""|ZXCVBNM<>?"
-	Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
-	Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ЯЧСМИТЬБЮ,"
+	;~ English := "``1234567890-=qwertyuiop[]asdfghjkl;'\zxcvbnm,./~!@#$`%^&*()_+QWERTYUIOP{}ASDFGHJKL:""|ZXCVBNM<>?"
+	;~ Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
+	;~ Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ячсмитьбю.Ё!""№;`%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ЯЧСМИТЬБЮ,"
+	
+	English := "``1234567890-=qwertyuiop[]asdfghjkl;'\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""|ZXCVBNM<>?"
+	Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
+	Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ЯЧСМИТЬБЮ,"
 	
 	IniRead,English,%INI_FILE%,DICTIONARIES,English,%English%
 	IniRead,Russian,%INI_FILE%,DICTIONARIES,Russian,%Russian%
 	IniRead,Ukrainian,%INI_FILE%,DICTIONARIES,Ukrainian,%Ukrainian%	
+	
+	PredictLayout := 1
+	IniRead,PredictLayout,%INI_FILE%,OPTIONS,PredictLayout,%PredictLayout%
 }
 
 ;~ ===================================================================================
@@ -89,18 +121,28 @@ AddMenuItems:
 {
 	Menu, Tray, Add
 	
-	Menu, Tray, Add, Show Borders, Menu_ToggleBorders
+	Menu, Tray, Add, % L["Show Borders"], Menu_ToggleBorders
 	If Borders
-		Menu, Tray, Check, Show Borders
+		Menu, Tray, Check, % L["Show Borders"]
 	
-	Menu, Tray, Add, Fix Position, Menu_ToggleFixPosition
+	Menu, Tray, Add, % L["Fix Position"], Menu_ToggleFixPosition
 	If FixPosition
-		Menu, Tray, Check, Fix Position
+		Menu, Tray, Check, % L["Fix Position"]
 	
 	Menu, Tray, Add
-	Menu, Tray, Add, Save Config, WriteConfigFile
-	Menu, Tray, Add, Edit Config, Menu_EditConfig
-
+	Menu, Tray, Add, % L["Predict Layout"],  Menu_TogglePredictLayout
+	If PredictLayout
+		Menu, Tray, Check, % L["Predict Layout"]
+	
+	Menu, Tray, Add
+	Menu, Tray, Add, % L["Save Config"], WriteConfigFile
+	Menu, Tray, Add, % L["Edit Config"], Menu_EditConfig
+	
+	Menu, Tray, Add
+	Menu, Tray, Add, % L["Generate Dictionary"], Menu_GenerateDictionary
+	
+	Menu, Tray, Add
+	Menu, Tray, Add, % L["Open project site"], Menu_OpenProjectSite
 }
 
 ;~ ===================================================================================
@@ -147,6 +189,8 @@ WriteConfigFile:
 	IniWrite("English", INI_FILE, "DICTIONARIES", English)
 	IniWrite("Russian", INI_FILE, "DICTIONARIES", Russian)
 	IniWrite("Ukrainian", INI_FILE, "DICTIONARIES", Ukrainian)
+	
+	IniWrite("PredictLayout", INI_FILE, "OPTIONS", PredictLayout)
 	
 	return
 }
@@ -216,9 +260,31 @@ Menu_ToggleFixPosition:
 	return
 }
 
+Menu_TogglePredictLayout:
+{
+	PredictLayout := !PredictLayout
+	IniWrite("PredictLayout", INI_FILE, "OPTIONS", PredictLayout)
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	return
+}
+
+
+Menu_GenerateDictionary:
+{
+	GenerateDictionary()
+	return
+}
+
+
 Menu_EditConfig:
 {
 	Run, notepad.exe "%INI_FILE%"
+	return
+}
+
+Menu_OpenProjectSite:
+{
+	Run, %SITE%
 }
 
 WM_LBUTTONDOWN()
@@ -230,6 +296,50 @@ WM_LBUTTONDOWN()
 	PostMessage,0xA1,2
 	SaveWinPosition()
 	return
+}
+
+GenerateDictionary()
+{
+	static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
+	
+	Run,notepad.exe /W,,,WinPID
+	
+	WinWait,ahk_pid %WinPID%
+	WinGet,WinID,ID
+	WinTitle = ahk_id %WinID%
+	
+	WinActivate, %WinTitle%
+	WinWaitActive, %WinTitle%
+	
+	Critical
+	
+	Keys:=["SC029","SC002","SC003","SC004","SC005","SC006","SC007","SC008","SC009","SC00A","SC00B","SC00C","SC00D","SC010","SC011","SC012","SC013","SC014","SC015","SC016","SC017","SC018","SC019","SC01A","SC01B","SC01E","SC01F","SC020","SC021","SC022","SC023","SC024","SC025","SC026","SC027","SC028","SC02B","SC02C","SC02D","SC02E","SC02F","SC030","SC031","SC032","SC033","SC034","SC035"]
+		
+	Sleep, 500
+	PostMessage, 0x50, 0, 0x4090409,, A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+		
+	For pos, InputLayout in LayoutsList {
+		Sleep, 500
+		PostMessage, 0x50, 0, LayoutsList[pos].HKL,, %WinTitle% ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+		Sleep, 500
+	
+		Dict := LayoutsList[pos].Locale
+	
+		SendRaw,% Dict "="
+	
+		For k,v in Keys {
+			Send,{%v%}
+		}
+		
+		Send,{SC039}
+		
+		For k,v in Keys {
+			Send,+{%v%}
+		}
+		
+		SendRaw,% "`n"
+		
+	}
 }
 
 ;~ ===================================================================================
@@ -251,8 +361,46 @@ SwitchKeysLocale()
 	;~ pResult := ConvertText(SelText)   ; получаем конвертированный текст и раскладку последней найденной буквы
 	;~ Clipboard := StrGet(pResult + A_PtrSize)
 	
+	if not SelText or SelText == ""
+		return
+	
+	global PredictLayout
+	
+	if (PredictLayout) {
+		global English
+		global Russian
+		global Ukrainian
+		
+		static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
+		
+		For pos, InputLayout in LayoutsList {
+			LocaleName := InputLayout.Locale
+			Dict := %LocaleName%
+			if (Dict) {
+				isDict := false
+				Loop, parse, SelText
+				{
+					isDict := InStr(Dict, A_LoopField, 1)
+					if not isDict
+						break
+				}
+				if (isDict) {
+					;~ MsgBox, % "isDict = " LocaleName "`n" InputLayout.HKL
+					PostMessage, 0x50, 0, % InputLayout.HKL,, A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+					Sleep, 250
+				}
+			}
+		}
+		;~ MsgBox % GetKeyboardLayoutByLocale("English").Locale
+	}
+	
 	Dict1 := CurrentKeyboardLayout("A")[1].Locale
 	Dict2 := CurrentKeyboardLayout("A")[2].Locale
+	
+	if (Dict1 == Dict2) {
+		return
+	}
+	
 	pResult := ConvertText(SelText, %Dict1%, %Dict2%)
 	Clipboard := pResult
 	
@@ -356,6 +504,19 @@ REMOVE_TOOLTIP:
     return
 }
 
+/*
+GetKeyboardLayoutByLocale(Locale)
+{
+    static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
+	
+	For pos, InputLayout in LayoutsList {
+		if (InputLayout.Locale == Locale) {
+			return InputLayout
+		}
+	}
+}
+*/
+
 CurrentKeyboardLayout(window)
 {
     static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
@@ -411,7 +572,9 @@ SwitchKeyboardLayout(window)
     }
     nextPos := Mod(pos, layoutsListSize)+1
 
-    PostMessage, 0x50,, LayoutsList[nextPos].HKL
+    ;~ PostMessage, 0x50,, LayoutsList[nextPos].HKL
+	PostMessage, 0x50, 0, LayoutsList[nextPos].HKL,, A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+	
     return LayoutsList[nextPos].Locale . " - " . LayoutsList[nextPos].DisplayName
 }
 

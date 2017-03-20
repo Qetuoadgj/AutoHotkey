@@ -35,6 +35,9 @@ CreateLocalization:
 	L["Open project site"] := "Open project site"
 	L["Predict Layout"] := "Predict Layout"
 	L["Tray Icon"] := "Tray Icon"
+	L["Reload"] := "Reload"
+	L["Suspend"] := "Suspend HotKeys"
+	L["Exit"] := "Exit"
 	
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
@@ -45,6 +48,9 @@ CreateLocalization:
 		L["Open project site"] := "Открыть сайт программы"
 		L["Predict Layout"] := "Определять раскладку текста"
 		L["Tray Icon"] := "Иконка в трее"
+		L["Reload"] := "Перезапустить"
+		L["Suspend"] := "Отключить кнопки"
+		L["Exit"] := "Закрыть"
 	}
 }
 
@@ -94,6 +100,9 @@ ReadConfigFile:
 	
 	TrayIcon := 1
 	IniRead,TrayIcon,%INI_FILE%,OPTIONS,TrayIcon,%TrayIcon%
+	
+	SuspendHotKeys := 0
+	IniRead,SuspendHotKeys,%INI_FILE%,OPTIONS,SuspendHotKeys,%SuspendHotKeys%
 }
 
 ;~ ===================================================================================
@@ -102,6 +111,8 @@ ReadConfigFile:
 CreateGUI:
 {
 	Gui, Margin, 0, 0
+	Gui, Color, FFFFFF
+	
 	GUI, +AlwaysOnTop -Border -SysMenu +Owner -Caption +ToolWindow
 	
 	Gui, Add, Picture, w%SizeX% h%SizeY% vFlagTexture
@@ -120,6 +131,14 @@ CreateGUI:
 
 AddMenuItems:
 {
+	Menu, Tray, NoStandard
+
+	Menu, Tray, Add, % L["Suspend"], Menu_Suspend
+	If (SuspendHotKeys) {
+		Suspend On
+		Menu, Tray, Check, % L["Suspend"]
+	}
+	
 	Menu, Tray, Add
 	
 	Menu, Tray, Add, % L["Show Borders"], Menu_ToggleBorders
@@ -152,6 +171,10 @@ AddMenuItems:
 	
 	Menu, Tray, Add
 	Menu, Tray, Add, % L["Open project site"], Menu_OpenProjectSite
+	
+	Menu, Tray, Add
+	Menu, Tray, Add, % L["Reload"], Menu_Reload
+	Menu, Tray, Add, % L["Exit"], Menu_Exit
 }
 
 ;~ ===================================================================================
@@ -202,6 +225,8 @@ WriteConfigFile:
 	IniWrite("PredictLayout", INI_FILE, "OPTIONS", PredictLayout)
 
 	IniWrite("TrayIcon", INI_FILE, "OPTIONS", TrayIcon)
+	
+	IniWrite("SuspendHotKeys", INI_FILE, "OPTIONS", SuspendHotKeys)
 	
 	return
 }
@@ -256,6 +281,28 @@ GuiContextMenu:
 	Menu, Tray, Show
 	return
 }
+
+Menu_Suspend:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	SuspendHotKeys := !SuspendHotKeys
+	IniWrite("SuspendHotKeys", INI_FILE, "OPTIONS", SuspendHotKeys)
+	Suspend Toggle
+	return
+}
+
+Menu_Reload:
+{
+	Reload
+	return
+}
+
+Menu_Exit:
+{
+	ExitApp
+	return
+}
+
 
 Menu_ToggleBorders:
 {

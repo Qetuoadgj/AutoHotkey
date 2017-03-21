@@ -6,7 +6,7 @@
 SendMode,Input ;Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir,%A_ScriptDir% ;Ensures a consistent starting directory.
 
-;~ #SingleInstance,Force
+#SingleInstance,Force
 ;~ #Persistent ;to make it run indefinitely
 ;~ #NoTrayIcon
 
@@ -40,6 +40,8 @@ CreateLocalization:
 	L["Error"] := "Error"
 	L["There is no image for: "] := "There is no image for: "
 	L["There is no dictionary for: "] := "There is no dictionary for: "
+	L["Auto Start"] := "Auto Start"
+	L["Run as Admin"] := "Run as Admin"
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
 		L["Fix Position"] := "Зафиксировать"
@@ -55,6 +57,8 @@ CreateLocalization:
 		L["Error"] := "Ошибка"
 		L["There is no image for: "] := "Отсутствует картинка для: "
 		L["There is no dictionary for: "] := "Отсутствует словарь для: "
+		L["Auto Start"] := "Автозагрузка"
+		L["Run as Admin"] := "Права администратора"
 	}
 }
 
@@ -106,6 +110,16 @@ ReadConfigFile:
 	
 	SuspendHotKeys := 0
 	IniRead,SuspendHotKeys,%INI_FILE%,OPTIONS,SuspendHotKeys,%SuspendHotKeys%
+	
+	AdminRights := 0
+	IniRead,AdminRights,%INI_FILE%,OPTIONS,AdminRights,%AdminRights%
+	
+	AutoStart := 0
+	IniRead,AutoStart,%INI_FILE%,OPTIONS,AutoStart,%AutoStart%
+}
+
+If (AdminRights) {
+	RunAsAdmin(A_ScriptFullPath) 
 }
 
 ;~ ===================================================================================
@@ -140,6 +154,15 @@ AddMenuItems:
 	If (SuspendHotKeys) {
 		Suspend,On
 		Menu,Tray,Check,% L["Suspend"]
+	}
+	
+	Menu,Tray,Add,% L["Auto Start"],Menu_AutoStart
+	If (AutoStart) {
+		Menu,Tray,Check,% L["Auto Start"]
+	}
+	Menu,Tray,Add,% L["Run as Admin"],Menu_AdminRights
+	If (AdminRights) {
+		Menu,Tray,Check,% L["Run as Admin"]
 	}
 	
 	Menu,Tray,Add
@@ -238,6 +261,9 @@ WriteConfigFile:
 	IniWrite("TrayIcon",INI_FILE,"OPTIONS",TrayIcon)
 	
 	IniWrite("SuspendHotKeys",INI_FILE,"OPTIONS",SuspendHotKeys)
+	
+	IniWrite("AutoStart",INI_FILE,"OPTIONS",AutoStart)
+	IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
 	
 	Return
 }
@@ -383,6 +409,39 @@ Menu_EditConfig:
 Menu_OpenProjectSite:
 {
 	Run,%SITE%
+}
+
+Menu_AdminRights:
+{
+	If (AdminRights) {
+		RunAsAdmin(A_ScriptFullPath)
+		AdminRights := !AdminRights
+		IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
+		Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	} Else {
+		AdminRights := !AdminRights
+		IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
+		Reload
+	}
+	Return
+}
+
+Menu_AutoStart:
+{
+	RunAsAdmin(A_ScriptFullPath)
+	AutoStart := !AutoStart
+	IniWrite("AutoStart",INI_FILE,"OPTIONS",AutoStart)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	schtasks = "%A_WinDir%\System32\schtasks.exe"
+	TaskName := "CustomTasks\" SCRIPT_NAME
+	If (AutoStart) {
+		cmd = %schtasks% /create /TN "%TaskName%" /TR "%A_ScriptFullPath%" /SC ONLOGON
+		cmd .= AdminRights ? " /RL HIGHEST /F" : " /F"		
+	} Else {
+		cmd = %schtasks% /delete /TN "%TaskName%" /F
+	}
+	RunWait,%cmd%
+	Return
 }
 
 WM_LBUTTONDOWN()
@@ -765,7 +824,7 @@ SHLoadIndirectString(ByRef source,ByRef outBuf,outBufSize = 50)
 RunAsAdmin(ScriptPath := False)
 {
 	If (not A_IsAdmin) {
-		ScriptPath := ScriptPath?ScriptPath:A_ScriptFullPath
+		ScriptPath := ScriptPath ? ScriptPath : A_ScriptFullPath
 		Try {
 			Run,*RunAs "%ScriptPath%"
 		} Catch {

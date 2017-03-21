@@ -478,7 +478,7 @@ SwitchKeysLocale(PredictLayout)
 				isDict := False
 				Loop,Parse,SelText
 				{
-					isDict := InStr(Dict,A_LoopField,1)
+					isDict := InStr(Dict,A_LoopField,1) or RegExMatch(A_LoopField,"(\s+)",WhiteSpace)
 					If (not isDict) {
 						Break
 					}

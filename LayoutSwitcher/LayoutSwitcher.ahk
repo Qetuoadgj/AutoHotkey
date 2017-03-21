@@ -561,15 +561,15 @@ SwitchKeysLocale(PredictLayout)
 				isDict := False
 				Loop,Parse,SelText
 				{
-					isDict := InStr(Dict,A_LoopField,1) or RegExMatch(A_LoopField,"(\s+)",WhiteSpace)
+					isDict := (InStr(Dict,A_LoopField,1) or RegExMatch(A_LoopField,"(\s+)",WhiteSpace))
 					If (not isDict) {
 						Break
 					}
 				}
 				If (isDict) {
 					;~ MsgBox,% "isDict = " LocaleName "`n" InputLayout.HKL
-					PostMessage,0x50,2,% InputLayout.HKL ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
-					Sleep,250
+					PostMessage,0x50,2,InputLayout.HKL,,A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+					Sleep,500
 				}
 			} Else {
 				SoundPlay,*16

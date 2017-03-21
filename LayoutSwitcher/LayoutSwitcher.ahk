@@ -3,8 +3,8 @@
 
 #NoEnv ;Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn ;Enable warnings to assist with detecting common errors.
-SendMode, Input ;Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir, %A_ScriptDir% ;Ensures a consistent starting directory.
+SendMode,Input ;Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir,%A_ScriptDir% ;Ensures a consistent starting directory.
 
 ;~ #SingleInstance,Force
 ;~ #Persistent ;to make it run indefinitely
@@ -26,7 +26,6 @@ SCRIPT_WIN_TITLE_SHORT := SCRIPT_NAME " v" SCRIPT_VERSION
 CreateLocalization:
 {
 	L := {}
-	
 	L["Show Borders"] := "Show Borders"
 	L["Fix Position"] := "Fix Position"
 	L["Edit Config"] := "Edit Config"
@@ -38,7 +37,9 @@ CreateLocalization:
 	L["Reload"] := "Reload"
 	L["Suspend"] := "Suspend HotKeys"
 	L["Exit"] := "Exit"
-	
+	L["Error"] := "Error"
+	L["There is no image for: "] := "There is no image for: "
+	L["There is no dictionary for: "] := "There is no dictionary for: "
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
 		L["Fix Position"] := "Зафиксировать"
@@ -51,6 +52,9 @@ CreateLocalization:
 		L["Reload"] := "Перезапустить"
 		L["Suspend"] := "Отключить кнопки"
 		L["Exit"] := "Закрыть"
+		L["Error"] := "Ошибка"
+		L["There is no image for: "] := "Отсутствует картинка для: "
+		L["There is no dictionary for: "] := "Отсутствует словарь для: "
 	}
 }
 
@@ -62,7 +66,6 @@ DefineGlobals:
 	INI_FILE := SCRIPT_NAME ".ini"
 	INI_FILE := A_ScriptDir "\" INI_FILE
 	INI_FILE := FileGetLongPath(INI_FILE)
-	
 	SITE := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/LayoutSwitcher"
 }
 
@@ -99,7 +102,7 @@ ReadConfigFile:
 	IniRead,PredictLayout,%INI_FILE%,OPTIONS,PredictLayout,%PredictLayout%
 	
 	TrayIcon := 1
-	IniRead,TrayIcon,%INI_FILE%,OPTIONS,TrayIcon,%TrayIcon%
+	IniRead,TrayIcon,%INI_FILE%,OPTIONS,T rayIcon,%TrayIcon%
 	
 	SuspendHotKeys := 0
 	IniRead,SuspendHotKeys,%INI_FILE%,OPTIONS,SuspendHotKeys,%SuspendHotKeys%
@@ -110,71 +113,79 @@ ReadConfigFile:
 ;~ ===================================================================================
 CreateGUI:
 {
-	Gui, Margin, 0, 0
-	Gui, Color, FFFFFF
+	Gui,Margin,0,0
+	Gui,Color,FFFFFF
+	GUI,+AlwaysOnTop -Border -SysMenu +Owner -Caption +ToolWindow
 	
-	GUI, +AlwaysOnTop -Border -SysMenu +Owner -Caption +ToolWindow
+	Gui,Add,Picture,w%SizeX% h%SizeY% vFlagTexture
 	
-	Gui, Add, Picture, w%SizeX% h%SizeY% vFlagTexture
+	if (Borders) {
+		Gui,+Border
+	}
 	
-	if Borders
-		Gui, +Border
+	Gui,Show,w%SizeX% h%SizeY%,%SCRIPT_WIN_TITLE_SHORT%
 	
-	Gui, Show, w%SizeX% h%SizeY%, %SCRIPT_WIN_TITLE_SHORT%
-	Gui, +LastFound
+	Gui,+LastFound
+	WinGet,GUIWinID,ID
+	WinMove,ahk_id %GUIWinID%,,%PosX%,%PosY%
 	
-	WinGet, GUIWinID, ID
-	WinMove, ahk_id %GUIWinID%,, %PosX%, %PosY%
-	
-	OnMessage(0x201, "WM_LBUTTONDOWN")
+	OnMessage(0x201,"WM_LBUTTONDOWN")
 }
 
 AddMenuItems:
 {
-	Menu, Tray, NoStandard
+	Menu,Tray,NoStandard
 
-	Menu, Tray, Add, % L["Suspend"], Menu_Suspend
+	Menu,Tray,Add,% L["Suspend"],Menu_Suspend
 	If (SuspendHotKeys) {
-		Suspend On
-		Menu, Tray, Check, % L["Suspend"]
+		Suspend,On
+		Menu,Tray,Check,% L["Suspend"]
 	}
 	
-	Menu, Tray, Add
+	Menu,Tray,Add
 	
-	Menu, Tray, Add, % L["Show Borders"], Menu_ToggleBorders
-	If Borders
-		Menu, Tray, Check, % L["Show Borders"]
+	Menu,Tray,Add,% L["Show Borders"],Menu_ToggleBorders
+	If (Borders) {
+		Menu,Tray,Check,% L["Show Borders"]
+	}
 	
-	Menu, Tray, Add, % L["Fix Position"], Menu_ToggleFixPosition
-	If FixPosition
-		Menu, Tray, Check, % L["Fix Position"]
+	Menu,Tray,Add,% L["Fix Position"],Menu_ToggleFixPosition
+	If (FixPosition) {
+		Menu,Tray,Check,% L["Fix Position"]
+	}
 	
-	Menu, Tray, Add, % L["Tray Icon"], Menu_ToggleTrayIcon
+	Menu,Tray,Add,% L["Tray Icon"],Menu_ToggleTrayIcon
 	If (TrayIcon) {
-		Menu, Tray, Icon
-		Menu, Tray, Check, % L["Tray Icon"]
+		Menu,Tray,Icon
+		Menu,Tray,Check,% L["Tray Icon"]
 	} Else {
-		Menu, Tray, NoIcon
+		Menu,Tray,NoIcon
 	}
 	
-	Menu, Tray, Add
-	Menu, Tray, Add, % L["Predict Layout"],  Menu_TogglePredictLayout
-	If PredictLayout
-		Menu, Tray, Check, % L["Predict Layout"]
+	Menu,Tray,Add
 	
-	Menu, Tray, Add
-	Menu, Tray, Add, % L["Save Config"], WriteConfigFile
-	Menu, Tray, Add, % L["Edit Config"], Menu_EditConfig
+	Menu,Tray,Add,% L["Predict Layout"],Menu_TogglePredictLayout
+	If (PredictLayout) {
+		Menu,Tray,Check,% L["Predict Layout"]
+	}
 	
-	Menu, Tray, Add
-	Menu, Tray, Add, % L["Generate Dictionary"], Menu_GenerateDictionary
+	Menu,Tray,Add
 	
-	Menu, Tray, Add
-	Menu, Tray, Add, % L["Open project site"], Menu_OpenProjectSite
+	Menu,Tray,Add,% L["Save Config"],WriteConfigFile
+	Menu,Tray,Add,% L["Edit Config"],Menu_EditConfig
 	
-	Menu, Tray, Add
-	Menu, Tray, Add, % L["Reload"], Menu_Reload
-	Menu, Tray, Add, % L["Exit"], Menu_Exit
+	Menu,Tray,Add
+	
+	Menu,Tray,Add,% L["Generate Dictionary"],Menu_GenerateDictionary
+	
+	Menu,Tray,Add
+	
+	Menu,Tray,Add,% L["Open project site"],Menu_OpenProjectSite
+	
+	Menu,Tray,Add
+	
+	Menu,Tray,Add,% L["Reload"],Menu_Reload
+	Menu,Tray,Add,% L["Exit"],Menu_Exit
 }
 
 ;~ ===================================================================================
@@ -182,18 +193,18 @@ AddMenuItems:
 ;~ ===================================================================================
 DefineBindings:
 {
-	;~ Hotkey, Capslock, CycleLayouts
-	Hotkey, $~Break, SwitchKeysLocale
+	Hotkey,Capslock,CycleLayouts
+	Hotkey,$~Break,SwitchKeysLocale
 }
 
-OnExit, CloseApp
+OnExit,CloseApp
 
-;~ MsgBox, 0, %SCRIPT_WIN_TITLE_SHORT%, Ready!, 0.5
+;~ MsgBox,0,%SCRIPT_WIN_TITLE_SHORT%,Ready!,0.5
 
 PreviousLocale := "English"
-SetTimer, ChangeGUIImage, On
+SetTimer,ChangeGUIImage,On
 
-Return
+Exit
 
 ;~ ===================================================================================
 ;~ ОПРЕДЕЛЕНИЕ ВЫЗЫВАЕМЫХ ФУНКЦИЙ И ЯРЛЫКОВ
@@ -202,457 +213,461 @@ SaveWinPosition()
 {
 	global GUIWinID
 	global INI_FILE
-	WinGetPos, X, Y,,, ahk_id %GUIWinID%
-	IniWrite("PosX", INI_FILE, "OPTIONS", X)
-	IniWrite("PosY", INI_FILE, "OPTIONS", Y)
-	return
+	WinGetPos,X,Y,,,ahk_id %GUIWinID%
+	IniWrite("PosX",INI_FILE,"OPTIONS",X)
+	IniWrite("PosY",INI_FILE,"OPTIONS",Y)
+	Return
 }
 
 WriteConfigFile:
 {
-	IniWrite("SizeX", INI_FILE, "OPTIONS", SizeX)
-	IniWrite("SizeY", INI_FILE, "OPTIONS", SizeY)
+	IniWrite("SizeX",INI_FILE,"OPTIONS",SizeX)
+	IniWrite("SizeY",INI_FILE,"OPTIONS",SizeY)
 	
 	SaveWinPosition()
 	
-	IniWrite("Borders", INI_FILE, "OPTIONS", Borders)
-	IniWrite("FixPosition", INI_FILE, "OPTIONS", FixPosition)
+	IniWrite("Borders",INI_FILE,"OPTIONS",Borders)
+	IniWrite("FixPosition",INI_FILE,"OPTIONS",FixPosition)
 	
-	IniWrite("English", INI_FILE, "DICTIONARIES", English)
-	IniWrite("Russian", INI_FILE, "DICTIONARIES", Russian)
-	IniWrite("Ukrainian", INI_FILE, "DICTIONARIES", Ukrainian)
+	IniWrite("English",INI_FILE,"DICTIONARIES",English)
+	IniWrite("Russian",INI_FILE,"DICTIONARIES",Russian)
+	IniWrite("Ukrainian",INI_FILE,"DICTIONARIES",Ukrainian)
 	
-	IniWrite("PredictLayout", INI_FILE, "OPTIONS", PredictLayout)
+	IniWrite("PredictLayout",INI_FILE,"OPTIONS",PredictLayout)
 
-	IniWrite("TrayIcon", INI_FILE, "OPTIONS", TrayIcon)
+	IniWrite("TrayIcon",INI_FILE,"OPTIONS",TrayIcon)
 	
-	IniWrite("SuspendHotKeys", INI_FILE, "OPTIONS", SuspendHotKeys)
+	IniWrite("SuspendHotKeys",INI_FILE,"OPTIONS",SuspendHotKeys)
 	
-	return
+	Return
 }
 
 CloseApp:
 {
-	;~ gosub WriteConfigFile
+	;~ GoSub,WriteConfigFile
 	ExitApp
 }
 
 ChangeGUIImage:
 {
-	CurrentLocale := CurrentKeyboardLayout("A")[1].Locale
-	if (not CurrentLocale or CurrentLocale == "") {
-		CurrentLocale := "English"
+	CurrentLocale := KeyboardLayoutQueue("A")[1].Locale
+	If (not CurrentLocale or CurrentLocale == "") {
+		Return
 	}
+	
 	If (PreviousLocale != CurrentLocale) {
-		ImageFile := A_WorkingDir "\Images\" CurrentLocale
-		If FileExist(ImageFile ".png") {
-			ImageFile := ImageFile ".png"
-		} else if FileExist(ImageFile ".jpg") {
-			ImageFile := ImageFile ".jpg"
-		} else {
-			SoundPlay, *16
-			MsgBox, 0, %SCRIPT_WIN_TITLE_SHORT% - Error, There is no image for:`n%CurrentLocale%, 3.0
+		ImageFile := False
+		ImageTypes := [".png",".jpg"]
+		For index,ImageType in ImageTypes {
+			FilePattern := A_WorkingDir "\Images\" CurrentLocale ImageType
+			Loop,Files,%FilePattern%,F
+			{
+				ImageFile := A_LoopFileFullPath
+				Break
+			}
 		}
-		GuiControl,, FlagTexture, *w%SizeX% *h%SizeY% %ImageFile%
-		PreviousLocale := CurrentLocale
-		NextLocale := CurrentKeyboardLayout("A")[2].Locale
+		If (ImageFile) {
+			GuiControl,,FlagTexture,*w%SizeX% *h%SizeY% %ImageFile%
+		} Else {
+			SoundPlay,*16
+			MsgBox,0,% SCRIPT_WIN_TITLE_SHORT " - " L["Error"],% L["There is no image for: "] "`n" CurrentLocale,3.0
+		}
+		
 		If (TrayIcon) {
 			IconFile := A_WorkingDir "\Icons\" CurrentLocale ".ico"
 			If FileExist(IconFile) {
-				Menu, Tray, Icon, %IconFile%
+				Menu,Tray,Icon,%IconFile%
 			}
-		} else {
-			Menu, Tray, NoIcon
+		} Else {
+			Menu,Tray,NoIcon
 		}
+		
+		PreviousLocale := CurrentLocale
 	}
-	return
+	Return
 }
 
 SwitchKeysLocale:
 {
-	SwitchKeysLocale()
-	return
+	SwitchKeysLocale(PredictLayout)
+	Return
 }
 ;~ ===================================================================================
 ;~ ОПРЕДЕЛЕНИЕ ФУНКЦИЙ, ВЫЗЫВАЕМЫХ GUI
 ;~ ===================================================================================
 GuiContextMenu:
 {
-	Menu, Tray, Show
-	return
+	Menu,Tray,Show
+	Return
 }
 
 Menu_Suspend:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	SuspendHotKeys := !SuspendHotKeys
-	IniWrite("SuspendHotKeys", INI_FILE, "OPTIONS", SuspendHotKeys)
-	Suspend Toggle
-	return
+	IniWrite("SuspendHotKeys",INI_FILE,"OPTIONS",SuspendHotKeys)
+	Suspend,Toggle
+	Return
 }
 
 Menu_Reload:
 {
 	Reload
-	return
+	Return
 }
 
 Menu_Exit:
 {
 	ExitApp
-	return
+	Return
 }
 
 
 Menu_ToggleBorders:
 {
 	Borders := !Borders
-	
-	if Borders
-		Gui, +Border
-	else
-		Gui, -Border
-	
-	Gui, Show, w%SizeX% h%SizeY%, %SCRIPT_WIN_TITLE_SHORT%
-	
-	IniWrite("Borders", INI_FILE, "OPTIONS", Borders)
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
-	return
+	If (Borders) {
+		Gui,+Border
+	} Else {
+		Gui,-Border
+	}
+	Gui,Show,w%SizeX% h%SizeY%,%SCRIPT_WIN_TITLE_SHORT%
+	IniWrite("Borders",INI_FILE,"OPTIONS",Borders)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	Return
 }
 
 Menu_ToggleFixPosition:
 {
 	FixPosition := !FixPosition
-	IniWrite("FixPosition", INI_FILE, "OPTIONS", FixPosition)
+	IniWrite("FixPosition",INI_FILE,"OPTIONS",FixPosition)
 	SaveWinPosition()
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
-	return
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	Return
 }
 
 Menu_ToggleTrayIcon:
 {
 	TrayIcon := !TrayIcon
-	IniWrite("TrayIcon", INI_FILE, "OPTIONS", TrayIcon)
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
-	If TrayIcon
-		Menu, Tray, Icon
-	return
+	IniWrite("TrayIcon",INI_FILE,"OPTIONS",TrayIcon)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	If (TrayIcon) {
+		Menu,Tray,Icon
+	} Else {
+		Menu,Tray,NoIcon
+	}
+	Return
 }
 
 Menu_TogglePredictLayout:
 {
 	PredictLayout := !PredictLayout
-	IniWrite("PredictLayout", INI_FILE, "OPTIONS", PredictLayout)
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
-	return
+	IniWrite("PredictLayout",INI_FILE,"OPTIONS",PredictLayout)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	Return
 }
 
 Menu_GenerateDictionary:
 {
 	GenerateDictionary()
-	return
+	Return
 }
 
 Menu_EditConfig:
 {
-	gosub WriteConfigFile
-	Run, notepad.exe "%INI_FILE%"
-	return
+	GoSub,WriteConfigFile
+	Run,notepad.exe "%INI_FILE%"
+	Return
 }
 
 Menu_OpenProjectSite:
 {
-	Run, %SITE%
+	Run,%SITE%
 }
 
 WM_LBUTTONDOWN()
 {
 	global FixPosition
-	if FixPosition
-		return
+	If (FixPosition) {
+		Return
+	}
 	
 	PostMessage,0xA1,2
 	SaveWinPosition()
-	return
+	Return
 }
 
 GenerateDictionary()
-{
-	static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
-	
-	Run,notepad.exe /W,,,WinPID
+{	
+	Run,% "notepad.exe /W",,,WinPID
 	
 	WinWait,ahk_pid %WinPID%
 	WinGet,WinID,ID
 	WinTitle = ahk_id %WinID%
-	
-	WinActivate, %WinTitle%
-	WinWaitActive, %WinTitle%
+		
+	Keys := ["SC029","SC002","SC003","SC004"
+	,"SC005","SC006","SC007","SC008","SC009"
+	,"SC00A","SC00B","SC00C","SC00D","SC010"
+	,"SC011","SC012","SC013","SC014","SC015"
+	,"SC016","SC017","SC018","SC019","SC01A"
+	,"SC01B","SC01E","SC01F","SC020","SC021"
+	,"SC022","SC023","SC024","SC025","SC026"
+	,"SC027","SC028","SC02B","SC056","SC02C"
+	,"SC02D","SC02E","SC02F","SC030","SC031"
+	,"SC032","SC033","SC034","SC035"]
 	
 	Critical
+	WinActivate,%WinTitle%
+	WinWaitActive,%WinTitle%
 	
-	Keys:=["SC029","SC002","SC003","SC004","SC005","SC006","SC007","SC008","SC009","SC00A","SC00B","SC00C","SC00D","SC010","SC011","SC012","SC013","SC014","SC015","SC016","SC017","SC018","SC019","SC01A","SC01B","SC01E","SC01F","SC020","SC021","SC022","SC023","SC024","SC025","SC026","SC027","SC028","SC02B","SC056","SC02C","SC02D","SC02E","SC02F","SC030","SC031","SC032","SC033","SC034","SC035"]
-		
-	Sleep, 500
-	PostMessage, 0x50, 0, 0x4090409,, A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
-		
-	For pos, InputLayout in LayoutsList {
-		Sleep, 500
-		PostMessage, 0x50, 0, LayoutsList[pos].HKL,, %WinTitle% ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
-		Sleep, 500
+	static LayoutsList := CreateLayoutsList()
 	
-		Dict := LayoutsList[pos].Locale
-	
-		SendRaw,% Dict "="
-	
-		For k,v in Keys {
-			Send,{%v%}
+	For pos,InputLayout in LayoutsList {
+		Sleep,500
+		PostMessage,0x50,2,LayoutsList[pos].HKL,,%WinTitle% ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+		WinActivate,%WinTitle%
+		Sleep,100
+		IfWinActive,%WinTitle%
+		{
+			Dict := LayoutsList[pos].Locale
+			SendRaw,% Dict "="
+			For k,v in Keys {
+				Send,{%v%}
+			}
+			Send,{SC039}
+			For k,v in Keys {
+				Send,+{%v%}
+			}
+			SendRaw,% "`n"
 		}
-		
-		Send,{SC039}
-		
-		For k,v in Keys {
-			Send,+{%v%}
-		}
-		
-		SendRaw,% "`n"
-		
 	}
+	Critical,Off
 }
 
 ;~ ===================================================================================
 ;~ ФУНКЦИИ КОНВЕРТАЦИИ ТЕКСТА
+;~ http://forum.script-coding.com/viewtopic.php?id=7186
 ;~ ===================================================================================
-SwitchKeysLocale()
+SwitchKeysLocale(PredictLayout)
 {
 	Critical
-	SetBatchLines, -1
-	SetKeyDelay, 0
+	SetBatchLines,-1
+	SetKeyDelay,0
 
 	TempClipboard := ClipboardAll
-	Clipboard =
-	SendInput, ^{vk43} ; Ctrl + C
-	ClipWait, 0
-	; если буфер обмена пуст (ничего не выделено), определяем и выделяем
-	; с помощью ф-ции GetWord() последнее слово слева от курсора
-	SelText := ErrorLevel ? GetWord() : Clipboard
+	Clipboard = ; Empty
+	SendInput,^{vk43} ; Ctrl + C
+	ClipWait,0
+	
+	SelText := ErrorLevel ? GetWord() : Clipboard ; если буфер обмена пуст (ничего не выделено), определяем и выделяем с помощью ф-ции GetWord() последнее слово слева от курсора
+		
 	;~ pResult := ConvertText(SelText)   ; получаем конвертированный текст и раскладку последней найденной буквы
 	;~ Clipboard := StrGet(pResult + A_PtrSize)
 	
-	if not SelText or SelText == ""
-		return
-	
-	global PredictLayout
-	
-	if (PredictLayout) {
-		global English
-		global Russian
-		global Ukrainian
+	If (not SelText or SelText == "") {
+		Return
+	}
 		
-		static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
-		
-		For pos, InputLayout in LayoutsList {
+	If (PredictLayout) {
+		global INI_FILE,SCRIPT_WIN_TITLE_SHORT,L		
+		For pos,InputLayout in CreateLayoutsList() {
 			LocaleName := InputLayout.Locale
-			Dict := %LocaleName%
-			if (Dict) {
-				isDict := false
-				Loop, parse, SelText
+			IniRead,Dict,%INI_FILE%,DICTIONARIES,%LocaleName%,A_Space
+			;~ Dict := %LocaleName%
+			If (Dict) {
+				isDict := False
+				Loop,Parse,SelText
 				{
-					isDict := InStr(Dict, A_LoopField, 1)
-					if not isDict
-						break
+					isDict := InStr(Dict,A_LoopField,1)
+					If (not isDict) {
+						Break
+					}
 				}
-				if (isDict) {
-					;~ MsgBox, % "isDict = " LocaleName "`n" InputLayout.HKL
-					PostMessage, 0x50, 0, % InputLayout.HKL,, A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
-					Sleep, 250
+				If (isDict) {
+					;~ MsgBox,% "isDict = " LocaleName "`n" InputLayout.HKL
+					PostMessage,0x50,2,% InputLayout.HKL ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+					Sleep,250
 				}
+			} Else {
+				SoundPlay,*16
+				MsgBox,0,% SCRIPT_WIN_TITLE_SHORT " - " L["Error"],% L["There is no dictionary for: "] "`n" LocaleName,3.0
 			}
 		}
-		;~ MsgBox % GetKeyboardLayoutByLocale("English").Locale
 	}
 	
-	Dict1 := CurrentKeyboardLayout("A")[1].Locale
-	Dict2 := CurrentKeyboardLayout("A")[2].Locale
+	TranslateQueue := KeyboardLayoutQueue("A")
 	
-	if (Dict1 == Dict2) {
-		return
+	LocaleTranslateFrom := TranslateQueue[1].Locale
+	LocaleTranslateTo := TranslateQueue[2].Locale
+	
+	;~ MsgBox,% LocaleTranslateFrom "`n" LocaleTranslateTo
+	
+	If (LocaleTranslateTo == LocaleTranslateFrom) {
+		Return
 	}
 	
-	pResult := ConvertText(SelText, %Dict1%, %Dict2%)
+	DictTranslateFrom := %LocaleTranslateFrom%
+	DictTranslateTo := %LocaleTranslateTo%
+	
+	pResult := ConvertText(SelText,DictTranslateFrom,DictTranslateTo)
+	
+	/*
+	If RegExMatch(pResult,"^(\s+)",WhiteSpace) {
+		SendRaw,%WhiteSpace%
+	}
+	*/
+	
 	Clipboard := pResult
 	
-	SendInput, ^{vk56}   ; Ctrl + V
-	; переключаем раскладку клавиатуры в зависимости от раскладки последней найденной буквы
-	Sleep, 200
-	;~ SwitchLocale(NumGet(pResult+0, "UInt"))
+	SendInput,^{vk56} ; Ctrl + V
 	
-	SwitchKeyboardLayout("A")
+	Sleep,200
 	
-	Sleep, 200
+	;~ SwitchLocale(NumGet(pResult+0,"UInt")) ; переключаем раскладку клавиатуры в зависимости от раскладки последней найденной буквы
+	
+	Tooltip,% SwitchKeyboardLayout("A")
+    SetTimer,REMOVE_TOOLTIP,-800
+	
+	Sleep,200
 	Clipboard := TempClipboard
+	
+	Critical,Off
 }
 
 GetWord()
 {
-	While A_Index < 10
-	{
-		Clipboard =
-		SendInput, ^+{Left}^{vk43}
-		ClipWait, 1
-		if ErrorLevel
+	While (A_Index < 10) {
+		Clipboard = ; Empty
+		SendInput,^+{Left}^{vk43}
+		ClipWait,1
+		If (ErrorLevel) {
 			Return
+		}
 
-		if RegExMatch(Clipboard, "P).*([ \t])", Found)
-		{
-			SendInput, ^+{Right}
-			Return SubStr(Clipboard, FoundPos1 + 1)
+		If RegExMatch(Clipboard,"P).*(\s)",Found) {
+			SendInput,^+{Right}
+			Return,SubStr(Clipboard,FoundPos1 + 1)
 		}
 
 		PrevClipboard := Clipboard
-		Clipboard =
-		SendInput, +{Left}^{vk43}
-		ClipWait, 1
-		if ErrorLevel
+		Clipboard = ; Empty
+		SendInput,+{Left}^{vk43}
+		ClipWait,1
+		If (ErrorLevel) {
 			Return
+		}
 
-		if (StrLen(Clipboard) = StrLen(PrevClipboard))
-		{
-			Clipboard =
-			SendInput, +{Left}^{vk43}
-			ClipWait, 1
-			if ErrorLevel
+		If (StrLen(Clipboard) = StrLen(PrevClipboard)) {
+			Clipboard = ; Empty
+			SendInput,+{Left}^{vk43}
+			ClipWait,1
+			If (ErrorLevel) {
 				Return
+			}
 
-			if (StrLen(Clipboard) = StrLen(PrevClipboard))
-				Return Clipboard
-			Else
-			{
-				SendInput, +{Right 2}
-				Return PrevClipboard
+			If (StrLen(Clipboard) = StrLen(PrevClipboard)) {
+				Return,Clipboard
+			} Else {
+				SendInput,+{Right 2}
+				Return,PrevClipboard
 			}
 		}
 
-		SendInput, +{Right}
+		SendInput,+{Right}
 
-		s := SubStr(Clipboard, 1, 1)
-		if s in %A_Space%,%A_Tab%,`n,`r
-		{
-			Clipboard =
-			SendInput, +{Left}^{vk43}
-			ClipWait, 1
-			if ErrorLevel
+		s := SubStr(Clipboard,1,1)
+		If RegExMatch(s,"(\s+)",WhiteSpace) {
+			Clipboard = ; Empty
+			SendInput,+{Left}^{vk43}
+			ClipWait,1
+			If (ErrorLevel) {
 				Return
+			}
 
-			Return Clipboard
+			Return,Clipboard
 		}
 	}
 }
 
-ConvertText(Text, Dict1, Dict2)
+ConvertText(Text,Dict1,Dict2)
 {
-	static Result
-	NewText := ""
-	Loop, parse, Text
+	NewText = ; Empty
+	Loop,Parse,Text
 	{
-		found =
-			if found := InStr(Dict1, A_LoopField, 1)
-				NewText .= SubStr(Dict2, found, 1)
-			if !found
-				NewText .= A_LoopField
+		Found = ; Empty
+		If (Found := InStr(Dict1,A_LoopField,1)) {
+			NewText .= SubStr(Dict2,Found,1)
+		} Else {
+			NewText .= A_LoopField
+		}
 	}
-	Result := NewText
-	return Result
+	Return,NewText
 }
 ;~ ===================================================================================
 
 ;~ ===================================================================================
 ;~ ФУНКЦИИ УПРАВЛЕНИЯ РАСКЛАДКАМИ КЛАВИАТУРЫ
+;~ http://forum.script-coding.com/viewtopic.php?id=5650&p=2
 ;~ ===================================================================================
 CycleLayouts:
 {
-    Tooltip % SwitchKeyboardLayout("A")
-    SetTimer, REMOVE_TOOLTIP, -800
-    return
+    Tooltip,% SwitchKeyboardLayout("A")
+    SetTimer,REMOVE_TOOLTIP,-800
+    Return
 }
 
 REMOVE_TOOLTIP:
 {
     ToolTip
-    return
+    Return
 }
 
-/*
-GetKeyboardLayoutByLocale(Locale)
+KeyboardLayoutQueue(window)
 {
     static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
-	
-	For pos, InputLayout in LayoutsList {
-		if (InputLayout.Locale == Locale) {
-			return InputLayout
-		}
+    If (!hWnd := WinExist(window)) {
+        Return
 	}
-}
-*/
-
-CurrentKeyboardLayout(window)
-{
-    static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
-
-    If !hWnd := WinExist(window)
-        return
-
-    WinGetClass, winClass
+    WinGetClass,winClass
     If (winClass == "ConsoleWindowClass")
     {
-        WinGet, consolePID, PID
+        WinGet,consolePID,PID
         currentDisplayName := GetLayoutDisplayName(GetConsoleKeyboardLayoutName(consolePID))
-        For pos, InputLayout in LayoutsList
+        For pos,InputLayout in LayoutsList {
             continue
-        Until InputLayout.DisplayName = currentDisplayName
-    }
-    Else
-    {
+		} Until (InputLayout.DisplayName = currentDisplayName)
+    } Else {
         currentHKL := GetKeyboardLayout(hWnd)
-        For pos, InputLayout in LayoutsList
+        For pos,InputLayout in LayoutsList {
             continue
-        Until InputLayout.HKL = currentHKL
+		} Until (InputLayout.HKL = currentHKL)
     }
-    nextPos := Mod(pos, layoutsListSize)+1
-	
-	return [LayoutsList[pos], LayoutsList[nextPos]]
+    nextPos := Mod(pos,layoutsListSize)+1
+	return [LayoutsList[pos],LayoutsList[nextPos]]
 }
-
-;~ ---------
 
 SwitchKeyboardLayout(window)
 {
     static LayoutsList := CreateLayoutsList(), layoutsListSize := LayoutsList.MaxIndex()
-
-    If !hWnd := WinExist(window)
-        return
-
-    WinGetClass, winClass
+    If (!hWnd := WinExist(window)) {
+        Return
+	}
+    WinGetClass,winClass
     If (winClass == "ConsoleWindowClass")
     {
-        WinGet, consolePID, PID
+        WinGet,consolePID,PID
         currentDisplayName := GetLayoutDisplayName(GetConsoleKeyboardLayoutName(consolePID))
-        For pos, InputLayout in LayoutsList
+        For pos,InputLayout in LayoutsList {
             continue
-        Until InputLayout.DisplayName = currentDisplayName
-    }
-    Else
-    {
+		} Until (InputLayout.DisplayName = currentDisplayName)
+    } Else {
         currentHKL := GetKeyboardLayout(hWnd)
-        For pos, InputLayout in LayoutsList
+        For pos,InputLayout in LayoutsList {
             continue
-        Until InputLayout.HKL = currentHKL
+		} Until (InputLayout.HKL = currentHKL)
     }
-    nextPos := Mod(pos, layoutsListSize)+1
-
-    ;~ PostMessage, 0x50,, LayoutsList[nextPos].HKL
-	PostMessage, 0x50, 0, LayoutsList[nextPos].HKL,, A ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
-	
+    nextPos := Mod(pos,layoutsListSize)+1
+	PostMessage,0x50,2,LayoutsList[nextPos].HKL,,%window%
     return LayoutsList[nextPos].Locale . " - " . LayoutsList[nextPos].DisplayName
 }
 
@@ -660,87 +675,83 @@ CreateLayoutsList()
 {
 	static LayoutsList
     LayoutsList := {}
-    , keyboardLayoutListSize := DllCall("GetKeyboardLayoutList", "UInt", 0, "UInt", 0)
-    , VarSetCapacity(keyboardLayoutList, keyboardLayoutListSize * A_PtrSize)
-    , DllCall("GetKeyboardLayoutList", "UInt", keyboardLayoutListSize, "Ptr", &keyboardLayoutList)
-
-    Loop %keyboardLayoutListSize%
-        HKL := NumGet(keyboardLayoutList, (A_Index-1)*A_PtrSize)
-        , LayoutsList.Insert({HKL: HKL, DisplayName: GetLayoutDisplayName(HKLtoKLID(HKL)), Locale: GetLocaleInfo(HKL & 0xFFFF)})
-    return LayoutsList
+    keyboardLayoutListSize := DllCall("GetKeyboardLayoutList","UInt",0,"UInt",0)
+    VarSetCapacity(keyboardLayoutList,keyboardLayoutListSize * A_PtrSize)
+    DllCall("GetKeyboardLayoutList","UInt",keyboardLayoutListSize,"Ptr",&keyboardLayoutList)
+    Loop,%keyboardLayoutListSize%
+	{
+        HKL := NumGet(keyboardLayoutList,(A_Index-1)*A_PtrSize)
+        LayoutsList.Insert({HKL: HKL,DisplayName: GetLayoutDisplayName(HKLtoKLID(HKL)),Locale: GetLocaleInfo(HKL & 0xFFFF)})
+	}
+    Return,LayoutsList
 }
 
 GetLayoutDisplayName(KLID)
 {
-    RegRead, displayName, HKEY_LOCAL_MACHINE, SYSTEM\CurrentControlSet\Control\Keyboard Layouts\%KLID%, Layout Display Name
-
-    if !displayName
-        return false
-
-    SHLoadIndirectString(displayName, displayName)
-
-    return displayName
+    RegRead,displayName,HKEY_LOCAL_MACHINE,% "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" KLID,% "Layout Display Name"
+    If (not displayName) {
+        Return,False
+	}
+    SHLoadIndirectString(displayName,displayName)
+    Return,displayName
 }
 
 GetLocaleInfo(langId)
 {
-    VarSetCapacity(localeSig, size :=  DllCall("GetLocaleInfo", "UInt", langId, "UInt", 0x1001, "UInt", 0, "UInt", 0) * 2)
-    , DllCall("GetLocaleInfo"
-        , "UInt", langId
-        , "UInt", 0x1001
-        , "Str" , localeSig
-        , "UInt", size)
-    return localeSig
+    VarSetCapacity(localeSig,size := DllCall("GetLocaleInfo","UInt",langId,"UInt",0x1001,"UInt",0,"UInt",0) * 2)
+    DllCall("GetLocaleInfo","UInt",langId,"UInt",0x1001,"Str",localeSig,"UInt",size)
+    Return,localeSig
 }
 
 HKLtoKLID(HKL)
 {
-    VarSetCapacity(KLID, 8*(A_IsUnicode+1))
-
+    VarSetCapacity(KLID,8*(A_IsUnicode+1))
+	
     priorHKL := GetKeyboardLayout(0)
-
-    if !ActivateKeyboardLayout(HKL, 0)
-        return false
-
-    if !GetKeyboardLayoutName(KLID)
-        return false
-
-    if !ActivateKeyboardLayout(priorHKL, 0)
-        return false
-
-    return StrGet(&KLID)
+	
+    If (not ActivateKeyboardLayout(HKL,0)) {
+        Return,False
+	}
+    If (not GetKeyboardLayoutName(KLID)) {
+        Return,False
+	}
+    If (not ActivateKeyboardLayout(priorHKL,0)) {
+        Return,False
+	}
+	
+    Return,StrGet(&KLID)
 }
 
 GetConsoleKeyboardLayoutName(ByRef consolePID)
 {
-    VarSetCapacity(KLID, 16)
+    VarSetCapacity(KLID,16)
 
-    DllCall("AttachConsole", "Ptr", consolePID)
-    DllCall("GetConsoleKeyboardLayoutName", "Ptr", &KLID)
+    DllCall("AttachConsole","Ptr",consolePID)
+    DllCall("GetConsoleKeyboardLayoutName","Ptr",&KLID)
     DllCall("FreeConsole")
 
-    VarSetCapacity(KLID, -1)
-    return KLID
+    VarSetCapacity(KLID,-1)
+    Return,KLID
 }
 
-ActivateKeyboardLayout(ByRef HKL, flags)
+ActivateKeyboardLayout(ByRef HKL,flags)
 {
-    return DllCall("ActivateKeyboardLayout", "Ptr", HKL, "UInt", flags)
+    Return,DllCall("ActivateKeyboardLayout","Ptr",HKL,"UInt",flags)
 }
 
 GetKeyboardLayout(ByRef hWnd)
 {
-    return DllCall("GetKeyboardLayout", "Ptr", DllCall("GetWindowThreadProcessId", "Ptr", hWnd, "UInt", 0, "Ptr"), "Ptr")
+    Return,DllCall("GetKeyboardLayout","Ptr",DllCall("GetWindowThreadProcessId","Ptr",hWnd,"UInt",0,"Ptr"),"Ptr")
 }
 
 GetKeyboardLayoutName(ByRef KLID)
 {
-    return DllCall("GetKeyboardLayoutName", "Ptr", &KLID)
+    Return,DllCall("GetKeyboardLayoutName","Ptr",&KLID)
 }
 
-SHLoadIndirectString(ByRef source, ByRef outBuf, outBufSize = 50)
+SHLoadIndirectString(ByRef source,ByRef outBuf,outBufSize = 50)
 {
-    return DllCall("Shlwapi.dll\SHLoadIndirectString", "Ptr", &source, "Ptr", &outBuf, "UInt", outBufSize, "UInt", 0)
+    Return,DllCall("Shlwapi.dll\SHLoadIndirectString","Ptr",&source,"Ptr",&outBuf,"UInt",outBufSize,"UInt",0)
 }
 ;~ ===================================================================================
 
@@ -751,11 +762,11 @@ SHLoadIndirectString(ByRef source, ByRef outBuf, outBufSize = 50)
 ;~ ===================================================================================
 ;~ ФУНКЦИЯ ЗАПУСКА СКРИПТА С ПРАВАМИ АДИМИНИСТРАТОРА
 ;~ ===================================================================================
-RunAsAdmin(ScriptPath:=False) {
+RunAsAdmin(ScriptPath := False)
+{
 	If (not A_IsAdmin) {
-		ScriptPath:=ScriptPath?ScriptPath:A_ScriptFullPath
-		Try
-		{
+		ScriptPath := ScriptPath?ScriptPath:A_ScriptFullPath
+		Try {
 			Run,*RunAs "%ScriptPath%"
 		} Catch {
 			; MsgBox,You cancelled when asked to elevate to admin!
@@ -767,17 +778,19 @@ RunAsAdmin(ScriptPath:=False) {
 ; ===================================================================================
 ; ФУНКЦИЯ АВТОМАТИЧЕСКОГО ЗАВЕРШЕНИЯ ВСЕХ КОПИЙ ТЕКУЩЕГО ПРОЦЕССА (КРОМЕ АКТИВНОЙ)
 ; ===================================================================================
-ForceSingleInstance() { 
+ForceSingleInstance() 
+{ 
 	DetectHiddenWindows,On
 	#SingleInstance,Off
-	WinGet, CurrentID, ID, %A_ScriptFullPath% ahk_class AutoHotkey
-	WinGet, ProcessList, List, %A_ScriptFullPath% ahk_class AutoHotkey
+	WinGet,CurrentID,ID,%A_ScriptFullPath% ahk_class AutoHotkey
+	WinGet,ProcessList,List,%A_ScriptFullPath% ahk_class AutoHotkey
 	ProcessCount := 1
-	Loop, %ProcessList% {
+	Loop,%ProcessList%
+	{
 		ProcessID := ProcessList%ProcessCount%
 		If (ProcessID != CurrentID) {
-			WinGet, ProcessPID, PID, %A_ScriptFullPath% ahk_id %ProcessID%
-			Process, Close, %ProcessPID%
+			WinGet,ProcessPID,PID,%A_ScriptFullPath% ahk_id %ProcessID%
+			Process,Close,%ProcessPID%
 		}
 		ProcessCount += 1
 	}	 
@@ -788,7 +801,7 @@ ForceSingleInstance() {
 ;~ ФУНКЦИЯ ПОЛУЧЕНИЯ ИМЕНИ ТЕКУЩЕГО СКРИПТА
 ;~ ===================================================================================
 GetScriptName() {
-	SplitPath,A_ScriptFullPath,,,,Name,
+	SplitPath,A_ScriptFullPath,,,,Name
 	Return,Name
 }
 
@@ -796,9 +809,9 @@ GetScriptName() {
 ;~ ФУНКЦИЯ УДАЛЕНИЯ ЛИШНИХ СИМВОЛОВ ИЗ ПУТЕЙ
 ;~ ===================================================================================
 TrimPath(GivenPath) {
-	GivenPath := StrReplace(GivenPath, """", "") ; Удаление кавычек из пути
-	GivenPath := RegExReplace(GivenPath, "[\\+]$", "", ,1) ; Удаление замыкающего слэша из пути
-	GivenPath := RegExReplace(GivenPath, "^[\\+]", "", ,1) ; Удаление предшествующего слэша из пути
+	GivenPath := StrReplace(GivenPath,"""","") ; Удаление кавычек из пути
+	GivenPath := RegExReplace(GivenPath,"[\\+]$","",,1) ; Удаление замыкающего слэша из пути
+	GivenPath := RegExReplace(GivenPath,"^[\\+]","",,1) ; Удаление предшествующего слэша из пути
 	Return,GivenPath
 }
 
@@ -818,9 +831,35 @@ FileGetLongPath(GivenPath) {
 	}
 }
 
-IniWrite(Key, File, Section, Value) {
-	IniRead, TestValue ,%File%, %Section%, %Key%
+;~ ===================================================================================
+;~ ЗАМЕНА СТАНДАРТОНГО IniWrite (ЗАПИСЫВАЕТ ТОЛЬКО ИЗМЕНЕННЫЕ ПАРАМЕТРЫ)
+;~ ===================================================================================
+IniWrite(Key,File,Section,Value) {
+	IniRead,TestValue,%File%,%Section%,%Key%
 	If (TestValue != Value) {
-		IniWrite ,%Value%, %File%, %Section%, %Key%
+		IniWrite,%Value%,%File%,%Section%,%Key%
 	}
 }
+
+/* НЕ ИСПОЛЬЗУЕМОЕ
+;~ ===================================================================================
+;~ ОПРЕДЕЛЕНИЕ РАСКЛАДКИ ПО ТЕКСТОВОМУ НАЗВАНИЮ (Locale)
+;~ ===================================================================================
+GetKeyboardLayoutByLocale(Locale)
+{
+	For i,InputLayout in CreateLayoutsList() {
+		If (InputLayout.Locale == Locale) {
+			Return,InputLayout
+		}
+	}
+}
+
+;~ ===================================================================================
+;~ ПЕРВОД ДЕСЯТИЧНОГО ЧИСЛА В HEX
+;~ ===================================================================================
+DecToHex(Dec)
+{
+	SetFormat,IntegerFast,Hex
+	Return,Dec
+}
+*/

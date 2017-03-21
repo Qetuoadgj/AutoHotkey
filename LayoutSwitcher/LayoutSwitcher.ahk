@@ -409,6 +409,7 @@ Menu_EditConfig:
 Menu_OpenProjectSite:
 {
 	Run,%SITE%
+	Return
 }
 
 Menu_AdminRights:
@@ -428,19 +429,18 @@ Menu_AdminRights:
 
 Menu_AutoStart:
 {
-	RunAsAdmin(A_ScriptFullPath)
+	;~ RunAsAdmin(A_ScriptFullPath)
 	AutoStart := !AutoStart
 	IniWrite("AutoStart",INI_FILE,"OPTIONS",AutoStart)
 	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
-	schtasks = "%A_WinDir%\System32\schtasks.exe"
 	TaskName := "CustomTasks\" SCRIPT_NAME
 	If (AutoStart) {
-		cmd = %schtasks% /create /TN "%TaskName%" /TR "%A_ScriptFullPath%" /SC ONLOGON
+		cmd = "%A_WinDir%\System32\schtasks.exe" /create /TN "%TaskName%" /TR """"%A_ScriptFullPath%"""" /SC ONLOGON
 		cmd .= AdminRights ? " /RL HIGHEST /F" : " /F"		
 	} Else {
-		cmd = %schtasks% /delete /TN "%TaskName%" /F
+		cmd = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%TaskName%" /F
 	}
-	RunWait,%cmd%
+	RunWait,*RunAs %cmd%
 	Return
 }
 

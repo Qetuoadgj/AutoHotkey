@@ -42,6 +42,7 @@ CreateLocalization:
 	L["There is no dictionary for: "] := "There is no dictionary for: "
 	L["Auto Start"] := "Auto Start"
 	L["Run as Admin"] := "Run as Admin"
+	L["Always on Top"] := "Always on Top"
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
 		L["Fix Position"] := "Зафиксировать"
@@ -59,6 +60,7 @@ CreateLocalization:
 		L["There is no dictionary for: "] := "Отсутствует словарь для: "
 		L["Auto Start"] := "Автозагрузка"
 		L["Run as Admin"] := "Права администратора"
+		L["Always on Top"] := "Поверх других окон"
 	}
 }
 
@@ -116,6 +118,9 @@ ReadConfigFile:
 	
 	AutoStart := 0
 	IniRead,AutoStart,%INI_FILE%,OPTIONS,AutoStart,%AutoStart%
+	
+	AlwaysOnTop := 1
+	IniRead,AlwaysOnTop,%INI_FILE%,OPTIONS,AlwaysOnTop,%AlwaysOnTop%
 }
 
 If (AdminRights) {
@@ -150,22 +155,27 @@ AddMenuItems:
 {
 	Menu,Tray,NoStandard
 
-	Menu,Tray,Add,% L["Suspend"],Menu_Suspend
+	Menu,Tray,Add,% L["Suspend"],Menu_ToggleSuspend
 	If (SuspendHotKeys) {
 		Suspend,On
 		Menu,Tray,Check,% L["Suspend"]
 	}
 	
-	Menu,Tray,Add,% L["Auto Start"],Menu_AutoStart
+	Menu,Tray,Add,% L["Auto Start"],Menu_ToggleAutoStart
 	If (AutoStart) {
 		Menu,Tray,Check,% L["Auto Start"]
 	}
-	Menu,Tray,Add,% L["Run as Admin"],Menu_AdminRights
+	Menu,Tray,Add,% L["Run as Admin"],Menu_ToggleAdminRights
 	If (AdminRights) {
 		Menu,Tray,Check,% L["Run as Admin"]
 	}
 	
 	Menu,Tray,Add
+	
+	Menu,Tray,Add,% L["Always on Top"],Menu_ToggleAlwaysOnTop
+	If (AlwaysOnTop) {
+		Menu,Tray,Check,% L["Always on Top"]
+	}
 	
 	Menu,Tray,Add,% L["Show Borders"],Menu_ToggleBorders
 	If (Borders) {
@@ -265,6 +275,8 @@ WriteConfigFile:
 	IniWrite("AutoStart",INI_FILE,"OPTIONS",AutoStart)
 	IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
 	
+	IniWrite("AlwaysOnTop",INI_FILE,"OPTIONS",AlwaysOnTop)
+
 	Return
 }
 
@@ -327,7 +339,7 @@ GuiContextMenu:
 	Return
 }
 
-Menu_Suspend:
+Menu_ToggleSuspend:
 {
 	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	SuspendHotKeys := !SuspendHotKeys
@@ -348,6 +360,18 @@ Menu_Exit:
 	Return
 }
 
+Menu_ToggleAlwaysOnTop:
+{
+	AlwaysOnTop := !AlwaysOnTop
+	If (AlwaysOnTop) {
+		Gui,+AlwaysOnTop
+	} Else {
+		Gui,-AlwaysOnTop
+	}
+	IniWrite("AlwaysOnTop",INI_FILE,"OPTIONS",AlwaysOnTop)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	Return
+}
 
 Menu_ToggleBorders:
 {
@@ -412,27 +436,26 @@ Menu_OpenProjectSite:
 	Return
 }
 
-Menu_AdminRights:
+Menu_ToggleAdminRights:
 {
 	If (AdminRights) {
 		RunAsAdmin(A_ScriptFullPath)
 		AdminRights := !AdminRights
 		IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
-		Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	} Else {
 		AdminRights := !AdminRights
 		IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
 		Reload
 	}
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	Return
 }
 
-Menu_AutoStart:
+Menu_ToggleAutoStart:
 {
 	;~ RunAsAdmin(A_ScriptFullPath)
 	AutoStart := !AutoStart
 	IniWrite("AutoStart",INI_FILE,"OPTIONS",AutoStart)
-	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	TaskName := "CustomTasks\" SCRIPT_NAME
 	If (AutoStart) {
 		cmd = "%A_WinDir%\System32\schtasks.exe" /create /TN "%TaskName%" /TR """"%A_ScriptFullPath%"""" /SC ONLOGON
@@ -441,6 +464,7 @@ Menu_AutoStart:
 		cmd = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%TaskName%" /F
 	}
 	RunWait,*RunAs %cmd%
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	Return
 }
 

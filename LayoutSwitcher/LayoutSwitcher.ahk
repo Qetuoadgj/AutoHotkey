@@ -471,8 +471,9 @@ GenerateDictionary()
 		WinWaitActive,%WinTitle%
 		IfWinActive,%WinTitle%
 		{
-			While (Lyt.GetInputHKL(WinTitle) != InputLayout.h) {
+			While (Lyt.GetInputHKL(WinTitle) != InputLayout.h and A_Index < 5) {
 				Lyt.Set(InputLayout.h,WinTitle)
+				Sleep,100
 			}
 			If (Lyt.GetInputHKL(WinTitle) = InputLayout.h) {
 				Dict := InputLayout.LngFullName
@@ -529,8 +530,9 @@ SwitchKeysLayout(PredictLayout)
 				}
 				If (isDict) {
 					;~ MsgBox,% "isDict = " Language "`n" InputLayout.HKL
-					While (Lyt.GetInputHKL() != InputLayout.h) {
+					While (Lyt.GetInputHKL() != InputLayout.h and A_Index < 5) {
 						Lyt.Set(InputLayout.h)
+						Sleep,100
 					}
 				}
 			} Else {
@@ -646,7 +648,7 @@ ConvertText(Text,Dict1,Dict2)
 ;~ ===================================================================================
 ChangeGUIImage:
 {
-	If (!CurrentLang := GetLayoutQueue()[1].LngFullName) {
+	If (!CurrentLang := Lyt.GetLng(,,true)) {
 		Return
 	}
 	
@@ -698,29 +700,30 @@ CycleLayouts:
 
 GetLayoutQueue(win := 0)
 {
-    layoutsList := Lyt.GetList()
+	layoutsList := Lyt.GetList()
 	layoutsListSize := layoutsList.MaxIndex()
-	thisNum := Lyt.GetNum()
-	nextNum := Mod(thisNum,layoutsListSize) + 1
-	thisLayoutData := layoutsList[thisNum]
-	nextLayoutData := layoutsList[nextNum]
-	return [thisLayoutData,nextLayoutData]
+	
+	curLayoutNum := Lyt.GetNum(win)
+	nextLayoutNum := Mod(curLayoutNum, layoutsListSize) + 1
+	
+	thisLayoutData := layoutsList[curLayoutNum]
+	nextLayoutData := layoutsList[nextLayoutNum]
+	
+	return [thisLayoutData, nextLayoutData]
 }
 
 SwitchKeyboardLayout(win := 0)
-{	
-	layoutQueue := GetLayoutQueue(win)
-	thisLayoutData := layoutQueue[1]
-	nextLayoutData := layoutQueue[2]
-	While (Lyt.GetInputHKL(win) != nextLayoutData.h) {
-		Lyt.Set(nextLayoutData.h,win)
-	}
-	return nextLayoutData.LngFullName " - " nextLayoutData.DisplayName
-}
-
-CreateLayoutsList()
 {
-    return Lyt.GetList()
+	layoutsQueue := GetLayoutQueue(win)
+	
+	thisLayoutData := layoutsQueue[1]
+	nextLayoutData := layoutsQueue[2]
+	
+	Lyt.Set(nextLayoutData.h)
+	
+	msg := nextLayoutData.LngFullName " - " nextLayoutData.DisplayName
+	
+	return msg
 }
 
 REMOVE_TOOLTIP:

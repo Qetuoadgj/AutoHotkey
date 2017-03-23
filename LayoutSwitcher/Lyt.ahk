@@ -77,7 +77,7 @@ Class Lyt {
 	GetNum(win := 0, HKL := 0) {
 		HKL ? : HKL := This.GetInputHKL(win)
 		For index, layout in This.GetList() {
-			if (layout.h = HKL) {
+			if (This.HKLtoKLID(layout.h) = This.HKLtoKLID(HKL)) {
 				Return index
 			}
 		}
@@ -150,6 +150,7 @@ Class Lyt {
 		} else {
 			HKL := DllCall("GetKeyboardLayout", Ptr, DllCall("GetWindowThreadProcessId", Ptr, hWnd, UInt, 0, Ptr), Ptr) ;& 0xFFFF
 		}
+		;~ MsgBox, % This.GetLng(,HKL,true)
 		return HKL
 	}
 }

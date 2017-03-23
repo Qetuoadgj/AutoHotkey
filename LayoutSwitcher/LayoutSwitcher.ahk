@@ -235,6 +235,7 @@ OnExit,CloseApp
 ;~ MsgBox,0,%SCRIPT_WIN_TITLE_SHORT%,Ready!,0.5
 
 PreviousLang = ; empty
+PredictLayoutSkip := false
 SetTimer,ChangeGUIImage,On
 
 Exit
@@ -513,8 +514,9 @@ SwitchKeysLayout(PredictLayout)
 	If (not SelText) {
 		Return
 	}
-		
-	If (PredictLayout) {
+	
+	global PredictLayoutSkip
+	If (PredictLayout and not PredictLayoutSkip) {
 		global INI_FILE,SCRIPT_WIN_TITLE_SHORT,L
 		For LayoutIndex,InputLayout in Lyt.GetList() {
 			Language := InputLayout.LngFullName
@@ -534,8 +536,10 @@ SwitchKeysLayout(PredictLayout)
 						Lyt.Set(InputLayout.h)
 						Sleep,100
 					}
+					PredictLayoutSkip := true
 				}
 			} Else {
+				PredictLayoutSkip := false
 				SoundPlay,*16
 				MsgBox,0,% SCRIPT_WIN_TITLE_SHORT " - " L["Error"],% L["There is no dictionary for: "] "`n" Language,3.0
 			}
@@ -719,7 +723,7 @@ SwitchKeyboardLayout(win := 0)
 	thisLayoutData := layoutsQueue[1]
 	nextLayoutData := layoutsQueue[2]
 	
-	Lyt.Set(nextLayoutData.h)
+	Lyt.Set(nextLayoutData.h,win)
 	
 	msg := nextLayoutData.LngFullName " - " nextLayoutData.DisplayName
 	

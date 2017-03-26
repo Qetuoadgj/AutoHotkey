@@ -2,21 +2,21 @@
 ; https://github.com/Qetuoadgj/AutoHotkey/tree/master/LayoutSwitcher  | v1.0.0
 
 #NoEnv ;Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn ;Enable warnings to assist with detecting common errors.
+; #Warn ;Enable warnings to assist with detecting common errors.
 SendMode,Input ;Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir,%A_ScriptDir% ;Ensures a consistent starting directory.
 
 #SingleInstance,Force
-;~ #Persistent ;to make it run indefinitely
-;~ #NoTrayIcon
+; #Persistent ;to make it run indefinitely
+; #NoTrayIcon
 
-;~ Process,Priority,,High
-;~ SetBatchLines,-1 ;Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
+; Process,Priority,,High
+; SetBatchLines,-1 ;Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
-;~ DetectHiddenWindows,Off
+; DetectHiddenWindows,Off
 
 ForceSingleInstance() ; Закрыть все открытые копии скрпита
-;~ RunAsAdmin(A_ScriptFullPath) ; Запустить скрипт от имени администратора
+; RunAsAdmin(A_ScriptFullPath) ; Запустить скрипт от имени администратора
 
 SCRIPT_NAME := GetScriptName()
 SCRIPT_VERSION := "1.0.0"
@@ -43,6 +43,7 @@ CreateLocalization:
 	L["Auto Start"] := "Auto Start"
 	L["Run as Admin"] := "Run as Admin"
 	L["Always on Top"] := "Always on Top"
+	L["Sounds"] := "Sounds"
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
 		L["Fix Position"] := "Зафиксировать"
@@ -61,12 +62,13 @@ CreateLocalization:
 		L["Auto Start"] := "Автозагрузка"
 		L["Run as Admin"] := "Права администратора"
 		L["Always on Top"] := "Поверх других окон"
+		L["Sounds"] := "Звуки"
 	}
 }
 
-;~ ===================================================================================
-;~ ОПРЕДЕЛЕНИЕ ОСНОВНЫХ ПЕРЕМЕННЫХ
-;~ ===================================================================================
+; ===================================================================================
+; ОПРЕДЕЛЕНИЕ ОСНОВНЫХ ПЕРЕМЕННЫХ
+; ===================================================================================
 DefineGlobals:
 {
 	INI_FILE := SCRIPT_NAME ".ini"
@@ -75,79 +77,82 @@ DefineGlobals:
 	SITE := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/LayoutSwitcher"
 }
 
-;~ ===================================================================================
-;~ ОБРАБОТКА ФАЙЛА НАСТРОЕК
-;~ ===================================================================================
+; ===================================================================================
+; ОБРАБОТКА ФАЙЛА НАСТРОЕК
+; ===================================================================================
 ReadConfigFile:
 {
 	SizeX := 32
 	SizeY := 22
 	IniRead,SizeX,%INI_FILE%,OPTIONS,SizeX,%SizeX%
 	IniRead,SizeY,%INI_FILE%,OPTIONS,SizeY,%SizeY%
-	
+
 	PosX := A_Space
 	PosY := A_Space
 	IniRead,PosX,%INI_FILE%,OPTIONS,PosX,%PosX%
 	IniRead,PosY,%INI_FILE%,OPTIONS,PosY,%PosY%
-	
+
 	Borders := 1
 	IniRead,Borders,%INI_FILE%,OPTIONS,Borders,%Borders%
-	
+
 	FixPosition := 0
 	IniRead,FixPosition,%INI_FILE%,OPTIONS,FixPosition,%FixPosition%
-	
+
 	Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	English := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
 	Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
-	
+
 	IniRead,English,%INI_FILE%,DICTIONARIES,English,%English%
 	IniRead,Russian,%INI_FILE%,DICTIONARIES,Russian,%Russian%
-	IniRead,Ukrainian,%INI_FILE%,DICTIONARIES,Ukrainian,%Ukrainian%	
-	
+	IniRead,Ukrainian,%INI_FILE%,DICTIONARIES,Ukrainian,%Ukrainian%
+
 	PredictLayout := 1
 	IniRead,PredictLayout,%INI_FILE%,OPTIONS,PredictLayout,%PredictLayout%
-	
+
 	TrayIcon := 1
 	IniRead,TrayIcon,%INI_FILE%,OPTIONS,T rayIcon,%TrayIcon%
-	
+
 	SuspendHotKeys := 0
 	IniRead,SuspendHotKeys,%INI_FILE%,OPTIONS,SuspendHotKeys,%SuspendHotKeys%
-	
+
 	AdminRights := 0
 	IniRead,AdminRights,%INI_FILE%,OPTIONS,AdminRights,%AdminRights%
-	
+
 	AutoStart := 0
 	IniRead,AutoStart,%INI_FILE%,OPTIONS,AutoStart,%AutoStart%
-	
+
 	AlwaysOnTop := 1
 	IniRead,AlwaysOnTop,%INI_FILE%,OPTIONS,AlwaysOnTop,%AlwaysOnTop%
+	
+	Sounds := 1
+	IniRead,Sounds,%INI_FILE%,OPTIONS,Sounds,%Sounds%
 }
 
 If (AdminRights) {
-	RunAsAdmin(A_ScriptFullPath) 
+	RunAsAdmin(A_ScriptFullPath)
 }
 
-;~ ===================================================================================
-;~ СОЗДАНИЕ GUI
-;~ ===================================================================================
+; ===================================================================================
+; СОЗДАНИЕ GUI
+; ===================================================================================
 CreateGUI:
 {
 	Gui,Margin,0,0
 	Gui,Color,FFFFFF
 	GUI,+AlwaysOnTop -Border -SysMenu +Owner -Caption +ToolWindow
-	
+
 	Gui,Add,Picture,w%SizeX% h%SizeY% vFlagTexture
-	
+
 	if (Borders) {
 		Gui,+Border
 	}
-	
+
 	Gui,Show,w%SizeX% h%SizeY%,%SCRIPT_WIN_TITLE_SHORT%
-	
+
 	Gui,+LastFound
 	WinGet,GUIWinID,ID
 	WinMove,ahk_id %GUIWinID%,,%PosX%,%PosY%
-	
+
 	OnMessage(0x201,"WM_LBUTTONDOWN")
 }
 
@@ -160,7 +165,7 @@ AddMenuItems:
 		Suspend,On
 		Menu,Tray,Check,% L["Suspend"]
 	}
-	
+
 	Menu,Tray,Add,% L["Auto Start"],Menu_ToggleAutoStart
 	If (AutoStart) {
 		Menu,Tray,Check,% L["Auto Start"]
@@ -169,24 +174,24 @@ AddMenuItems:
 	If (AdminRights) {
 		Menu,Tray,Check,% L["Run as Admin"]
 	}
-	
+
 	Menu,Tray,Add
-	
+
 	Menu,Tray,Add,% L["Always on Top"],Menu_ToggleAlwaysOnTop
 	If (AlwaysOnTop) {
 		Menu,Tray,Check,% L["Always on Top"]
 	}
-	
+
 	Menu,Tray,Add,% L["Show Borders"],Menu_ToggleBorders
 	If (Borders) {
 		Menu,Tray,Check,% L["Show Borders"]
 	}
-	
+
 	Menu,Tray,Add,% L["Fix Position"],Menu_ToggleFixPosition
 	If (FixPosition) {
 		Menu,Tray,Check,% L["Fix Position"]
 	}
-	
+
 	Menu,Tray,Add,% L["Tray Icon"],Menu_ToggleTrayIcon
 	If (TrayIcon) {
 		Menu,Tray,Icon
@@ -195,35 +200,40 @@ AddMenuItems:
 		Menu,Tray,NoIcon
 	}
 	
+	Menu,Tray,Add,% L["Sounds"],Menu_ToggleSounds
+	If (Sounds) {
+		Menu,Tray,Check,% L["Sounds"]
+	}
+
 	Menu,Tray,Add
-	
+
 	Menu,Tray,Add,% L["Predict Layout"],Menu_TogglePredictLayout
 	If (PredictLayout) {
 		Menu,Tray,Check,% L["Predict Layout"]
 	}
-	
+
 	Menu,Tray,Add
-	
+
 	Menu,Tray,Add,% L["Save Config"],WriteConfigFile
 	Menu,Tray,Add,% L["Edit Config"],Menu_EditConfig
-	
+
 	Menu,Tray,Add
-	
+
 	Menu,Tray,Add,% L["Generate Dictionary"],Menu_GenerateDictionary
-	
+
 	Menu,Tray,Add
-	
+
 	Menu,Tray,Add,% L["Open project site"],Menu_OpenProjectSite
-	
+
 	Menu,Tray,Add
-	
+
 	Menu,Tray,Add,% L["Reload"],Menu_Reload
 	Menu,Tray,Add,% L["Exit"],Menu_Exit
 }
 
-;~ ===================================================================================
-;~ ОПРЕДЕЛЕНИЕ НАЗНАЧЕНИЙ КЛАВИШ
-;~ ===================================================================================
+; ===================================================================================
+; ОПРЕДЕЛЕНИЕ НАЗНАЧЕНИЙ КЛАВИШ
+; ===================================================================================
 DefineBindings:
 {
 	Hotkey,Capslock,CycleLayouts
@@ -232,17 +242,20 @@ DefineBindings:
 
 OnExit,CloseApp
 
-;~ MsgBox,0,%SCRIPT_WIN_TITLE_SHORT%,Ready!,0.5
+; MsgBox,0,%SCRIPT_WIN_TITLE_SHORT%,Ready!,0.5
 
 PreviousLang = ; empty
 PredictLayoutSkip := false
+
+LayoutSwitchCount := 0
+
 SetTimer,ChangeGUIImage,On
 
 Exit
 
-;~ ===================================================================================
-;~ ОПРЕДЕЛЕНИЕ ВЫЗЫВАЕМЫХ ФУНКЦИЙ И ЯРЛЫКОВ
-;~ ===================================================================================
+; ===================================================================================
+; ОПРЕДЕЛЕНИЕ ВЫЗЫВАЕМЫХ ФУНКЦИЙ И ЯРЛЫКОВ
+; ===================================================================================
 SaveWinPosition()
 {
 	global GUIWinID
@@ -257,25 +270,26 @@ WriteConfigFile:
 {
 	IniWrite("SizeX",INI_FILE,"OPTIONS",SizeX)
 	IniWrite("SizeY",INI_FILE,"OPTIONS",SizeY)
-	
+
 	SaveWinPosition()
-	
+
 	IniWrite("Borders",INI_FILE,"OPTIONS",Borders)
 	IniWrite("FixPosition",INI_FILE,"OPTIONS",FixPosition)
-	
+
 	IniWrite("English",INI_FILE,"DICTIONARIES",English)
 	IniWrite("Russian",INI_FILE,"DICTIONARIES",Russian)
 	IniWrite("Ukrainian",INI_FILE,"DICTIONARIES",Ukrainian)
-	
+
 	IniWrite("PredictLayout",INI_FILE,"OPTIONS",PredictLayout)
 
 	IniWrite("TrayIcon",INI_FILE,"OPTIONS",TrayIcon)
-	
+	IniWrite("Sounds",INI_FILE,"OPTIONS",Sounds)
+
 	IniWrite("SuspendHotKeys",INI_FILE,"OPTIONS",SuspendHotKeys)
-	
+
 	IniWrite("AutoStart",INI_FILE,"OPTIONS",AutoStart)
 	IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
-	
+
 	IniWrite("AlwaysOnTop",INI_FILE,"OPTIONS",AlwaysOnTop)
 
 	Return
@@ -292,9 +306,9 @@ SwitchKeysLayout:
 	SwitchKeysLayout(PredictLayout)
 	Return
 }
-;~ ===================================================================================
-;~ ОПРЕДЕЛЕНИЕ ФУНКЦИЙ, ВЫЗЫВАЕМЫХ GUI
-;~ ===================================================================================
+; ===================================================================================
+; ОПРЕДЕЛЕНИЕ ФУНКЦИЙ, ВЫЗЫВАЕМЫХ GUI
+; ===================================================================================
 GuiContextMenu:
 {
 	Menu,Tray,Show
@@ -371,6 +385,14 @@ Menu_ToggleTrayIcon:
 	Return
 }
 
+Menu_ToggleSounds:
+{
+	Sounds := !Sounds
+	IniWrite("Sounds",INI_FILE,"OPTIONS",Sounds)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	Return
+}
+
 Menu_TogglePredictLayout:
 {
 	PredictLayout := !PredictLayout
@@ -415,13 +437,13 @@ Menu_ToggleAdminRights:
 
 Menu_ToggleAutoStart:
 {
-	;~ RunAsAdmin(A_ScriptFullPath)
+	; RunAsAdmin(A_ScriptFullPath)
 	AutoStart := !AutoStart
 	IniWrite("AutoStart",INI_FILE,"OPTIONS",AutoStart)
 	TaskName := "CustomTasks\" SCRIPT_NAME
 	If (AutoStart) {
 		cmd = "%A_WinDir%\System32\schtasks.exe" /create /TN "%TaskName%" /TR """"%A_ScriptFullPath%"""" /SC ONLOGON
-		cmd .= AdminRights ? " /RL HIGHEST /F" : " /F"		
+		cmd .= AdminRights ? " /RL HIGHEST /F" : " /F"
 	} Else {
 		cmd = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%TaskName%" /F
 	}
@@ -436,21 +458,21 @@ WM_LBUTTONDOWN()
 	If (FixPosition) {
 		Return
 	}
-	
+
 	PostMessage,0xA1,2
 	SaveWinPosition()
 	Return
 }
 
 GenerateDictionary()
-{	
+{
 	Run,% "notepad.exe /W",,,WinPID
-	
+
 	WinWait,ahk_pid %WinPID%
 	WinGet,WinID,ID,ahk_pid %WinPID%
-	
+
 	WinTitle = ahk_id %WinID%
-		
+
 	Keys := ["SC029","SC002","SC003","SC004"
 	,"SC005","SC006","SC007","SC008","SC009"
 	,"SC00A","SC00B","SC00C","SC00D","SC010"
@@ -461,12 +483,12 @@ GenerateDictionary()
 	,"SC027","SC028","SC02B","SC056","SC02C"
 	,"SC02D","SC02E","SC02F","SC030","SC031"
 	,"SC032","SC033","SC034","SC035"]
-	
+
 	Critical
-	
+
 	WinActivate,%WinTitle%
 	WinWaitActive,%WinTitle%
-	
+
 	For LayoutIndex,InputLayout in Lyt.GetList() {
 		WinActivate,%WinTitle%
 		WinWaitActive,%WinTitle%
@@ -490,143 +512,120 @@ GenerateDictionary()
 			}
 		}
 	}
-	
+
 	Critical,Off
 }
 
-;~ ===================================================================================
-;~ ФУНКЦИИ КОНВЕРТАЦИИ ТЕКСТА
-;~ http://forum.script-coding.com/viewtopic.php?id=7186
-;~ ===================================================================================
+; ===================================================================================
+; ФУНКЦИИ КОНВЕРТАЦИИ ТЕКСТА
+; http://forum.іcript-coding.com/viewtopic.php?id=7186
+; ===================================================================================
 SwitchKeysLayout(PredictLayout)
 {
+	; ShowToolTip("PredictLayout:" PredictLayout)
+
 	Critical
 	SetBatchLines,-1
 	SetKeyDelay,0
 
-	TempClipboard := ClipboardAll
-	Clipboard = ; Empty
-	SendInput,^{vk43} ; Ctrl + C
-	ClipWait,0
-	
-	SelText := ErrorLevel ? GetWord() : Clipboard ; если буфер обмена пуст (ничего не выделено), определяем и выделяем с помощью ф-ции GetWord() последнее слово слева от курсора
-			
-	If (not SelText) {
-		Return
+	CtrlC = ^{vk43}
+	CtrlV = ^{vk56}
+
+	Clipboard = ; empty
+	Sleep,100
+	SendInput,%CtrlC%
+	ClipWait,1
+
+	SelectedText = ; empty
+	If (Clipboard) {
+		SelectedText := Clipboard
+	} else {
+		WhiteSpace := False
+		Loop, 100 {
+			Clipboard = ; empty
+			SendInput,^+{Left}
+			SendInput,^{vk43}
+			ClipWait,1
+			if (StrLen(Clipboard) = StrLen(SelectedText)) {
+				Break
+			}
+			if RegExMatch(Clipboard, "(\s+)", WhiteSpace) {
+				Clipboard = ; empty
+				SendInput,^+{Right}
+				SendInput,^{vk43}
+				ClipWait,1
+				Break
+			}
+			SelectedText := Clipboard
+		}
+		SelectedText := Clipboard
 	}
-	
-	global PredictLayoutSkip
-	If (PredictLayout and not PredictLayoutSkip) {
-		global INI_FILE,SCRIPT_WIN_TITLE_SHORT,L
-		For LayoutIndex,InputLayout in Lyt.GetList() {
-			Language := InputLayout.LngFullName
-			IniRead,Dict,%INI_FILE%,DICTIONARIES,%Language%,A_Space
-			If (Dict) {
-				isDict := False
-				Loop,Parse,SelText
-				{
-					isDict := InStr(Dict,A_LoopField,1) or RegExMatch(A_LoopField,"(\s+)",WhiteSpace)
-					If (not isDict) {
+
+	If (not SelectedText) {
+		return
+	}
+
+	If (PredictLayout) {
+		global LayoutSwitchCount
+		If (LayoutSwitchCount < 1) {
+			global INI_FILE, SCRIPT_WIN_TITLE_SHORT, L
+			For LayoutIndex,InputLayout in Lyt.GetList() {
+				Language := InputLayout.LngFullName
+				IniRead,Dictionary,%INI_FILE%,DICTIONARIES,%Language%,A_Space
+				If (Dictionary) {
+					isDict := False
+					Loop, Parse, SelectedText
+					{
+						isDict := InStr(Dictionary,A_LoopField,1) or RegExMatch(A_LoopField,"(\s+)",WhiteSpace)
+						If (not isDict) {
+							Break
+						}
+					}
+					If (isDict) {
+						ShowToolTip("isDict = " Language "`n" InputLayout.HKL)
+						LayoutSwitchCount += 1
+						SetTimer,ResetSwitchCount,-1000
+						Lyt.Set(InputLayout.h)
 						Break
 					}
+				} Else {
+					SoundPlay,*16
+					MsgBox,0,% SCRIPT_WIN_TITLE_SHORT " - " L["Error"],% L["There is no dictionary for: "] "`n" Language,3.0
 				}
-				If (isDict) {
-					;~ MsgBox,% "isDict = " Language "`n" InputLayout.HKL
-					While (Lyt.GetInputHKL() != InputLayout.h and A_Index < 5) {
-						Lyt.Set(InputLayout.h)
-						Sleep,100
-					}
-					PredictLayoutSkip := true
-				}
-			} Else {
-				PredictLayoutSkip := false
-				SoundPlay,*16
-				MsgBox,0,% SCRIPT_WIN_TITLE_SHORT " - " L["Error"],% L["There is no dictionary for: "] "`n" Language,3.0
 			}
 		}
 	}
-		
-	layoutQueue := GetLayoutQueue()
-	
-	LangTranslateFrom := layoutQueue[1].LngFullName
-	LangTranslateTo := layoutQueue[2].LngFullName
-	
-	;~ MsgBox,% "LangTranslateFrom: " LangTranslateFrom "`nLangTranslateTo: " LangTranslateTo
-	
+
+	layoutsList := Lyt.GetList()
+	layoutsListSize := layoutsList.MaxIndex()
+	curLayoutNum := Lyt.GetNum()
+	nextLayoutNum := Mod(curLayoutNum, layoutsListSize) + 1
+	LangTranslateFrom := layoutsList[curLayoutNum].LngFullName
+	LangTranslateTo := layoutsList[nextLayoutNum].LngFullName
+	; ShowToolTip("LangTranslateFrom: " LangTranslateFrom "`nLangTranslateTo: " LangTranslateTo)
 	If (LangTranslateTo = LangTranslateFrom) {
-		Return
+		return
 	}
-	
 	DictTranslateFrom := %LangTranslateFrom%
 	DictTranslateTo := %LangTranslateTo%
-	
-	pResult := ConvertText(SelText,DictTranslateFrom,DictTranslateTo)
-	
-	Clipboard := pResult
+
+	ConvertedText = ; empty
+	ConvertedText := ConvertText(SelectedText, DictTranslateFrom, DictTranslateTo)
+
+	Clipboard = ; empty
+	Clipboard = %ConvertedText%
 	ClipWait,1
+
+	SendInput,%CtrlV%
+
+	Lyt.Set(layoutsList[nextLayoutNum].h)
+	ShowLangTooltip()
 	
-	SendInput,^{vk56} ; Ctrl + V
-	
-	Tooltip,% SwitchKeyboardLayout()
-    SetTimer,REMOVE_TOOLTIP,-800
-	
-	Clipboard := TempClipboard
-	ClipWait,1
-	
-	Critical,Off
-}
-
-GetWord()
-{
-	While (A_Index < 10) {
-		Clipboard = ; Empty
-		SendInput,^+{Left}^{vk43}
-		ClipWait,1
-		If (ErrorLevel) {
-			Return
-		}
-
-		If RegExMatch(Clipboard,"P).*(\s)",Found) {
-			SendInput,^+{Right}
-			Return,SubStr(Clipboard,FoundPos1 + 1)
-		}
-
-		PrevClipboard := Clipboard
-		Clipboard = ; Empty
-		SendInput,+{Left}^{vk43}
-		ClipWait,1
-		If (ErrorLevel) {
-			Return
-		}
-
-		If (StrLen(Clipboard) = StrLen(PrevClipboard)) {
-			Clipboard = ; Empty
-			SendInput,+{Left}^{vk43}
-			ClipWait,1
-			If (ErrorLevel) {
-				Return
-			}
-
-			If (StrLen(Clipboard) = StrLen(PrevClipboard)) {
-				Return,Clipboard
-			} Else {
-				SendInput,+{Right 2}
-				Return,PrevClipboard
-			}
-		}
-
-		SendInput,+{Right}
-
-		s := SubStr(Clipboard,1,1)
-		If RegExMatch(s,"(\s+)",WhiteSpace) {
-			Clipboard = ; Empty
-			SendInput,+{Left}^{vk43}
-			ClipWait,1
-			If (ErrorLevel) {
-				Return
-			}
-
-			Return,Clipboard
+	global Sounds
+	If (Sounds) {
+		static SoundFile :=  A_WorkingDir "\Sounds\" "TextConverted.wav"
+		If FileExist(SoundFile) {
+			SoundPlay,%SoundFile%
 		}
 	}
 }
@@ -645,17 +644,17 @@ ConvertText(Text,Dict1,Dict2)
 	}
 	Return,NewText
 }
-;~ ===================================================================================
+; ===================================================================================
 
-;~ ===================================================================================
-;~ ФУНКЦИИ УПРАВЛЕНИЯ ЭЛЕМЕНТАМИ GUI
-;~ ===================================================================================
+; ===================================================================================
+; ФУНКЦИИ УПРАВЛЕНИЯ ЭЛЕМЕНТАМИ GUI
+; ===================================================================================
 ChangeGUIImage:
 {
 	If (!CurrentLang := Lyt.GetLng(,,true)) {
 		Return
 	}
-	
+
 	If (CurrentLang = PreviousLang) {
 		Return
 	} else {
@@ -669,81 +668,77 @@ ChangeGUIImage:
 				Break
 			}
 		}
-		
+
 		If (ImageFile) {
 			GuiControl,,FlagTexture,*w%SizeX% *h%SizeY% %ImageFile%
 		} Else {
 			SoundPlay,*16
 			MsgBox,0,% SCRIPT_WIN_TITLE_SHORT " - " L["Error"],% L["There is no image for: "] "`n" CurrentLang,3.0
 		}
-		
+
 		If (TrayIcon) {
 			IconFile := A_WorkingDir "\Icons\" CurrentLang ".ico"
 			If FileExist(IconFile) {
 				Menu,Tray,Icon,%IconFile%
 			}
-		} Else {		
+		} Else {
 			Menu,Tray,NoIcon
 		}
-		
+
 		PreviousLang := CurrentLang
 	}
-	
+
 	Return
 }
 
-;~ ===================================================================================
-;~ ФУНКЦИИ УПРАВЛЕНИЯ РАСКЛАДКАМИ КЛАВИАТУРЫ
-;~ ===================================================================================
+; ===================================================================================
+; ФУНКЦИИ УПРАВЛЕНИЯ РАСКЛАДКАМИ КЛАВИАТУРЫ
+; ===================================================================================
 CycleLayouts:
 {
-    Tooltip,% SwitchKeyboardLayout()
-    SetTimer,REMOVE_TOOLTIP,-800
+	Lyt.Set("Forward")
+	ShowLangTooltip()
+	If (Sounds) {
+		SoundFile :=  A_WorkingDir "\Sounds\" "LayoutChanged.wav"
+		If FileExist(SoundFile) {
+			SoundPlay,%SoundFile%
+		}
+	}
     return
 }
 
-GetLayoutQueue(win := 0)
+ShowLangTooltip(win := 0, time := -800, delay := 50)
 {
-	layoutsList := Lyt.GetList()
-	layoutsListSize := layoutsList.MaxIndex()
-	
-	curLayoutNum := Lyt.GetNum(win)
-	nextLayoutNum := Mod(curLayoutNum, layoutsListSize) + 1
-	
-	thisLayoutData := layoutsList[curLayoutNum]
-	nextLayoutData := layoutsList[nextLayoutNum]
-	
-	return [thisLayoutData, nextLayoutData]
+	Sleep,% delay
+	text := Lyt.GetLng(win,,true) " - " Lyt.GetDisplayName(win)
+	ShowToolTip(text, time)
 }
 
-SwitchKeyboardLayout(win := 0)
+ShowToolTip(text, time := -800)
 {
-	layoutsQueue := GetLayoutQueue(win)
-	
-	thisLayoutData := layoutsQueue[1]
-	nextLayoutData := layoutsQueue[2]
-	
-	Lyt.Set(nextLayoutData.h,win)
-	
-	msg := nextLayoutData.LngFullName " - " nextLayoutData.DisplayName
-	
-	return msg
+	Tooltip, %text%
+    SetTimer,ClearToolTips,%time%
 }
 
-REMOVE_TOOLTIP:
+ClearToolTips:
 {
 	ToolTip
     return
 }
-;~ ===================================================================================
+
+ResetSwitchCount:
+{
+	LayoutSwitchCount := 0
+}
+; ===================================================================================
 
 
 
-;~ ОБЩИЕ ФУНКЦИИ (БИБЛИОТЕКА)
+; ОБЩИЕ ФУНКЦИИ (БИБЛИОТЕКА)
 
-;~ ===================================================================================
-;~ ФУНКЦИЯ ЗАПУСКА СКРИПТА С ПРАВАМИ АДИМИНИСТРАТОРА
-;~ ===================================================================================
+; ===================================================================================
+; ФУНКЦИЯ ЗАПУСКА СКРИПТА С ПРАВАМИ АДИМИНИСТРАТОРА
+; ===================================================================================
 RunAsAdmin(ScriptPath := False)
 {
 	If (not A_IsAdmin) {
@@ -760,8 +755,8 @@ RunAsAdmin(ScriptPath := False)
 ; ===================================================================================
 ; ФУНКЦИЯ АВТОМАТИЧЕСКОГО ЗАВЕРШЕНИЯ ВСЕХ КОПИЙ ТЕКУЩЕГО ПРОЦЕССА (КРОМЕ АКТИВНОЙ)
 ; ===================================================================================
-ForceSingleInstance() 
-{ 
+ForceSingleInstance()
+{
 	DetectHiddenWindows,On
 	#SingleInstance,Off
 	WinGet,CurrentID,ID,%A_ScriptFullPath% ahk_class AutoHotkey
@@ -775,21 +770,21 @@ ForceSingleInstance()
 			Process,Close,%ProcessPID%
 		}
 		ProcessCount += 1
-	}	 
+	}
 	Return
 }
 
-;~ ===================================================================================
-;~ ФУНКЦИЯ ПОЛУЧЕНИЯ ИМЕНИ ТЕКУЩЕГО СКРИПТА
-;~ ===================================================================================
+; ===================================================================================
+; ФУНКЦИЯ ПОЛУЧЕНИЯ ИМЕНИ ТЕКУЩЕГО СКРИПТА
+; ===================================================================================
 GetScriptName() {
 	SplitPath,A_ScriptFullPath,,,,Name
 	Return,Name
 }
 
-;~ ===================================================================================
-;~ ФУНКЦИЯ УДАЛЕНИЯ ЛИШНИХ СИМВОЛОВ ИЗ ПУТЕЙ
-;~ ===================================================================================
+; ===================================================================================
+; ФУНКЦИЯ УДАЛЕНИЯ ЛИШНИХ СИМВОЛОВ ИЗ ПУТЕЙ
+; ===================================================================================
 TrimPath(GivenPath) {
 	GivenPath := StrReplace(GivenPath,"""","") ; Удаление кавычек из пути
 	GivenPath := RegExReplace(GivenPath,"[\\+]$","",,1) ; Удаление замыкающего слэша из пути
@@ -797,9 +792,9 @@ TrimPath(GivenPath) {
 	Return,GivenPath
 }
 
-;~ ===================================================================================
-;~ ФУНКЦИЯ ПОЛУЧЕНИЯ ПОЛНОГО ПУТИ К ФАЙЛУ
-;~ ===================================================================================
+; ===================================================================================
+; ФУНКЦИЯ ПОЛУЧЕНИЯ ПОЛНОГО ПУТИ К ФАЙЛУ
+; ===================================================================================
 FileGetLongPath(GivenPath) {
 	GivenPath := TrimPath(GivenPath)
 	IfExist,%GivenPath%
@@ -813,9 +808,9 @@ FileGetLongPath(GivenPath) {
 	}
 }
 
-;~ ===================================================================================
-;~ ЗАМЕНА СТАНДАРТОНГО IniWrite (ЗАПИСЫВАЕТ ТОЛЬКО ИЗМЕНЕННЫЕ ПАРАМЕТРЫ)
-;~ ===================================================================================
+; ===================================================================================
+; ЗАМЕНА СТАНДАРТОНГО IniWrite (ЗАПИСЫВАЕТ ТОЛЬКО ИЗМЕНЕННЫЕ ПАРАМЕТРЫ)
+; ===================================================================================
 IniWrite(Key,File,Section,Value) {
 	IniRead,TestValue,%File%,%Section%,%Key%
 	If (TestValue != Value) {
@@ -824,14 +819,36 @@ IniWrite(Key,File,Section,Value) {
 }
 
 /* НЕ ИСПОЛЬЗУЕМОЕ
-;~ ===================================================================================
-;~ ПЕРВОД ДЕСЯТИЧНОГО ЧИСЛА В HEX
-;~ ===================================================================================
+; ===================================================================================
+; ПЕРВОД ДЕСЯТИЧНОГО ЧИСЛА В HEX
+; ===================================================================================
 DecToHex(Dec)
 {
 	SetFormat,IntegerFast,Hex
 	Return,Dec
 }
+
+isFullScreen := isWindowFullScreen( "A" )
+MsgBox % isFullScreen ? "Full Screen" : "Windowed"
+Return
+
+isWindowFullScreen( winTitle ) {
+	;checks if the specified window is full screen
+	
+	winID := WinExist( winTitle )
+
+	If ( !winID )
+		Return false
+
+	WinGet style, Style, ahk_id %WinID%
+	WinGetPos ,,,winW,winH, %winTitle%
+	; 0x800000 is WS_BORDER.
+	; 0x20000000 is WS_MINIMIZE.
+	; no border and not minimized
+	Return ((style & 0x20800000) or winH < A_ScreenHeight or winW < A_ScreenWidth) ? false : true
+}
 */
 
 #Include Lyt.ahk
+; #Include Clip.ahk
+

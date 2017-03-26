@@ -1,14 +1,14 @@
-;~ F1::Lyt.Set(0x4090409)	; set english layout by id
-;~ F2::Lyt.Set("Switch")	; switch input language. Lyt.Set() do the same.
-;~ F3::Lyt.Set("Forward")	; move forward in layout list cycle
-;~ F4::Lyt.Set(2)			; set second layout in list
-;~ F7::Lyt.Set("-en")		; set first non-english layout in list
-;~ F8::Lyt.Set("en", "global")
-;~ F9::Lyt.Set("forward", WinExist("AutoHotkey Help ahk_class HH Parent"))
-;~ F10::Lyt.Set("en", "AutoHotkey Help ahk_class HH Parent")
-;~ F11::MsgBox % Lyt.GetDisplayName("AutoHotkey Help ahk_class HH Parent")
-;~ F12::MsgBox % "HKL: " Format("{:#010x}", Lyt.GetInputHKL()) "`n¹: " Lyt.GetNum() "`nDisplayName: " Lyt.GetDisplayName() "`nLanguage: " Lyt.GetLng() " - " Lyt.GetLng(,, true) "`n`n"Lyt.GetList()[2].DisplayName " " Lyt.GetList()[2].LngName " " Lyt.GetList()[2].LngFullName
-;~ Esc::ExitApp
+; F1::Lyt.Set(0x4090409)	; set english layout by id
+; F2::Lyt.Set("Switch")	; switch input language. Lyt.Set() do the same.
+; F3::Lyt.Set("Forward")	; move forward in layout list cycle
+; F4::Lyt.Set(2)			; set second layout in list
+; F7::Lyt.Set("-en")		; set first non-english layout in list
+; F8::Lyt.Set("en", "global")
+; F9::Lyt.Set("forward", WinExist("AutoHotkey Help ahk_class HH Parent"))
+; F10::Lyt.Set("en", "AutoHotkey Help ahk_class HH Parent")
+; F11::MsgBox % Lyt.GetDisplayName("AutoHotkey Help ahk_class HH Parent")
+; F12::MsgBox % "HKL: " Format("{:#010x}", Lyt.GetInputHKL()) "`n¹: " Lyt.GetNum() "`nDisplayName: " Lyt.GetDisplayName() "`nLanguage: " Lyt.GetLng() " - " Lyt.GetLng(,, true) "`n`n"Lyt.GetList()[2].DisplayName " " Lyt.GetList()[2].LngName " " Lyt.GetList()[2].LngFullName
+; Esc::ExitApp
 
 Class Lyt {
 	; ===================================================================================================================
@@ -44,6 +44,8 @@ Class Lyt {
 				}
 			}
 			Return "Language not found in current layout list"
+		} else if (arg < -1024) {
+			Return This.Change(arg,, hWnd)
 		} else if (arg <= This.GetList().MaxIndex()) {
 			Return This.Change(This.GetList()[arg].h,, hWnd)
 		} else if (arg > 1024) {
@@ -150,7 +152,7 @@ Class Lyt {
 		} else {
 			HKL := DllCall("GetKeyboardLayout", Ptr, DllCall("GetWindowThreadProcessId", Ptr, hWnd, UInt, 0, Ptr), Ptr) ;& 0xFFFF
 		}
-		;~ MsgBox, % This.GetLng(,HKL,true)
+		; MsgBox, % This.GetLng(,HKL,true)
 		return HKL
 	}
 }

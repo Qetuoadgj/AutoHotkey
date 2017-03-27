@@ -530,6 +530,8 @@ SwitchKeysLayout(PredictLayout)
 
 	CtrlC = ^{vk43}
 	CtrlV = ^{vk56}
+	
+	SavedClip := ClipboardAll
 
 	Clipboard = ; empty
 	Sleep,100
@@ -582,7 +584,7 @@ SwitchKeysLayout(PredictLayout)
 						}
 					}
 					If (isDict) {
-						ShowToolTip("isDict = " Language "`n" InputLayout.HKL)
+						; ShowToolTip("isDict = " Language "`n" InputLayout.HKL)
 						LayoutSwitchCount += 1
 						SetTimer,ResetSwitchCount,-1000
 						Lyt.Set(InputLayout.h)
@@ -613,7 +615,7 @@ SwitchKeysLayout(PredictLayout)
 	ConvertedText := ConvertText(SelectedText, DictTranslateFrom, DictTranslateTo)
 
 	Clipboard = ; empty
-	Clipboard = %ConvertedText%
+	Clipboard := ConvertedText
 	ClipWait,1
 
 	SendInput,%CtrlV%
@@ -628,6 +630,11 @@ SwitchKeysLayout(PredictLayout)
 			SoundPlay,%SoundFile%
 		}
 	}
+	
+	Clipboard = ; empty
+	Sleep,100
+	Clipboard := SavedClip
+	ClipWait,1
 }
 
 ConvertText(Text,Dict1,Dict2)

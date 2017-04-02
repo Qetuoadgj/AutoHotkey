@@ -80,6 +80,8 @@ DefineGlobals:
 	INI_FILE := A_ScriptDir "\" INI_FILE
 	INI_FILE := FileGetLongPath(INI_FILE)
 	SITE := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/LayoutSwitcher"
+	CtrlC = ^{vk43}
+	CtrlV = ^{vk56}
 }
 
 ; ===================================================================================
@@ -259,6 +261,7 @@ DefineBindings:
 {
 	Hotkey,Capslock,CycleLayouts
 	Hotkey,$~Break,SwitchKeysLayout
+	Hotkey,$~!Break,SwitchCase
 }
 
 OnExit,CloseApp
@@ -266,9 +269,8 @@ OnExit,CloseApp
 ; MsgBox,0,%SCRIPT_WIN_TITLE_SHORT%,Ready!,0.5
 
 PreviousLang = ; empty
-PredictLayoutSkip := false
-
 LayoutSwitchCount := 0
+CurrentCase := 0
 
 SetTimer,UpdateGUI,On
 
@@ -330,6 +332,16 @@ SwitchKeysLayout:
 		SwitchKeysLayout(PredictLayout, true)
 	} Else {
 		SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
+	}
+	Return
+}
+
+SwitchCase:
+{
+	If (isWindowFullScreen("A")) {
+		SwitchCase(true)
+	} Else {
+		SwitchCase(EncodingCompatibilityMode)
 	}
 	Return
 }
@@ -565,6 +577,62 @@ GenerateDictionary()
 ; ФУНКЦИИ КОНВЕРТАЦИИ ТЕКСТА
 ; http://forum.іcript-coding.com/viewtopic.php?id=7186
 ; ===================================================================================
+SwitchCase(EncodingCompatibilityMode)
+{
+	Critical
+	SetBatchLines,-1
+	SetKeyDelay,0
+
+	global CtrlC, CtrlV
+	
+	SavedClip := ClipboardAll
+
+	SelectedText := GetSelection()
+
+	If (not SelectedText) {
+		return
+	}
+	
+	global CurrentCase
+	
+	ConvertedText = ; empty
+	
+	if (CurrentCase = 0) { ; lower case
+		StringLower, ConvertedText, SelectedText
+	} else if (CurrentCase = 1) { ; title case
+		StringLower, ConvertedText, SelectedText, T
+	} else if (CurrentCase = 2) { ; upper case
+		StringUpper, ConvertedText, SelectedText
+	}
+	
+	CurrentCase := CurrentCase < 2 ? CurrentCase + 1 : 0
+	
+	if (EncodingCompatibilityMode) {
+		ConvertedText := RegExReplace(ConvertedText, "`r`n", "`n")
+		SetKeyDelay,10
+		SendEvent,%ConvertedText%
+	} else {
+		Clipboard = ; empty
+		Clipboard := ConvertedText
+		ClipWait,1
+		SendInput,%CtrlV%
+	}
+	
+	global Sounds
+	If (Sounds) {
+		static SoundFile :=  A_WorkingDir "\Sounds\" "CaseSwitched.wav"
+		If FileExist(SoundFile) {
+			SoundPlay,%SoundFile%
+		}
+	}
+		
+	Clipboard = ; empty
+	Sleep,100
+	Clipboard := SavedClip
+	ClipWait,1
+	
+}
+
 SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 {
 	; ShowToolTip("PredictLayout:" PredictLayout)
@@ -573,40 +641,11 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 	SetBatchLines,-1
 	SetKeyDelay,0
 
-	CtrlC = ^{vk43}
-	CtrlV = ^{vk56}
+	global CtrlC, CtrlV
 	
 	SavedClip := ClipboardAll
 
-	Clipboard = ; empty
-	Sleep,100
-	SendInput,%CtrlC%
-	ClipWait,1
-
-	SelectedText = ; empty
-	If (Clipboard) {
-		SelectedText := Clipboard
-	} else {
-		WhiteSpace := False
-		Loop, 100 {
-			Clipboard = ; empty
-			SendInput,^+{Left}
-			SendInput,%CtrlC%
-			ClipWait,1
-			if (StrLen(Clipboard) = StrLen(SelectedText)) {
-				Break
-			}
-			if RegExMatch(Clipboard, "(\s+)", WhiteSpace) {
-				Clipboard = ; empty
-				SendInput,^+{Right}
-				SendInput,%CtrlC%
-				ClipWait,1
-				Break
-			}
-			SelectedText := Clipboard
-		}
-		SelectedText := Clipboard
-	}
+	SelectedText := GetSelection()
 
 	If (not SelectedText) {
 		return
@@ -687,13 +726,48 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 			SoundPlay,%SoundFile%
 		}
 	}
-	
-	return
-	
+		
 	Clipboard = ; empty
 	Sleep,100
 	Clipboard := SavedClip
 	ClipWait,1
+}
+
+GetSelection()
+{
+	global CtrlC
+
+	Clipboard = ; empty
+	Sleep,100
+	SendInput,%CtrlC%
+	ClipWait,1
+
+	SelectedText = ; empty
+	If (Clipboard) {
+		SelectedText := Clipboard
+	} else {
+		WhiteSpace := False
+		Loop, 100 {
+			Clipboard = ; empty
+			SendInput,^+{Left}
+			SendInput,%CtrlC%
+			ClipWait,1
+			if (StrLen(Clipboard) = StrLen(SelectedText)) {
+				Break
+			}
+			if RegExMatch(Clipboard, "(\s+)", WhiteSpace) {
+				Clipboard = ; empty
+				SendInput,^+{Right}
+				SendInput,%CtrlC%
+				ClipWait,1
+				Break
+			}
+			SelectedText := Clipboard
+		}
+		SelectedText := Clipboard
+	}
+	
+	Return,Clipboard
 }
 
 ConvertText(Text,Dict1,Dict2)

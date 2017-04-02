@@ -2,7 +2,7 @@
 ; https://github.com/Qetuoadgj/AutoHotkey/tree/master/LayoutSwitcher  | v1.0.0
 
 #NoEnv ;Recommended for performance and compatibility with future AutoHotkey releases.
-; #Warn ;Enable warnings to assist with detecting common errors.
+#Warn ;Enable warnings to assist with detecting common errors.
 SendMode,Input ;Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir,%A_ScriptDir% ;Ensures a consistent starting directory.
 
@@ -14,6 +14,7 @@ SetWorkingDir,%A_ScriptDir% ;Ensures a consistent starting directory.
 ; SetBatchLines,-1 ;Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
 ; DetectHiddenWindows,Off
+DetectHiddenWindows,On
 
 ForceSingleInstance() ; Закрыть все открытые копии скрпита
 ; RunAsAdmin(A_ScriptFullPath) ; Запустить скрипт от имени администратора
@@ -44,6 +45,7 @@ CreateLocalization:
 	L["Run as Admin"] := "Run as Admin"
 	L["Always on Top"] := "Always on Top"
 	L["Sounds"] := "Sounds"
+	L["Encoding Compatibility Mode"] := "Encoding Compatibility Mode"
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
 		L["Fix Position"] := "Зафиксировать"
@@ -63,6 +65,7 @@ CreateLocalization:
 		L["Run as Admin"] := "Права администратора"
 		L["Always on Top"] := "Поверх других окон"
 		L["Sounds"] := "Звуки"
+		L["Encoding Compatibility Mode"] := "Режим совместимости кодировок"
 	}
 }
 
@@ -126,6 +129,9 @@ ReadConfigFile:
 	
 	Sounds := 1
 	IniRead,Sounds,%INI_FILE%,OPTIONS,Sounds,%Sounds%
+	
+	EncodingCompatibilityMode := 1
+	IniRead,EncodingCompatibilityMode,%INI_FILE%,OPTIONS,EncodingCompatibilityMode,%EncodingCompatibilityMode%
 }
 
 If (AdminRights) {
@@ -211,6 +217,11 @@ AddMenuItems:
 	If (PredictLayout) {
 		Menu,Tray,Check,% L["Predict Layout"]
 	}
+	
+	Menu,Tray,Add,% L["Encoding Compatibility Mode"],Menu_ToggleEncodingCompatibilityMode
+	If (EncodingCompatibilityMode) {
+		Menu,Tray,Check,% L["Encoding Compatibility Mode"]
+	}
 
 	Menu,Tray,Add
 
@@ -281,6 +292,7 @@ WriteConfigFile:
 	IniWrite("Ukrainian",INI_FILE,"DICTIONARIES",Ukrainian)
 
 	IniWrite("PredictLayout",INI_FILE,"OPTIONS",PredictLayout)
+	IniWrite("EncodingCompatibilityMode",INI_FILE,"OPTIONS",EncodingCompatibilityMode)
 
 	IniWrite("TrayIcon",INI_FILE,"OPTIONS",TrayIcon)
 	IniWrite("Sounds",INI_FILE,"OPTIONS",Sounds)
@@ -303,7 +315,11 @@ CloseApp:
 
 SwitchKeysLayout:
 {
-	SwitchKeysLayout(PredictLayout)
+	If (isWindowFullScreen("A")) {
+		SwitchKeysLayout(PredictLayout, true)
+	} Else {
+		SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
+	}
 	Return
 }
 ; ===================================================================================
@@ -397,6 +413,14 @@ Menu_TogglePredictLayout:
 {
 	PredictLayout := !PredictLayout
 	IniWrite("PredictLayout",INI_FILE,"OPTIONS",PredictLayout)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	Return
+}
+
+Menu_ToggleEncodingCompatibilityMode:
+{
+	EncodingCompatibilityMode := !EncodingCompatibilityMode
+	IniWrite("EncodingCompatibilityMode",INI_FILE,"OPTIONS",EncodingCompatibilityMode)
 	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	Return
 }
@@ -496,6 +520,8 @@ GenerateDictionary()
 		{
 			While (Lyt.GetInputHKL(WinTitle) != InputLayout.h and A_Index < 5) {
 				Lyt.Set(InputLayout.h,WinTitle)
+				Sleep,50
+				ChangeGUIImage()
 				Sleep,100
 			}
 			If (Lyt.GetInputHKL(WinTitle) = InputLayout.h) {
@@ -520,7 +546,7 @@ GenerateDictionary()
 ; ФУНКЦИИ КОНВЕРТАЦИИ ТЕКСТА
 ; http://forum.іcript-coding.com/viewtopic.php?id=7186
 ; ===================================================================================
-SwitchKeysLayout(PredictLayout)
+SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 {
 	; ShowToolTip("PredictLayout:" PredictLayout)
 
@@ -588,6 +614,8 @@ SwitchKeysLayout(PredictLayout)
 						LayoutSwitchCount += 1
 						SetTimer,ResetSwitchCount,-1000
 						Lyt.Set(InputLayout.h)
+						Sleep,50
+						ChangeGUIImage()						
 						Break
 					}
 				} Else {
@@ -613,14 +641,20 @@ SwitchKeysLayout(PredictLayout)
 
 	ConvertedText = ; empty
 	ConvertedText := ConvertText(SelectedText, DictTranslateFrom, DictTranslateTo)
-
-	Clipboard = ; empty
-	Clipboard := ConvertedText
-	ClipWait,1
-
-	SendInput,%CtrlV%
+	
+	if (EncodingCompatibilityMode) {
+		ConvertedText := RegExReplace(ConvertedText, "`r`n", "`n")
+		SendInput,%ConvertedText%
+	} else {
+		Clipboard = ; empty
+		Clipboard := ConvertedText
+		ClipWait,1
+		SendInput,%CtrlV%
+	}
 
 	Lyt.Set(layoutsList[nextLayoutNum].h)
+	Sleep,50
+	ChangeGUIImage()
 	ShowLangTooltip()
 	
 	global Sounds
@@ -630,6 +664,8 @@ SwitchKeysLayout(PredictLayout)
 			SoundPlay,%SoundFile%
 		}
 	}
+	
+	return
 	
 	Clipboard = ; empty
 	Sleep,100
@@ -658,6 +694,16 @@ ConvertText(Text,Dict1,Dict2)
 ; ===================================================================================
 ChangeGUIImage:
 {
+	ChangeGUIImage()
+	Return
+}
+
+ChangeGUIImage()
+{
+	static CurrentLang
+	global PreviousLang, SCRIPT_WIN_TITLE_SHORT, L
+	global TrayIcon, FlagTexture, SizeX, SizeY
+	
 	If (!CurrentLang := Lyt.GetLng(,,true)) {
 		Return
 	}
@@ -694,8 +740,6 @@ ChangeGUIImage:
 
 		PreviousLang := CurrentLang
 	}
-
-	Return
 }
 
 ; ===================================================================================
@@ -704,7 +748,10 @@ ChangeGUIImage:
 CycleLayouts:
 {
 	Lyt.Set("Forward")
+	Sleep,50
+	ChangeGUIImage()	
 	ShowLangTooltip()
+	
 	If (Sounds) {
 		SoundFile :=  A_WorkingDir "\Sounds\" "LayoutChanged.wav"
 		If FileExist(SoundFile) {
@@ -714,10 +761,9 @@ CycleLayouts:
     return
 }
 
-ShowLangTooltip(win := 0, time := -800, delay := 50)
+ShowLangTooltip(win := 0, HKL := 0, time := -800)
 {
-	Sleep,% delay
-	text := Lyt.GetLng(win,,true) " - " Lyt.GetDisplayName(win)
+	text := Lyt.GetLng(win,HKL,true) " - " Lyt.GetDisplayName(win)
 	ShowToolTip(text, time)
 }
 
@@ -839,22 +885,34 @@ isFullScreen := isWindowFullScreen( "A" )
 MsgBox % isFullScreen ? "Full Screen" : "Windowed"
 Return
 
-isWindowFullScreen( winTitle ) {
+isWindowFullScreen(winTitle := "A") {
 	;checks if the specified window is full screen
-	
-	winID := WinExist( winTitle )
-
-	If ( !winID )
-		Return false
-
-	WinGet style, Style, ahk_id %WinID%
-	WinGetPos ,,,winW,winH, %winTitle%
+	winID := WinExist(winTitle)
+	If (!winID) {
+		Return,false
+	}
+	WinGet,style,Style,ahk_id %WinID%
+	WinGetPos,,,winW,winH,%winTitle%
 	; 0x800000 is WS_BORDER.
 	; 0x20000000 is WS_MINIMIZE.
 	; no border and not minimized
-	Return ((style & 0x20800000) or winH < A_ScreenHeight or winW < A_ScreenWidth) ? false : true
+	Return,((style & 0x20800000) or winH < A_ScreenHeight or winW < A_ScreenWidth) ? false : true
 }
 */
+
+isWindowFullScreen(winTitle := "A") {
+	;checks if the specified window is full screen
+	winID := WinExist(winTitle)
+	If (!winID) {
+		Return,false
+	}
+	WinGet,style,Style,ahk_id %WinID%
+	WinGetPos,,,winW,winH,%winTitle%
+	; 0x800000 is WS_BORDER.
+	; 0x20000000 is WS_MINIMIZE.
+	; no border and not minimized
+	Return,((style & 0x20800000) or winH < A_ScreenHeight or winW < A_ScreenWidth) ? false : true
+}
 
 #Include Lyt.ahk
 ; #Include Clip.ahk

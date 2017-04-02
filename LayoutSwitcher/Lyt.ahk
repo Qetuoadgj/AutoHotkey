@@ -148,7 +148,9 @@ Class Lyt {
 			VarSetCapacity(buff, 16)
 			DllCall("GetConsoleKeyboardLayoutName", Str, buff)
 			DllCall("FreeConsole")
-			HKL := "0x" . SubStr(buff, -3)
+			; HKL := "0x" . SubStr(buff, -3)
+			HKL := SubStr(buff, -3)
+			HKL := HKL ? "0x" . HKL : 0
 		} else {
 			HKL := DllCall("GetKeyboardLayout", Ptr, DllCall("GetWindowThreadProcessId", Ptr, hWnd, UInt, 0, Ptr), Ptr) ;& 0xFFFF
 		}

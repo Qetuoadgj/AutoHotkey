@@ -10,7 +10,7 @@ SetWorkingDir,%A_ScriptDir% ;Ensures a consistent starting directory.
 ; #Persistent ;to make it run indefinitely
 ; #NoTrayIcon
 
-; Process,Priority,,High
+Process,Priority,,High
 ; SetBatchLines,-1 ;Use SetBatchLines -1 to run the script at maximum speed (Affects CPU utilization).
 
 ; DetectHiddenWindows,Off
@@ -130,7 +130,7 @@ ReadConfigFile:
 	Sounds := 1
 	IniRead,Sounds,%INI_FILE%,OPTIONS,Sounds,%Sounds%
 	
-	EncodingCompatibilityMode := 1
+	EncodingCompatibilityMode := 0
 	IniRead,EncodingCompatibilityMode,%INI_FILE%,OPTIONS,EncodingCompatibilityMode,%EncodingCompatibilityMode%
 }
 
@@ -572,7 +572,7 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 		Loop, 100 {
 			Clipboard = ; empty
 			SendInput,^+{Left}
-			SendInput,^{vk43}
+			SendInput,%CtrlC%
 			ClipWait,1
 			if (StrLen(Clipboard) = StrLen(SelectedText)) {
 				Break
@@ -580,7 +580,7 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 			if RegExMatch(Clipboard, "(\s+)", WhiteSpace) {
 				Clipboard = ; empty
 				SendInput,^+{Right}
-				SendInput,^{vk43}
+				SendInput,%CtrlC%
 				ClipWait,1
 				Break
 			}
@@ -612,7 +612,9 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 					If (isDict) {
 						; ShowToolTip("isDict = " Language "`n" InputLayout.HKL)
 						LayoutSwitchCount += 1
-						SetTimer,ResetSwitchCount,-1000
+						SwitchResetTimeout := EncodingCompatibilityMode ? -Max(1000, StrLen(SelectedText)*10) : -1000
+						SetTimer,ResetSwitchCount,%SwitchResetTimeout%
+						; MsgBox % SwitchResetTimeout
 						Lyt.Set(InputLayout.h)
 						Sleep,50
 						ChangeGUIImage()						
@@ -644,7 +646,8 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 	
 	if (EncodingCompatibilityMode) {
 		ConvertedText := RegExReplace(ConvertedText, "`r`n", "`n")
-		SendInput,%ConvertedText%
+		SetKeyDelay,10
+		SendEvent,%ConvertedText%
 	} else {
 		Clipboard = ; empty
 		Clipboard := ConvertedText
@@ -812,19 +815,29 @@ ForceSingleInstance()
 {
 	DetectHiddenWindows,On
 	#SingleInstance,Off
+	FileTypes := [".exe",".ahk"]
+	For i,FileType in FileTypes {
+		ScriptName := RegExReplace(A_ScriptName, "^(.*)\.(.*)$", "$1") . FileType
+		ScriptFullPath := A_ScriptDir . "\" . ScriptName
+		CloseOtherScriptInstances(ScriptFullPath . "ahk_class AutoHotkey")
+	}
+}
+
+CloseOtherScriptInstances(ScriptFullPath)
+{
+	ScriptFullPath := ScriptFullPath ? ScriptFullPath : A_ScriptFullPath " ahk_class AutoHotkey"
 	WinGet,CurrentID,ID,%A_ScriptFullPath% ahk_class AutoHotkey
-	WinGet,ProcessList,List,%A_ScriptFullPath% ahk_class AutoHotkey
+	WinGet,ProcessList,List,%ScriptFullPath% ahk_class AutoHotkey
 	ProcessCount := 1
 	Loop,%ProcessList%
 	{
 		ProcessID := ProcessList%ProcessCount%
 		If (ProcessID != CurrentID) {
-			WinGet,ProcessPID,PID,%A_ScriptFullPath% ahk_id %ProcessID%
+			WinGet,ProcessPID,PID,%ScriptFullPath% ahk_id %ProcessID%
 			Process,Close,%ProcessPID%
 		}
 		ProcessCount += 1
 	}
-	Return
 }
 
 ; ===================================================================================
@@ -880,24 +893,6 @@ DecToHex(Dec)
 	SetFormat,IntegerFast,Hex
 	Return,Dec
 }
-
-isFullScreen := isWindowFullScreen( "A" )
-MsgBox % isFullScreen ? "Full Screen" : "Windowed"
-Return
-
-isWindowFullScreen(winTitle := "A") {
-	;checks if the specified window is full screen
-	winID := WinExist(winTitle)
-	If (!winID) {
-		Return,false
-	}
-	WinGet,style,Style,ahk_id %WinID%
-	WinGetPos,,,winW,winH,%winTitle%
-	; 0x800000 is WS_BORDER.
-	; 0x20000000 is WS_MINIMIZE.
-	; no border and not minimized
-	Return,((style & 0x20800000) or winH < A_ScreenHeight or winW < A_ScreenWidth) ? false : true
-}
 */
 
 isWindowFullScreen(winTitle := "A") {
@@ -914,6 +909,23 @@ isWindowFullScreen(winTitle := "A") {
 	Return,((style & 0x20800000) or winH < A_ScreenHeight or winW < A_ScreenWidth) ? false : true
 }
 
+Min(a, b)
+{
+	If (a < b) {
+		Return,a
+	} Else {
+		Return,b
+	}
+}
+
+Max(a, b)
+{
+	If (a > b) {
+		Return,a
+	} Else {
+		Return,b
+	}
+}
+
 #Include Lyt.ahk
 ; #Include Clip.ahk
-

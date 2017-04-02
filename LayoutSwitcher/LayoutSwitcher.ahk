@@ -46,6 +46,7 @@ CreateLocalization:
 	L["Always on Top"] := "Always on Top"
 	L["Sounds"] := "Sounds"
 	L["Encoding Compatibility Mode"] := "Encoding Compatibility Mode"
+	L["Hide in Fullscreen Mode"] := "Hide in Fullscreen Mode"
 	If (A_Language = "0419") {
 		L["Show Borders"] := "Показать границы"
 		L["Fix Position"] := "Зафиксировать"
@@ -66,6 +67,7 @@ CreateLocalization:
 		L["Always on Top"] := "Поверх других окон"
 		L["Sounds"] := "Звуки"
 		L["Encoding Compatibility Mode"] := "Режим совместимости кодировок"
+		L["Hide in Fullscreen Mode"] := "Скрывать в полноэкранном режиме"
 	}
 }
 
@@ -132,6 +134,9 @@ ReadConfigFile:
 	
 	EncodingCompatibilityMode := 0
 	IniRead,EncodingCompatibilityMode,%INI_FILE%,OPTIONS,EncodingCompatibilityMode,%EncodingCompatibilityMode%
+	
+	HideInFullscreenMode := 1
+	IniRead,HideInFullscreenMode,%INI_FILE%,OPTIONS,HideInFullscreenMode,%HideInFullscreenMode%
 }
 
 If (AdminRights) {
@@ -186,6 +191,11 @@ AddMenuItems:
 	Menu,Tray,Add,% L["Always on Top"],Menu_ToggleAlwaysOnTop
 	If (AlwaysOnTop) {
 		Menu,Tray,Check,% L["Always on Top"]
+	}
+	
+	Menu,Tray,Add,% L["Hide in Fullscreen Mode"],Menu_ToggleHideInFullscreenMode
+	If (HideInFullscreenMode) {
+		Menu,Tray,Check,% L["Hide in Fullscreen Mode"]
 	}
 
 	Menu,Tray,Add,% L["Show Borders"],Menu_ToggleBorders
@@ -260,7 +270,7 @@ PredictLayoutSkip := false
 
 LayoutSwitchCount := 0
 
-SetTimer,ChangeGUIImage,On
+SetTimer,UpdateGUI,On
 
 Exit
 
@@ -303,6 +313,7 @@ WriteConfigFile:
 	IniWrite("AdminRights",INI_FILE,"OPTIONS",AdminRights)
 
 	IniWrite("AlwaysOnTop",INI_FILE,"OPTIONS",AlwaysOnTop)
+	IniWrite("HideInFullscreenMode",INI_FILE,"OPTIONS",HideInFullscreenMode)
 
 	Return
 }
@@ -361,6 +372,14 @@ Menu_ToggleAlwaysOnTop:
 		Gui,-AlwaysOnTop
 	}
 	IniWrite("AlwaysOnTop",INI_FILE,"OPTIONS",AlwaysOnTop)
+	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
+	Return
+}
+
+Menu_ToggleHideInFullscreenMode:
+{
+	HideInFullscreenMode := !HideInFullscreenMode
+	IniWrite("HideInFullscreenMode",INI_FILE,"OPTIONS",HideInFullscreenMode)
 	Menu,Tray,ToggleCheck,%A_ThisMenuItem%
 	Return
 }
@@ -521,7 +540,7 @@ GenerateDictionary()
 			While (Lyt.GetInputHKL(WinTitle) != InputLayout.h and A_Index < 5) {
 				Lyt.Set(InputLayout.h,WinTitle)
 				Sleep,50
-				ChangeGUIImage()
+				UpdateGUIImage()
 				Sleep,100
 			}
 			If (Lyt.GetInputHKL(WinTitle) = InputLayout.h) {
@@ -617,7 +636,7 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 						; MsgBox % SwitchResetTimeout
 						Lyt.Set(InputLayout.h)
 						Sleep,50
-						ChangeGUIImage()						
+						UpdateGUIImage()						
 						Break
 					}
 				} Else {
@@ -658,7 +677,7 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 		SendInput,%CtrlV%
 	}
 
-	ChangeGUIImage()
+	UpdateGUIImage()
 	ShowLangTooltip()
 	
 	global Sounds
@@ -696,13 +715,21 @@ ConvertText(Text,Dict1,Dict2)
 ; ===================================================================================
 ; ФУНКЦИИ УПРАВЛЕНИЯ ЭЛЕМЕНТАМИ GUI
 ; ===================================================================================
-ChangeGUIImage:
+UpdateGUI:
 {
-	ChangeGUIImage()
+	UpdateGUIImage()
+	If (AlwaysOnTop and HideInFullscreenMode) {
+		isInFullScreen := isWindowFullScreen("A")
+		if (isInFullScreen) {
+			Gui,-AlwaysOnTop
+		} else {
+			Gui,+AlwaysOnTop
+		}
+	}
 	Return
 }
 
-ChangeGUIImage()
+UpdateGUIImage()
 {
 	static CurrentLang
 	global PreviousLang, SCRIPT_WIN_TITLE_SHORT, L
@@ -753,7 +780,7 @@ CycleLayouts:
 {
 	Lyt.Set("Forward")
 	Sleep,50
-	ChangeGUIImage()	
+	UpdateGUIImage()	
 	ShowLangTooltip()
 	
 	If (Sounds) {

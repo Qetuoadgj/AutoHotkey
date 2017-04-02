@@ -640,6 +640,9 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 	}
 	DictTranslateFrom := %LangTranslateFrom%
 	DictTranslateTo := %LangTranslateTo%
+	
+	Lyt.Set(layoutsList[nextLayoutNum].h)
+	Sleep,50
 
 	ConvertedText = ; empty
 	ConvertedText := ConvertText(SelectedText, DictTranslateFrom, DictTranslateTo)
@@ -655,8 +658,6 @@ SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
 		SendInput,%CtrlV%
 	}
 
-	Lyt.Set(layoutsList[nextLayoutNum].h)
-	Sleep,50
 	ChangeGUIImage()
 	ShowLangTooltip()
 	

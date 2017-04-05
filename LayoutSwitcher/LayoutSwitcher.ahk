@@ -139,10 +139,49 @@ ReadConfigFile:
 	
 	HideInFullscreenMode := 1
 	IniRead,HideInFullscreenMode,%INI_FILE%,OPTIONS,HideInFullscreenMode,%HideInFullscreenMode%
+	
+	CycleKeyboardLayouts_HotKey := "CapsLock"
+	IniRead,CycleKeyboardLayouts_HotKey,%INI_FILE%,HOTKEYS,CycleKeyboardLayouts,%CycleKeyboardLayouts_HotKey%
+	CycleKeyboardLayouts_Disabled := 0
+	IniRead,CycleKeyboardLayouts_Disabled,%INI_FILE%,DISABLED,CycleKeyboardLayouts,%CycleKeyboardLayouts_Disabled%
+
+	SwitchTextLayout_HotKey := "$~Break"
+	IniRead,SwitchTextLayout_HotKey,%INI_FILE%,HOTKEYS,SwitchTextLayout,%SwitchTextLayout_HotKey%
+	SwitchTextLayout_Disabled := 0
+	IniRead,SwitchTextLayout_Disabled,%INI_FILE%,DISABLED,SwitchTextLayout,%SwitchTextLayout_Disabled%
+	
+	SwitchTextCase_HotKey := "$~!Break"
+	IniRead,SwitchTextCase_HotKey,%INI_FILE%,HOTKEYS,SwitchTextCase,%SwitchTextCase_HotKey%
+	SwitchTextCase_Disabled := 0
+	IniRead,SwitchTextCase_Disabled,%INI_FILE%,DISABLED,SwitchTextCase,%SwitchTextCase_Disabled%
 }
 
 If (AdminRights) {
 	RunAsAdmin(A_ScriptFullPath)
+}
+
+; ===================================================================================
+; ОПРЕДЕЛЕНИЕ НАЗНАЧЕНИЙ КЛАВИШ
+; ===================================================================================
+DefineBindings:
+{
+	FunctionList := ["CycleKeyboardLayouts", "SwitchTextLayout", "SwitchTextCase"]
+	DefineBindings(FunctionList)
+}
+
+DefineBindings(FunctionList)
+{
+	static i, Function, HK
+	For i,Function in FunctionList {
+		HK = %Function%_HotKey
+		HK := %HK%
+		D = %Function%_Disabled
+		D := %D%
+		If (HK and not D) {
+			Hotkey,%HK%,%Function%
+			; MsgBox % Function " : " HK
+		}
+	}
 }
 
 ; ===================================================================================
@@ -254,16 +293,6 @@ AddMenuItems:
 	Menu,Tray,Add,% L["Exit"],Menu_Exit
 }
 
-; ===================================================================================
-; ОПРЕДЕЛЕНИЕ НАЗНАЧЕНИЙ КЛАВИШ
-; ===================================================================================
-DefineBindings:
-{
-	Hotkey,Capslock,CycleLayouts
-	Hotkey,$~Break,SwitchKeysLayout
-	Hotkey,$~!Break,SwitchCase
-}
-
 OnExit,CloseApp
 
 ; MsgBox,0,%SCRIPT_WIN_TITLE_SHORT%,Ready!,0.5
@@ -299,10 +328,6 @@ WriteConfigFile:
 	IniWrite("Borders",INI_FILE,"OPTIONS",Borders)
 	IniWrite("FixPosition",INI_FILE,"OPTIONS",FixPosition)
 
-	IniWrite("English",INI_FILE,"DICTIONARIES",English)
-	IniWrite("Russian",INI_FILE,"DICTIONARIES",Russian)
-	IniWrite("Ukrainian",INI_FILE,"DICTIONARIES",Ukrainian)
-
 	IniWrite("PredictLayout",INI_FILE,"OPTIONS",PredictLayout)
 	IniWrite("EncodingCompatibilityMode",INI_FILE,"OPTIONS",EncodingCompatibilityMode)
 
@@ -316,6 +341,19 @@ WriteConfigFile:
 
 	IniWrite("AlwaysOnTop",INI_FILE,"OPTIONS",AlwaysOnTop)
 	IniWrite("HideInFullscreenMode",INI_FILE,"OPTIONS",HideInFullscreenMode)
+	
+	IniWrite("CycleKeyboardLayouts",INI_FILE,"HOTKEYS",CycleKeyboardLayouts_HotKey)
+	IniWrite("CycleKeyboardLayouts",INI_FILE,"DISABLED",CycleKeyboardLayouts_Disabled)
+	
+	IniWrite("SwitchTextLayout",INI_FILE,"HOTKEYS",SwitchTextLayout_HotKey)
+	IniWrite("SwitchTextLayout",INI_FILE,"DISABLED",SwitchTextLayout_Disabled)
+	
+	IniWrite("SwitchTextCase",INI_FILE,"HOTKEYS",SwitchTextCase_HotKey)
+	IniWrite("SwitchTextCase",INI_FILE,"DISABLED",SwitchTextCase_Disabled)
+	
+	IniWrite("English",INI_FILE,"DICTIONARIES",English)
+	IniWrite("Russian",INI_FILE,"DICTIONARIES",Russian)
+	IniWrite("Ukrainian",INI_FILE,"DICTIONARIES",Ukrainian)
 
 	Return
 }
@@ -326,22 +364,22 @@ CloseApp:
 }
 
 
-SwitchKeysLayout:
+SwitchTextLayout:
 {
 	If (isWindowFullScreen("A")) {
-		SwitchKeysLayout(PredictLayout, true)
+		SwitchTextLayout(PredictLayout, true)
 	} Else {
-		SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
+		SwitchTextLayout(PredictLayout, EncodingCompatibilityMode)
 	}
 	Return
 }
 
-SwitchCase:
+SwitchTextCase:
 {
 	If (isWindowFullScreen("A")) {
-		SwitchCase(true)
+		SwitchTextCase(true)
 	} Else {
-		SwitchCase(EncodingCompatibilityMode)
+		SwitchTextCase(EncodingCompatibilityMode)
 	}
 	Return
 }
@@ -577,7 +615,7 @@ GenerateDictionary()
 ; ФУНКЦИИ КОНВЕРТАЦИИ ТЕКСТА
 ; http://forum.іcript-coding.com/viewtopic.php?id=7186
 ; ===================================================================================
-SwitchCase(EncodingCompatibilityMode)
+SwitchTextCase(EncodingCompatibilityMode)
 {
 	Critical
 	SetBatchLines,-1
@@ -633,7 +671,7 @@ SwitchCase(EncodingCompatibilityMode)
 	
 }
 
-SwitchKeysLayout(PredictLayout, EncodingCompatibilityMode)
+SwitchTextLayout(PredictLayout, EncodingCompatibilityMode)
 {
 	; ShowToolTip("PredictLayout:" PredictLayout)
 
@@ -850,7 +888,7 @@ UpdateGUIImage()
 ; ===================================================================================
 ; ФУНКЦИИ УПРАВЛЕНИЯ РАСКЛАДКАМИ КЛАВИАТУРЫ
 ; ===================================================================================
-CycleLayouts:
+CycleKeyboardLayouts:
 {
 	Lyt.Set("Forward")
 	Sleep,50
@@ -863,7 +901,7 @@ CycleLayouts:
 			SoundPlay,%SoundFile%
 		}
 	}
-    return
+	return
 }
 
 ShowLangTooltip(win := 0, HKL := 0, time := -800)
@@ -875,13 +913,13 @@ ShowLangTooltip(win := 0, HKL := 0, time := -800)
 ShowToolTip(text, time := -800)
 {
 	Tooltip, %text%
-    SetTimer,ClearToolTips,%time%
+	SetTimer,ClearToolTips,%time%
 }
 
 ClearToolTips:
 {
 	ToolTip
-    return
+	return
 }
 
 ResetSwitchCount:

@@ -48,7 +48,7 @@ NumPad2::
 	Layout_Index := Layout.Get_Index( Layout_HKL )
 	Next_Layout_Index := Layout_Index + 1 > Layouts_List_Size ? 1 : Layout_Index + 1
 	Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
-	Next_Layout_Full_Name := ΔτνωγεώΔτνωγε³_Δψ³ευÒσχε_Δτνωγε_ΨςβσχΏώΐγδδ_Òτόσ
+	Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
 	Layout.Change( Next_Layout_HKL )
 		
 	; Layout.Next( "A" )

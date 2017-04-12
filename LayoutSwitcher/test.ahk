@@ -159,10 +159,10 @@ class Layout
 			If ( Window_Class = "ConsoleWindowClass" ) {
 				WinGet, Console_PID, PID
 				DllCall( "AttachConsole", Ptr, Console_PID )
-				VarSetCapacity( buff, 16 )
-				DllCall( "GetConsoleKeyboardLayoutName", Str, buff )
+				VarSetCapacity( Buff, 16 )
+				DllCall( "GetConsoleKeyboardLayoutName", Str, Buff )
 				DllCall( "FreeConsole" )
-				HKL := SubStr( buff, -3 )
+				HKL := SubStr( Buff, -3 )
 				HKL := HKL ? "0x" . HKL : 0
 			} else {
 				HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, hWnd, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
@@ -249,6 +249,10 @@ class Edit_Text
 				Clipboard = ; Null
 				SendInput, % This.Select_Left . This.Ctrl_C
 				ClipWait, 0.5
+				If ( not Clipboard )
+				{ ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
+					Return
+				}
 				; Selection_Steps_Count += 1
 				If RegExMatch( Clipboard, "\s" ) {
 					Clipboard = ; Null

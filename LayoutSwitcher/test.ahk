@@ -153,7 +153,7 @@ class Layout
 	Get_HKL( ByRef Window := "A" )
 	{ ; функция получения названия "HKL" текущей раскладки
 		static HKL
-		If ( hWnd := WinExist( Window ) ) {
+		If ( Window_ID := WinExist( Window ) ) {
 			WinGetClass, Window_Class
 			If ( Window_Class = "ConsoleWindowClass" ) {
 				WinGet, Console_PID, PID
@@ -164,12 +164,12 @@ class Layout
 				HKL := SubStr( Buff, -3 )
 				HKL := HKL ? "0x" . HKL : 0
 			} else {
-				HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, hWnd, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
+				HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, Window_ID, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
 			}
 			If ( not HKL )
 			{ ; рабочий стол Windows
-				If ( hWnd := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) ) {
-					HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, hWnd, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
+				If ( Window_ID := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) ) {
+					HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, Window_ID, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
 				}
 			}
 			Return, HKL
@@ -178,15 +178,15 @@ class Layout
 	
 	Next( ByRef Window := "A" )
 	{ ; функция смены раскладки ( вперед )
-		If ( hWnd := WinExist( Window ) ) {
-			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %hWnd%
+		If ( Window_ID := WinExist( Window ) ) {
+			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
 		}
 	}
 	
 	Change( Byref HKL, ByRef Window := "A" )
 	{ ; функция смены раскладки по "HKL"
-		If ( hWnd := WinExist( Window ) ) {
-			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %hWnd%
+		If ( Window_ID := WinExist( Window ) ) {
+			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
 		}
 	}
 	
@@ -219,6 +219,7 @@ class Edit_Text
 	static Ctrl_V := "^{vk56}"
 	static Select_Left := "^+{Left}"
 	static Select_Right := "^+{Right}"
+	static Select_No_Space := "^+{Right 2}" . "^+{Left}"
 
 	static Title_Case_Symbols := "(\_|\-|\.)"
 	static Title_Case_Match := "(.)"
@@ -241,7 +242,6 @@ class Edit_Text
 		SendInput, % This.Ctrl_C
 		ClipWait, 0.05
 		Selected_Text = ; Null
-		; Selection_Steps_Count := 0
 		If ( not Selected_Text := Clipboard ) {
 			Loop, 100
 			{
@@ -252,12 +252,10 @@ class Edit_Text
 				{ ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					Return
 				}
-				; Selection_Steps_Count += 1
 				If RegExMatch( Clipboard, "\s" ) {
 					Clipboard = ; Null
-					SendInput, % This.Select_Right . This.Ctrl_C
+					SendInput, % This.Select_No_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
 					ClipWait, 0.5
-					; Selection_Steps_Count -= 1
 					Break
 				}
 				Selected_Text := Clipboard

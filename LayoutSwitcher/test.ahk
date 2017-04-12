@@ -82,18 +82,17 @@ NumPad2::
 Exit
 
 class Layout
-{
+{ ; функции управления раскладками клавиатуры
 	static SISO639LANGNAME := 0x0059 ; ISO abbreviated language name, eg "en"
 	static LOCALE_SENGLANGUAGE := 0x1001 ; Full language name, eg "English"
 	static WM_INPUTLANGCHANGEREQUEST := 0x0050
 	static INPUTLANGCHANGE_FORWARD := 0x0002
 	static INPUTLANGCHANGE_BACKWARD := 0x0004
-	static WM_INPUTLANGCHANGE := 0x51
 	
 	static Layouts_List := Layout.Get_Layouts_List()
 	
 	Get_Layouts_List()
-	{
+	{ ; функция создания базы данных для текущих раскладок
 		static Layouts_List, Layouts_List_Size
 		static Layout_HKL, Layout_Name, Layout_Full_Name, Layout_Display_Name
 		VarSetCapacity( List, A_PtrSize * 5 )
@@ -115,7 +114,7 @@ class Layout
 	}
 	
 	Language_Name( ByRef HKL, ByRef Full_Name := false )
-	{
+	{ ; функция получения наименования ( сокращённого "en" или полного "English") раскладки по её "HKL" 
 		static LocID, LCType, Size
 		LocID := HKL & 0xFFFF
 		LCType := Full_Name ? This.LOCALE_SENGLANGUAGE : This.SISO639LANGNAME
@@ -126,7 +125,7 @@ class Layout
 	}
 	
 	Display_Name( ByRef HKL )
-	{
+	{ ; функция получения названия ( "Английская" ) раскладки по её "HKL" 
 		static KLID
 		KLID := This.KLID( HKL )
 		RegRead, Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Display Name"
@@ -141,7 +140,7 @@ class Layout
 	}
 	
 	KLID( Byref HKL )
-	{
+	{ ; функция получения названия "KLID" раскладки по её "HKL" 
 		static KLID, Prior_HKL
 		VarSetCapacity( KLID, 8 * ( A_IsUnicode ? 2 : 1 ) )
 		Prior_HKL := DllCall( "GetKeyboardLayout", "Ptr", DllCall( "GetWindowThreadProcessId", "Ptr", 0, "UInt", 0, "Ptr" ), "Ptr" )
@@ -152,7 +151,7 @@ class Layout
 	}
 	
 	Get_HKL( ByRef Window := "A" )
-	{
+	{ ; функция получения названия "HKL" текущей раскладки
 		static HKL
 		If ( hWnd := WinExist( Window ) ) {
 			WinGetClass, Window_Class
@@ -178,21 +177,21 @@ class Layout
 	}
 	
 	Next( ByRef Window := "A" )
-	{
+	{ ; функция смены раскладки ( вперед )
 		If ( hWnd := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %hWnd%
 		}
 	}
 	
 	Change( Byref HKL, ByRef Window := "A" )
-	{
+	{ ; функция смены раскладки по "HKL"
 		If ( hWnd := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %hWnd%
 		}
 	}
 	
 	Get_Index( Byref HKL )
-	{
+	{ ; функция получения порядкового номера раскладки по "HKL"
 		static Index, Layout
 		For Index, Layout in This.Layouts_List
 		{
@@ -203,7 +202,7 @@ class Layout
 	}
 	
 	Get_Index_By_Name( Byref Full_Name )
-	{
+	{ ; функция получения порядкового номера раскладки по полному имени ( "English" )
 		static Index, Layout
 		For Index, Layout in This.Layouts_List
 		{
@@ -442,15 +441,15 @@ IniWrite( ByRef Key, ByRef File, ByRef Section, ByRef Value )
 }
 
 ToolTip( ByRef text, ByRef time := 800 )
-{
+{ ; функция вывода высплывающей подсказки с последующим ( убирается по таймеру )
 	Tooltip, %text%
 	SetTimer, Clear_ToolTips, %time%
 }
 
 Clear_ToolTips:
-{
+{ ; рутина очистки подсказок и отключения связанных с ней таймеров
 	ToolTip
-	SetTimer, %A_ThisLabel%, Delete
+	SetTimer, %A_ThisLabel%, Off
 	Return
 }
 

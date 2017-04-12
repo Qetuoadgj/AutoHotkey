@@ -258,8 +258,11 @@ class Edit_Text
 					ClipWait, 0.5
 					Break
 				}
+				If ( StrLen( Clipboard ) = StrLen( Selected_Text ) ) {
+					Break
+				}
 				Selected_Text := Clipboard
-			} Until StrLen( Clipboard ) <> StrLen( Selected_Text )
+			}
 		}
 		; -----------------------------------------------------------------------------------
 		Return, Selected_Text

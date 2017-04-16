@@ -215,50 +215,54 @@ SAVE_CONFIG_FILE:
 
 SWITCH_KEYBOARD_LAYOUT:
 {
-	Layout.Next( "A" )
-	If ( sound_enable and FileExist( sound_switch_keyboard_layout ) ) {
-		SoundPlay, %sound_switch_keyboard_layout%
-	}	
+	If WinExist( "A" ) {
+		Layout.Next( "A" )
+		If ( sound_enable and FileExist( sound_switch_keyboard_layout ) ) {
+			SoundPlay, %sound_switch_keyboard_layout%
+		}
+	}
 	Sleep, 50
 	Return
 }
 
 SWITCH_TEXT_CASE:
 {
-	Selected_Text := Edit_Text.Select()
-	Converted_Text := Edit_Text.Convert_Case( Selected_Text, false )
-	Edit_Text.Paste( Converted_Text )
-	If ( sound_enable and FileExist( sound_switch_text_case ) ) {
-		SoundPlay, %sound_switch_text_case%
-	}	
+	If ( Selected_Text := Edit_Text.Select() ) {
+		Converted_Text := Edit_Text.Convert_Case( Selected_Text, false )
+		Edit_Text.Paste( Converted_Text )
+		If ( sound_enable and FileExist( sound_switch_text_case ) ) {
+			SoundPlay, %sound_switch_text_case%
+		}
+	}
 	Sleep, 50
 	Return
 }
 
 SWITCH_TEXT_LAYOUT:
 {
-	Selected_Text := Edit_Text.Select()
-	Selected_Text_Dictionary := Edit_Text.Dictionary( Selected_Text )
-	If ( not Selected_Text_Dictionary ) {
-		Text_Layout_Index := Layout.Get_Index( Layout.Get_HKL( "A" ) )
-		Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
-	} Else {
-		Text_Layout_Index := Layout.Get_Index_By_Name( Selected_Text_Dictionary )
+	If ( Selected_Text := Edit_Text.Select() ) {
+		Selected_Text_Dictionary := Edit_Text.Dictionary( Selected_Text )
+		If ( not Selected_Text_Dictionary ) {
+			Text_Layout_Index := Layout.Get_Index( Layout.Get_HKL( "A" ) )
+			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
+		} Else {
+			Text_Layout_Index := Layout.Get_Index_By_Name( Selected_Text_Dictionary )
+		}
+		If ( Text_Layout_Index ) {
+			Next_Layout_Index := Text_Layout_Index + 1 > Layout.Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
+			Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
+			Converted_Text := Edit_Text.Replace_By_Dictionaries( Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name )
+			Edit_Text.Paste( Converted_Text )
+			Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
+			Layout.Change( Next_Layout_HKL )
+			
+			Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
+			ToolTip( Next_Layout_Full_Name " - " Next_Layout_Display_Name )
+		}
+		If ( sound_enable and FileExist( sound_switch_text_layout ) ) {
+			SoundPlay, %sound_switch_text_layout%
+		}
 	}
-	If ( Text_Layout_Index ) {
-		Next_Layout_Index := Text_Layout_Index + 1 > Layout.Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
-		Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
-		Converted_Text := Edit_Text.Replace_By_Dictionaries( Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name )
-		Edit_Text.Paste( Converted_Text )
-		Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
-		Layout.Change( Next_Layout_HKL )
-		
-		Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
-		ToolTip( Next_Layout_Full_Name " - " Next_Layout_Display_Name )
-	}
-	If ( sound_enable and FileExist( sound_switch_text_layout ) ) {
-		SoundPlay, %sound_switch_text_layout%
-	}	
 	Sleep, 50
 	Return
 }
@@ -303,7 +307,7 @@ Get_Binds( ByRef Config_File, ByRef Section, ByRef Prefix := ""  )
 			Key := Trim( Match1 )
 			IniRead, Value, %Config_File%, %Section%, % Prefix . Key
 			If ( Value != "ERROR" and IsLabel( Key ) ) {
-				Hotkey, %Value%, %Key%
+				Hotkey, %Value%, %Key%, UseErrorLevel
 				; MsgBox, % Key "`n" Value
 			}
 		}
@@ -492,7 +496,7 @@ Menu_Toggle_Auto_Start:
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	system_enable_auto_start := not system_enable_auto_start
 	IniWrite( "system_enable_auto_start", Config_File, "System", system_enable_auto_start )
-	Auto_Run_Task_Name := "CustomTasks\" Script_Name
+	Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
 	If ( system_enable_auto_start ) {
 		Create_Auto_Run_Task( Auto_Run_Task_Name, system_start_with_admin_rights )
 	} Else {

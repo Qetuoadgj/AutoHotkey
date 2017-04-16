@@ -36,6 +36,8 @@ CreateLocalization:
 	; App
 	IniRead, l_app_restart, %Translation_File%, App, app_restart, % "Restart App"
 	IniRead, l_app_exit, %Translation_File%, App, app_exit, % "Close App"
+	IniRead, l_app_options, %Translation_File%, App, app_options, % "Open Settings"
+	IniRead, l_app_generate_dictionaries, %Translation_File%, App, app_generate_dictionaries, % "Generate Dictionaries"
 }
 
 GoSub, SET_DEFAULTS
@@ -429,6 +431,8 @@ FLAG_Customize_Menus:
 	
 	Menu, Tray, Add
 
+	Menu, Tray, Add, %l_app_generate_dictionaries%, Menu_Generate_Dictionaries
+	Menu, Tray, Add, %l_app_options%, Menu_Options
 	Menu, Tray, Add, %l_app_restart%, Menu_Reload_App
 	Menu, Tray, Add, %l_app_exit%, Menu_Exit_App
 	
@@ -543,6 +547,18 @@ Menu_App_Site:
 	Return
 }
 
+Menu_Generate_Dictionaries:
+{
+	Generate_Dictionaries()
+	Return
+}
+
+Menu_Options:
+{
+	Run, notepad.exe "%Config_File%"
+	Return
+}
+
 Menu_Reload_App:
 {
 	Reload
@@ -568,6 +584,61 @@ Delete_Auto_Run_Task( ByRef Task_Name )
 	static Command
 	Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
 	RunWait, *RunAs %Command%
+}
+
+Generate_Dictionaries()
+{
+	static Notepad_PID, Notepad_ID, Win_Title, Keys
+	Run, % "notepad.exe /W",,, Notepad_PID
+
+	WinWait, ahk_pid %Notepad_PID%
+	WinGet, Notepad_ID, ID, ahk_pid %Notepad_PID%
+
+	Win_Title = ahk_id %Notepad_ID%
+
+	Keys := ["SC029","SC002","SC003","SC004"
+	,"SC005","SC006","SC007","SC008","SC009"
+	,"SC00A","SC00B","SC00C","SC00D","SC010"
+	,"SC011","SC012","SC013","SC014","SC015"
+	,"SC016","SC017","SC018","SC019","SC01A"
+	,"SC01B","SC01E","SC01F","SC020","SC021"
+	,"SC022","SC023","SC024","SC025","SC026"
+	,"SC027","SC028","SC02B","SC056","SC02C"
+	,"SC02D","SC02E","SC02F","SC030","SC031"
+	,"SC032","SC033","SC034","SC035"]
+	
+	WinActivate, %Win_Title%
+	WinWaitActive, %Win_Title%
+	
+	static Layout_Index, Layout_Data
+	static Dictionary_Name, k, v
+	
+	For Layout_Index, Layout_Data in Layout.Layouts_List
+	{
+		WinActivate, %Win_Title%
+		WinWaitActive, %Win_Title%
+		IfWinActive, %Win_Title%
+		{			
+			While ( Layout.Get_HKL( Win_Title ) != Layout_Data.HKL and A_Index < 5 )
+			{
+				Layout.Change( Layout_Data.HKL, Win_Title )
+				Sleep,50
+			}
+			If ( Layout.Get_HKL( Win_Title ) = Layout_Data.HKL )
+			{
+				Dictionary_Name := Layout_Data.Full_Name
+				SendRaw, %Dictionary_Name%=
+				For k, v in Keys {
+					Send, {%v%}
+				}
+				Send, {SC039}
+				For k, v in Keys {
+					Send, +{%v%}
+				}
+				SendRaw, % "`n"
+			}
+		}
+	}
 }
 
 class Layout

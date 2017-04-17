@@ -215,6 +215,10 @@ SAVE_CONFIG_FILE:
 
 SWITCH_KEYBOARD_LAYOUT:
 {
+	If WinActive( "ahk_class Shell_TrayWnd" ) {
+		WinActivate, ahk_class Progman ahk_exe Explorer.EXE
+		Sleep, 50
+	}
 	If WinExist( "A" ) {
 		Layout.Next( "A" )
 		If ( sound_enable and FileExist( sound_switch_keyboard_layout ) ) {
@@ -371,7 +375,7 @@ FLAG_Add_Picture:
 FLAG_Update:
 {
 	If ( flag_always_on_top ) {
-		If ( flag_hide_in_fullscreen_mode and isWindowFullScreen( "A" ) ) {
+		If ( flag_hide_in_fullscreen_mode and Window.Is_Full_Screen( "A" ) ) {
 			; Gui, FLAG_: -AlwaysOnTop
 			WinSet, Bottom,, ahk_id %flag_win_id%
 		} Else {
@@ -1065,17 +1069,30 @@ Clear_ToolTips:
 	Return
 }
 
-isWindowFullScreen( ByRef Win_Title := "A" )
-{ ; функция проверки полноэкранного режима
-	static Win_ID
-	Win_ID := WinExist( Win_Title )
-	If ( not Win_ID ) {
-		Return, False
+class Window
+{
+	static Windows_Tray_ID := WinExist( "ahk_class Shell_TrayWnd" )
+	static Windows_Desktop_ID := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" )
+	
+	Is_Full_Screen( ByRef Win_Title := "A" )
+	{ ; функция проверки полноэкранного режима
+		static Win_ID
+		Win_ID := WinExist( Win_Title )
+		If ( not Win_ID ) {
+			Return, False
+		}
+		If ( Win_ID = This.Windows_Desktop_ID ) {
+			Return, False
+		}
+		WinGet, Win_Style, Style, ahk_id %Win_ID%
+		If ( Win_Style & 0x20800000 ) { ; 0x800000 is WS_BORDER, 0x20000000 is WS_MINIMIZE, no border and not minimized
+			Return, False
+		}
+		WinGetPos,,, Win_W, Win_H, %Win_Title%
+		If ( Win_H < A_ScreenHeight or Win_W < A_ScreenWidth ) {
+			Return, False
+		}
+		Return, True
 	}
-	WinGet, Win_Style, Style, ahk_id %Win_ID%
-	WinGetPos,,, Win_W, Win_H, %Win_Title%
-	; 0x800000 is WS_BORDER.
-	; 0x20000000 is WS_MINIMIZE.
-	; no border and not minimized
-	Return, ( ( Win_Style & 0x20800000 ) or Win_H < A_ScreenHeight or Win_W < A_ScreenWidth ) ? False : True
 }
+

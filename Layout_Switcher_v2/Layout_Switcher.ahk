@@ -215,8 +215,8 @@ SAVE_CONFIG_FILE:
 
 SWITCH_KEYBOARD_LAYOUT:
 {
-	If WinActive( "ahk_class Shell_TrayWnd" ) {
-		WinActivate, ahk_class Progman ahk_exe Explorer.EXE
+	If WinActive( "ahk_id " Layout.Windows_Tray_ID ) {
+		WinActivate, % "ahk_id " Layout.Windows_Desktop_ID
 		Sleep, 50
 	}
 	If WinExist( "A" ) {
@@ -706,6 +706,9 @@ class Layout
 	
 	static Layouts_List := Layout.Get_Layouts_List()
 	
+	static Windows_Tray_ID := WinExist( "ahk_class Shell_TrayWnd ahk_exe explorer.exe" )
+	static Windows_Desktop_ID := WinExist( "ahk_class WorkerW ahk_exe Explorer.EXE" ) or WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) 
+	
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок
 		static Layouts_List, Layouts_List_Size
@@ -781,11 +784,9 @@ class Layout
 			} else {
 				HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, Window_ID, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
 			}
-			If ( not HKL )
+			If ( not HKL and This.Windows_Desktop_ID )
 			{ ; рабочий стол Windows
-				If ( Window_ID := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) ) {
-					HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, Window_ID, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
-				}
+				HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, This.Windows_Desktop_ID, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
 			}
 			Return, HKL
 		}
@@ -1072,7 +1073,7 @@ Clear_ToolTips:
 class Window
 {
 	static Windows_Tray_ID := WinExist( "ahk_class Shell_TrayWnd" )
-	static Windows_Desktop_ID := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" )
+	static Windows_Desktop_ID := WinExist( "ahk_class WorkerW ahk_exe Explorer.EXE" ) or WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) 
 	
 	Is_Full_Screen( ByRef Win_Title := "A" )
 	{ ; функция проверки полноэкранного режима

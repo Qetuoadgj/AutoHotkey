@@ -605,7 +605,7 @@ Menu_App_Site:
 
 Menu_Generate_Dictionaries:
 {
-	Generate_Dictionaries()
+	Generate_Dictionaries( "dictionary_" )
 	Return
 }
 
@@ -628,7 +628,7 @@ Menu_Exit_App:
 }
 
 Create_Auto_Run_Task( ByRef Task_Name, ByRef Admin_Rights := False )
-{
+{ ; функция создания автозагрузки программы в планировщике Windows
 	static Command
 	Command = "%A_WinDir%\System32\schtasks.exe" /create /TN "%Task_Name%" /TR """"%A_ScriptFullPath%"""" /SC ONLOGON
 	Command .= Admin_Rights ? " /RL HIGHEST /F" : " /F"
@@ -636,14 +636,14 @@ Create_Auto_Run_Task( ByRef Task_Name, ByRef Admin_Rights := False )
 }
 
 Delete_Auto_Run_Task( ByRef Task_Name )
-{
+{ ; функция удаления автозагрузки программы из планировщика Windows
 	static Command
 	Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
 	RunWait, *RunAs %Command%
 }
 
-Generate_Dictionaries()
-{
+Generate_Dictionaries( ByRef Prefix := "" )
+{ ; функция создания словарей для текущих раскладок
 	static Notepad_PID, Notepad_ID, Win_Title, Keys
 	Run, % "notepad.exe /W",,, Notepad_PID
 
@@ -682,7 +682,8 @@ Generate_Dictionaries()
 			}
 			If ( Layout.Get_HKL( Win_Title ) = Layout_Data.HKL )
 			{
-				Dictionary_Name := Layout_Data.Full_Name
+				Dictionary_Name := Prefix . Layout_Data.Full_Name
+				StringLower, Dictionary_Name, Dictionary_Name
 				SendRaw, %Dictionary_Name%=
 				For k, v in Keys {
 					Send, {%v%}

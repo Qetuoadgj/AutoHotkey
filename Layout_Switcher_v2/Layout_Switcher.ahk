@@ -96,7 +96,7 @@ SET_DEFAULTS:
 	key_switch_text_layout := "NumPad2" ;"$~Break"
 	
 	; Text
-	text_title_case_symbols := "(\_|\-|\.|\[|\(|\{)"
+	text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
 	text_title_case_match := "(.)"
 	text_upper_case_words := "(ID\b|PID\b|UI\b|HKL\b|KLID\b)"
 	

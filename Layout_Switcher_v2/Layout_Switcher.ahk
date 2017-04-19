@@ -102,9 +102,9 @@ SET_DEFAULTS:
 	
 	; Dictionaries
 	dictionary_english := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
-	dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
-	dictionary_russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
-	
+	dictionary_russian := "Є1234567890-=йцукенгшщзхъфывапролджэ\\¤чсмитьбю. ®!""є;:?*()_+…?” ?ЌvЎў«’Џ‘џ¬јѕ–ќЋ??Ё//я„—ћ»“№Ѕё,"
+	dictionary_ukrainian := "Є1234567890-=йцукенгшщзхњф?вапролджЇ\і¤чсмитьбю. ®!""є;:?*()_+…?” ?ЌvЎў«’ѓ‘?¬јѕ–ќЋ??™/•я„—ћ»“№Ѕё,"
+
 	Return
 }
 
@@ -154,8 +154,8 @@ READ_CONFIG_FILE:
 
 	; Dictionaries
 	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, %dictionary_english%
-	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
 	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, %dictionary_russian%
+	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
 	
 	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_" )
 	Remove_Unused_Dictionaries()
@@ -207,23 +207,20 @@ SAVE_CONFIG_FILE:
 
 	; Dictionaries
 	IniWrite( "dictionary_english", Config_File, "Dictionaries", dictionary_english )
-	IniWrite( "dictionary_ukrainian", Config_File, "Dictionaries", dictionary_ukrainian )
 	IniWrite( "dictionary_russian", Config_File, "Dictionaries", dictionary_russian )
+	IniWrite( "dictionary_ukrainian", Config_File, "Dictionaries", dictionary_ukrainian )
 	
 	Return
 }
 
 SWITCH_KEYBOARD_LAYOUT:
 {
-	If WinActive( "ahk_id " Layout.Windows_Tray_ID ) {
-		WinActivate, % "ahk_id " Layout.Windows_Desktop_ID
-		Sleep, 50
+	If WinActive( "ahk_id " Windows.Tray_ID ) {
+		WinActivate, % "ahk_id " Windows.Desktop_ID
 	}
-	If WinExist( "A" ) {
-		Layout.Next( "A" )
-		If ( sound_enable and FileExist( sound_switch_keyboard_layout ) ) {
-			SoundPlay, %sound_switch_keyboard_layout%
-		}
+	Layout.Next( "A" )
+	If ( sound_enable and FileExist( sound_switch_keyboard_layout ) ) {
+		SoundPlay, %sound_switch_keyboard_layout%
 	}
 	Sleep, 50
 	Return
@@ -514,6 +511,10 @@ Menu_Toggle_Admin_Rights:
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	system_start_with_admin_rights := not system_start_with_admin_rights
 	IniWrite( "system_start_with_admin_rights", Config_File, "System", system_start_with_admin_rights )
+	If ( system_enable_auto_start ) {
+		Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
+		Create_Auto_Run_Task( Auto_Run_Task_Name, system_start_with_admin_rights )
+	}
 	If ( system_start_with_admin_rights ) {
 		Script.Run_As_Admin()
 	} Else {
@@ -706,9 +707,6 @@ class Layout
 	
 	static Layouts_List := Layout.Get_Layouts_List()
 	
-	static Windows_Tray_ID := WinExist( "ahk_class Shell_TrayWnd ahk_exe explorer.exe" )
-	static Windows_Desktop_ID := WinExist( "ahk_class WorkerW ahk_exe Explorer.EXE" ) or WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) 
-	
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок
 		static Layouts_List, Layouts_List_Size
@@ -771,6 +769,7 @@ class Layout
 	Get_HKL( ByRef Window := "A" )
 	{ ; функция получения названия "HKL" текущей раскладки
 		static HKL
+		static Window_Class
 		If ( Window_ID := WinExist( Window ) ) {
 			WinGetClass, Window_Class
 			If ( Window_Class = "ConsoleWindowClass" ) {
@@ -783,10 +782,6 @@ class Layout
 				HKL := HKL ? "0x" . HKL : 0
 			} else {
 				HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, Window_ID, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
-			}
-			If ( not HKL and This.Windows_Desktop_ID )
-			{ ; рабочий стол Windows
-				HKL := DllCall( "GetKeyboardLayout", Ptr, DllCall( "GetWindowThreadProcessId", Ptr, This.Windows_Desktop_ID, UInt, 0, Ptr ), Ptr ) ; & 0xFFFF
 			}
 			Return, HKL
 		}
@@ -1072,9 +1067,6 @@ Clear_ToolTips:
 
 class Window
 {
-	static Windows_Tray_ID := WinExist( "ahk_class Shell_TrayWnd" )
-	static Windows_Desktop_ID := WinExist( "ahk_class WorkerW ahk_exe Explorer.EXE" ) or WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) 
-	
 	Is_Full_Screen( ByRef Win_Title := "A" )
 	{ ; функция проверки полноэкранного режима
 		static Win_ID
@@ -1082,7 +1074,7 @@ class Window
 		If ( not Win_ID ) {
 			Return, False
 		}
-		If ( Win_ID = This.Windows_Desktop_ID ) {
+		If ( Win_ID = Windows.Desktop_ID ) {
 			Return, False
 		}
 		WinGet, Win_Style, Style, ahk_id %Win_ID%
@@ -1094,6 +1086,29 @@ class Window
 			Return, False
 		}
 		Return, True
+	}
+}
+
+class Windows
+{ ; получение информации о Windows
+	static Tray_ID := Windows.Get_Tray_ID() ; ID системного трея Windows
+	static Desktop_ID := Windows.Get_Desktop_ID() ; ID рабочего стола Windows
+	
+	Get_Tray_ID()
+	{ ; функция получения ID системного трея Windows
+		static ID
+		ID := WinExist( "ahk_class Shell_TrayWnd" )
+		Return, ID
+	}
+	
+	Get_Desktop_ID()
+	{ ; функция получения ID рабочего стола Windows
+		static ID
+		ID := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) ;
+		if ( not ID ) {
+			ID := WinExist( "ahk_class WorkerW ahk_exe Explorer.EXE" )
+		}
+		Return, ID
 	}
 }
 

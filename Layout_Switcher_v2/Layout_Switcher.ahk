@@ -102,8 +102,8 @@ SET_DEFAULTS:
 	
 	; Dictionaries
 	dictionary_english := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
-	dictionary_russian := "™1234567890-=йцукенгшщзхъфывапролджэ\\§чсмитьбю. Ѓ!""Ї;:?*()_+Е?Ф†?Нv°ҐЂТПСЯђЉЊЦЭО??®//€ДЧЮїУєљЄ,"
-	dictionary_ukrainian := "™1234567890-=йцукенгшщзхЬф?вапролджѓ\≥§чсмитьбю. Ѓ!""Ї;:?*()_+Е?Ф†?Нv°ҐЂТГС?ђЉЊЦЭО??Щ/Х€ДЧЮїУєљЄ,"
+	dictionary_ukrainian := "Є1234567890-=йцукенгшщзхњф≥вапролджЇ\і€чсмитьбю. ®!""є;:?*()_+…÷” ≈Ќ√Ўў«’ѓ‘≤¬јѕ–ќЋƒ∆™/•я„—ћ»“№Ѕё,"
+	dictionary_russian := "Є1234567890-=йцукенгшщзхъфывапролджэ\\€чсмитьбю. ®!""є;:?*()_+…÷” ≈Ќ√Ўў«’Џ‘џ¬јѕ–ќЋƒ∆Ё//я„—ћ»“№Ѕё,"
 
 	Return
 }
@@ -154,8 +154,8 @@ READ_CONFIG_FILE:
 
 	; Dictionaries
 	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, %dictionary_english%
-	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, %dictionary_russian%
 	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
+	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, %dictionary_russian%
 	
 	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_" )
 	Remove_Unused_Dictionaries()
@@ -207,8 +207,8 @@ SAVE_CONFIG_FILE:
 
 	; Dictionaries
 	IniWrite( "dictionary_english", Config_File, "Dictionaries", dictionary_english )
-	IniWrite( "dictionary_russian", Config_File, "Dictionaries", dictionary_russian )
 	IniWrite( "dictionary_ukrainian", Config_File, "Dictionaries", dictionary_ukrainian )
+	IniWrite( "dictionary_russian", Config_File, "Dictionaries", dictionary_russian )
 	
 	Return
 }
@@ -1043,12 +1043,12 @@ class Script
 
 IniWrite( ByRef Key, ByRef File, ByRef Section, ByRef Value )
 { ; замена стандартонго IniWrite (записывает только измененные параметры)
-	if (not File) {
+	If ( not File ) {
 		Return
 	}
 	Value := Value = "ERROR" ? "" : Value
 	IniRead, Test_Value, %File%, %Section%, %Key%
-	If (not Test_Value = Value) {
+	If ( not Test_Value = Value ) {
 		IniWrite, %Value%, %File%, %Section%, %Key%
 	}
 }
@@ -1106,7 +1106,7 @@ class Windows
 	{ ; функци€ получени€ ID рабочего стола Windows
 		static ID
 		ID := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) ;
-		if ( not ID ) {
+		If ( not ID ) {
 			ID := WinExist( "ahk_class WorkerW ahk_exe Explorer.EXE" )
 		}
 		Return, ID

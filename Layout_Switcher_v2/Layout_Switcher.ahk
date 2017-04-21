@@ -98,7 +98,7 @@ SET_DEFAULTS:
 	; Text
 	text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
 	text_title_case_match := "(.)"
-	text_upper_case_words := "(ID\b|PID\b|UI\b|HKL\b|KLID\b)"
+	text_upper_case_words := "(ID\b|PID\b|UI\b|HKL\b|KLID\b|AI\b)"
 	
 	; Dictionaries
 	dictionary_english := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
@@ -827,11 +827,11 @@ class Layout
 
 class Edit_Text
 { ; функции получения / обработки текста
-	static Ctrl_C := "^{vk43}"
-	static Ctrl_V := "^{vk56}"
-	static Select_Left := "^+{Left}"
-	static Select_Right := "^+{Right}"
-	static Select_No_Space := "^+{Right 2}" . "^+{Left}"
+	static Ctrl_C := "^{vk43}" . "{Ctrl Up}"
+	static Ctrl_V := "^{vk56}" . "{Ctrl Up}"
+	static Select_Left := "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
+	static Select_Right := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}"
+	static Select_No_Space := "^+{Right 2}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 
 	static Title_Case_Symbols := "(\_|\-|\.|\[|\(|\{)"
 	static Title_Case_Match := "(.)"

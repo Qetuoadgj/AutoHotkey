@@ -228,8 +228,8 @@ SWITCH_KEYBOARD_LAYOUT:
 
 SWITCH_TEXT_CASE:
 {
-	Clipboard = ; Null
-	Sleep, 50
+	; Clipboard = ; Null
+	; Sleep, 50
 	If ( Selected_Text := Edit_Text.Select() ) {
 		Converted_Text := Edit_Text.Convert_Case( Selected_Text, false )
 		Edit_Text.Paste( Converted_Text )
@@ -243,8 +243,8 @@ SWITCH_TEXT_CASE:
 
 SWITCH_TEXT_LAYOUT:
 {
-	Clipboard = ; Null
-	Sleep, 50
+	; Clipboard = ; Null
+	; Sleep, 50
 	If ( Selected_Text := Edit_Text.Select() ) {
 		Selected_Text_Dictionary := Edit_Text.Dictionary( Selected_Text )
 		If ( not Selected_Text_Dictionary ) {

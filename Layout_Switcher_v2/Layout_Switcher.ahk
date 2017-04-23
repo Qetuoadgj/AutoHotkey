@@ -853,13 +853,13 @@ class Edit_Text
 				{ ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					Return
 				}
+				If ( StrLen( Clipboard ) = StrLen( Selected_Text ) ) {
+					Break
+				}
 				If RegExMatch( Clipboard, "\s" ) {
 					Clipboard = ; Null
 					SendInput, % This.Select_No_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
 					ClipWait, 0.5
-					Break
-				}
-				If ( StrLen( Clipboard ) = StrLen( Selected_Text ) ) {
 					Break
 				}
 				Selected_Text := Clipboard

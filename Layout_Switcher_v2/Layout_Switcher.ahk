@@ -102,8 +102,8 @@ SET_DEFAULTS:
 	
 	; Dictionaries
 	dictionary_english := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
-	dictionary_ukrainian := "¸1234567890-=éöóêåíãøùçõ¿ô³âàïğîëäæº\´ÿ÷ñìèòüáş. ¨!""¹;:?*()_+ÉÖÓÊÅÍÃØÙÇÕ¯Ô²ÂÀÏĞÎËÄÆª/¥ß×ÑÌÈÒÜÁŞ,"
 	dictionary_russian := "¸1234567890-=éöóêåíãøùçõúôûâàïğîëäæı\\ÿ÷ñìèòüáş. ¨!""¹;:?*()_+ÉÖÓÊÅÍÃØÙÇÕÚÔÛÂÀÏĞÎËÄÆİ//ß×ÑÌÈÒÜÁŞ,"
+	dictionary_ukrainian := "¸1234567890-=éöóêåíãøùçõ¿ô³âàïğîëäæº\´ÿ÷ñìèòüáş. ¨!""¹;:?*()_+ÉÖÓÊÅÍÃØÙÇÕ¯Ô²ÂÀÏĞÎËÄÆª/¥ß×ÑÌÈÒÜÁŞ,"
 
 	Return
 }
@@ -154,8 +154,8 @@ READ_CONFIG_FILE:
 
 	; Dictionaries
 	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, %dictionary_english%
-	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
 	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, %dictionary_russian%
+	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
 	
 	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_" )
 	Remove_Unused_Dictionaries()
@@ -207,8 +207,8 @@ SAVE_CONFIG_FILE:
 
 	; Dictionaries
 	IniWrite( "dictionary_english", Config_File, "Dictionaries", dictionary_english )
-	IniWrite( "dictionary_ukrainian", Config_File, "Dictionaries", dictionary_ukrainian )
 	IniWrite( "dictionary_russian", Config_File, "Dictionaries", dictionary_russian )
+	IniWrite( "dictionary_ukrainian", Config_File, "Dictionaries", dictionary_ukrainian )
 	
 	Return
 }
@@ -820,6 +820,7 @@ class Edit_Text
 	static Ctrl_V := "^{vk56}" . "{Ctrl Up}"
 	static Select_Left := "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 	static Select_Right := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}"
+	static Select_No_Starting_Space := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 	static Select_No_Space := "^+{Right 2}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 
 	static Title_Case_Symbols := "(\_|\-|\.|\[|\(|\{)"
@@ -829,8 +830,8 @@ class Edit_Text
 	static Next_Case_ID := "U"
 	
 	static Dictionaries := {}
-	static Dictionaries.Russian := "¸1234567890-=éöóêåíãøùçõúôûâàïğîëäæı\\ÿ÷ñìèòüáş. ¨!""¹;%:?*()_+ÉÖÓÊÅÍÃØÙÇÕÚÔÛÂÀÏĞÎËÄÆİ//ß×ÑÌÈÒÜÁŞ,"
 	static Dictionaries.English := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
+	static Dictionaries.Russian := "¸1234567890-=éöóêåíãøùçõúôûâàïğîëäæı\\ÿ÷ñìèòüáş. ¨!""¹;%:?*()_+ÉÖÓÊÅÍÃØÙÇÕÚÔÛÂÀÏĞÎËÄÆİ//ß×ÑÌÈÒÜÁŞ,"
 	static Dictionaries.Ukrainian := "¸1234567890-=éöóêåíãøùçõ¿ô³âàïğîëäæº\´ÿ÷ñìèòüáş. ¨!""¹;%:?*()_+ÉÖÓÊÅÍÃØÙÇÕ¯Ô²ÂÀÏĞÎËÄÆª/¥ß×ÑÌÈÒÜÁŞ,"
 	
 	Select()
@@ -856,7 +857,12 @@ class Edit_Text
 				If ( StrLen( Clipboard ) = StrLen( Selected_Text ) ) {
 					Break
 				}
-				If RegExMatch( Clipboard, "\s" ) {
+				If RegExMatch( Clipboard, "^\s.+" ) {
+					Clipboard = ; Null
+					SendInput, % This.Select_No_Starting_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
+					ClipWait, 0.5
+					Break
+				} Else If RegExMatch( Clipboard, "\s" ) {
 					Clipboard = ; Null
 					SendInput, % This.Select_No_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
 					ClipWait, 0.5

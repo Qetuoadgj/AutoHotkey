@@ -9,6 +9,8 @@ Script_Name := Script.Name()
 Config_File := A_ScriptDir "\" "Layout_Switcher" ".ini"
 Auto_Run_Task_Name := "CustomTasks" "\" "Layout_Switcher" ; Script_Name
 
+Clipboard_Tmp = ; Null
+
 CreateLocalization:
 {
 	Translation_Language := Layout.Language_Name( "0x" . A_Language, true )
@@ -163,7 +165,9 @@ READ_CONFIG_FILE:
 	
 	Get_Binds( Config_File, "HotKeys", "key_" )
 	
-	system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
+	If ( system_enable_auto_start ) {
+		system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
+	}
 	
 	Return
 }
@@ -231,8 +235,8 @@ SWITCH_KEYBOARD_LAYOUT:
 
 SWITCH_TEXT_CASE:
 {
-	; Clipboard = ; Null
-	; Sleep, 50
+	Clipboard_Tmp = ; Null
+	Clipboard_Tmp := Clipboard
 	If ( Selected_Text := Edit_Text.Select() ) {
 		Converted_Text := Edit_Text.Convert_Case( Selected_Text, false )
 		Edit_Text.Paste( Converted_Text )
@@ -241,13 +245,16 @@ SWITCH_TEXT_CASE:
 		}
 	}
 	Sleep, 50
+	Clipboard = ; Null
+	Clipboard := Clipboard_Tmp
+	ClipWait, 0.05
 	Return
 }
 
 SWITCH_TEXT_LAYOUT:
 {
-	; Clipboard = ; Null
-	; Sleep, 50
+	Clipboard_Tmp = ; Null
+	Clipboard_Tmp := Clipboard
 	If ( Selected_Text := Edit_Text.Select() ) {
 		Selected_Text_Dictionary := Edit_Text.Dictionary( Selected_Text )
 		If ( not Selected_Text_Dictionary ) {
@@ -272,6 +279,9 @@ SWITCH_TEXT_LAYOUT:
 		}
 	}
 	Sleep, 50
+	Clipboard = ; Null
+	Clipboard := Clipboard_Tmp
+	ClipWait, 0.05
 	Return
 }
 

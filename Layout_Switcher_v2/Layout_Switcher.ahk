@@ -165,9 +165,9 @@ READ_CONFIG_FILE:
 	
 	Get_Binds( Config_File, "HotKeys", "key_" )
 	
-	If ( system_enable_auto_start ) {
-		system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
-	}
+	; If ( system_enable_auto_start ) {
+		; system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
+	; }
 	
 	Return
 }
@@ -442,7 +442,7 @@ FLAG_Customize_Menus:
 	}
 
 	Menu, Tray, Add, %l_system_enable_auto_start%, Menu_Toggle_Auto_Start
-	If ( system_enable_auto_start ) {
+	If ( system_enable_auto_start and Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath ) ) {
 		Menu, Tray, Check, %l_system_enable_auto_start%
 	}
 	

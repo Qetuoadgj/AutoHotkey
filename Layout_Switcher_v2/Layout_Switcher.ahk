@@ -7,6 +7,7 @@ Script.Force_Single_Instance()
 
 Script_Name := Script.Name()
 Config_File := A_ScriptDir "\" "Layout_Switcher" ".ini"
+Auto_Run_Task_Name := "CustomTasks" "\" "Layout_Switcher" ; Script_Name
 
 CreateLocalization:
 {
@@ -161,6 +162,8 @@ READ_CONFIG_FILE:
 	Remove_Unused_Dictionaries()
 	
 	Get_Binds( Config_File, "HotKeys", "key_" )
+	
+	system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
 	
 	Return
 }
@@ -501,7 +504,7 @@ Menu_Toggle_Auto_Start:
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	system_enable_auto_start := not system_enable_auto_start
 	IniWrite( "system_enable_auto_start", Config_File, "System", system_enable_auto_start )
-	Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
+	; Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
 	If ( system_enable_auto_start ) {
 		Task_Sheduler.Create_Auto_Run_Task( Auto_Run_Task_Name, system_start_with_admin_rights, True )
 	} Else {
@@ -516,7 +519,7 @@ Menu_Toggle_Admin_Rights:
 	system_start_with_admin_rights := not system_start_with_admin_rights
 	IniWrite( "system_start_with_admin_rights", Config_File, "System", system_start_with_admin_rights )
 	If ( system_enable_auto_start ) {
-		Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
+		; Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
 		Task_Sheduler.Create_Auto_Run_Task( Auto_Run_Task_Name, system_start_with_admin_rights, True )
 	}
 	If ( system_start_with_admin_rights ) {
@@ -854,15 +857,26 @@ class Edit_Text
 				{ ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					Return
 				}
-				If ( StrLen( Clipboard ) = StrLen( Selected_Text ) ) {
+				Else If ( StrLen( Clipboard ) = StrLen( Selected_Text ) )
+				{ ; достигнуто начало строки
 					Break
 				}
-				If RegExMatch( Clipboard, "^\s.+" ) {
+				Else If RegExMatch( Clipboard, "[\r\n]" )
+				{ ; в выделение попал перенос на новую строку
 					Clipboard = ; Null
-					SendInput, % This.Select_No_Starting_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
+					SendInput, % This.Select_No_Space . This.Ctrl_C
 					ClipWait, 0.5
 					Break
-				} Else If RegExMatch( Clipboard, "\s" ) {
+				}
+				Else If RegExMatch( Clipboard, "^\s.+" )
+				{ ; строка начинается с пробела
+					Clipboard = ; Null
+					SendInput, % This.Select_No_Starting_Space . This.Ctrl_C
+					ClipWait, 0.5
+					Break
+				}
+				Else If RegExMatch( Clipboard, "\s" )
+				{ ; в выделение попал пробел
 					Clipboard = ; Null
 					SendInput, % This.Select_No_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
 					ClipWait, 0.5
@@ -1110,6 +1124,9 @@ class Windows
 
 class Task_Sheduler
 {
+	static Tasks_Dir := A_WinDir . "\System32\Tasks"
+	static Tasks_Dir_Lenght := StrLen( Task_Sheduler.Tasks_Dir . "\" )
+	
 	/*
 	Create_Auto_Run_Task( ByRef Task_Name, ByRef Admin_Rights := False )
 	{ ; функция создания автозагрузки программы в планировщике Windows
@@ -1223,6 +1240,34 @@ class Task_Sheduler
 		XML_Text := RegExReplace( XML_Text, "m)^\t{2}", "" )
 		
 		FileAppend, %XML_Text%, %Task_XML%
+	}
+	
+	Task_Exists( ByRef Task_Name, ByRef Command := 0 )
+	{
+		static Task_File
+		static Task_Command
+		Task_File := This.Tasks_Dir "\" RegExReplace( Task_Name, "^\\", "" )
+		If FileExist( Task_File ) {
+			If ( Command ) {
+				Loop, Read, %Task_File%
+				{
+					Loop, Parse, A_LoopReadLine, `n, `r
+					{
+						Task_Full_Name := SubStr( A_LoopFileFullPath, This.Tasks_Dir_Lenght )
+						If RegExMatch( A_LoopReadLine, ".*<Command>(.*?)<\/Command>", Match) {
+							Task_Command := Trim( Match1, """" )
+							; MsgBox, % Task_Command
+							If ( Task_Command = Command ) {
+								Return, True
+							}
+						}
+					}
+				}
+			} Else {
+				Return, True
+			}
+		}
+		Return, False
 	}
 }
 

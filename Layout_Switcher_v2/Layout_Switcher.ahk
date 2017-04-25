@@ -26,6 +26,7 @@ CreateLocalization:
 	IniRead, l_system_start_with_admin_rights, %Translation_File%, System, system_start_with_admin_rights, % "Admin Rights"
 	; IniRead, l_system_encoding_compatibility_mode, %Translation_File%, System, system_encoding_compatibility_mode, % "Encoding Compatibility Mode"
 	IniRead, l_system_show_tray_icon, %Translation_File%, System, system_show_tray_icon, % "Show Tray Icon"
+	IniRead, l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
 
 	; Flag
 	IniRead, l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
@@ -76,6 +77,7 @@ SET_DEFAULTS:
 	system_detect_dictionary := 1
 	; system_encoding_compatibility_mode := 0
 	system_show_tray_icon := 1
+	system_skip_unused_dictionaries := 1
 	
 	; Flag
 	flag_width := 32
@@ -124,7 +126,8 @@ READ_CONFIG_FILE:
 	IniRead, system_detect_dictionary, %Config_File%, System, system_detect_dictionary, %system_detect_dictionary%
 	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, %system_encoding_compatibility_mode%
 	IniRead, system_show_tray_icon, %Config_File%, System, system_show_tray_icon, %system_show_tray_icon%
-
+	IniRead, system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, %system_skip_unused_dictionaries%
+	
 	; Flag
 	IniRead, flag_width, %Config_File%, Flag, flag_width, %flag_width%
 	IniRead, flag_height, %Config_File%, Flag, flag_height, %flag_height%
@@ -160,8 +163,12 @@ READ_CONFIG_FILE:
 	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, %dictionary_russian%
 	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
 	
-	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_", True )
+	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_", system_skip_unused_dictionaries )
 	; Remove_Unused_Dictionaries()
+	
+	; For k,v in Edit_Text.Dictionaries_Order {
+		; MsgBox, % v
+	; }
 	
 	Get_Binds( Config_File, "HotKeys", "key_" )
 	
@@ -185,6 +192,7 @@ SAVE_CONFIG_FILE:
 	IniWrite( "system_detect_dictionary", Config_File, "System", system_detect_dictionary )
 	; IniWrite( "system_encoding_compatibility_mode", Config_File, "System", system_encoding_compatibility_mode )
 	IniWrite( "system_show_tray_icon", Config_File, "System", system_show_tray_icon )
+	IniWrite( "system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries )
 
 	; Flag
 	IniWrite( "flag_width", Config_File, "Flag", flag_width )
@@ -319,7 +327,6 @@ SWITCH_TEXT_LAYOUT:
 				ToolTip( Next_Dictionary_Name )
 			}
 		}
-		; MsgBox, % Selected_Text_Dictionary
 		If ( sound_enable and FileExist( sound_switch_text_layout ) )
 		{
 			SoundPlay, %sound_switch_text_layout%
@@ -351,7 +358,9 @@ Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Sk
 			}
 			IniRead, Value, %Config_File%, %Section%, % Prefix . Key
 			Edit_Text.Dictionaries[Key] := Value
-			Edit_Text.Dictionaries_Order.Push( Key )
+			If not In_Array( Edit_Text.Dictionaries_Order, Key ) {
+				Edit_Text.Dictionaries_Order.Push( Key )
+			}
 			; MsgBox, % Prefix . Key "`n" Value
 		}
 	}
@@ -521,6 +530,13 @@ FLAG_Customize_Menus:
 	
 	Menu, Tray, Add
 	
+	Menu, Tray, Add, %l_system_skip_unused_dictionaries%, Menu_Toggle_Skip_Unused_Dictionaries
+	If ( system_skip_unused_dictionaries ) {
+		Menu, Tray, Check, %l_system_skip_unused_dictionaries%
+	}
+	
+	Menu, Tray, Add
+	
 	Menu, Tray, Add, %l_flag_show_borders%, Menu_Toggle_Show_Borders
 	If ( flag_show_borders ) {
 		Menu, Tray, Check, %l_flag_show_borders%
@@ -613,6 +629,14 @@ Menu_Toggle_Sound:
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	sound_enable := not sound_enable
 	IniWrite( "sound_enable", Config_File, "Sound", sound_enable )
+	Return
+}
+
+Menu_Toggle_Skip_Unused_Dictionaries:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	system_skip_unused_dictionaries := not system_skip_unused_dictionaries
+	IniWrite( "system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries )
 	Return
 }
 
@@ -1401,4 +1425,21 @@ class Table
 		}
 		Return, Index
 	}
+}
+
+In_Array( ByRef Array, ByRef Value )
+{ ; функция проверки наличия значения во множестве
+	static k, v
+	If ( not isObject( Array ) ) {
+		Return, False
+	}
+	If ( Array.Length() == 0 ) {
+		Return, False
+	}
+	For k, v in Array {
+		If ( v == Value ) {
+			Return, True
+		}
+	}
+	Return, False
 }

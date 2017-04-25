@@ -952,25 +952,25 @@ class Edit_Text
 				{ ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					Return
 				}
-				Else If ( StrLen( Clipboard ) = StrLen( Selected_Text ) )
+				If ( StrLen( Clipboard ) = StrLen( Selected_Text ) )
 				{ ; достигнуто начало строки
 					Break
 				}
-				Else If RegExMatch( Clipboard, "[\r\n]" )
+				If RegExMatch( Clipboard, "[\r\n]" )
 				{ ; в выделение попал перенос на новую строку
 					Clipboard = ; Null
 					SendInput, % This.Select_No_Space . This.Ctrl_C
 					ClipWait, 0.5
 					Break
 				}
-				Else If RegExMatch( Clipboard, "^\s.+" )
+				If RegExMatch( Clipboard, "^\s.+" )
 				{ ; строка начинается с пробела
 					Clipboard = ; Null
 					SendInput, % This.Select_No_Starting_Space . This.Ctrl_C
 					ClipWait, 0.5
 					Break
 				}
-				Else If RegExMatch( Clipboard, "\s" )
+				If RegExMatch( Clipboard, "\s" )
 				{ ; в выделение попал пробел
 					Clipboard = ; Null
 					SendInput, % This.Select_No_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
@@ -1043,7 +1043,10 @@ class Edit_Text
 			Loop, Parse, Selected_Text
 			{
 				Same_Dictionary := InStr( Dictionary, A_LoopField, 1 ) or RegExMatch( A_LoopField, "\s" )
-			} Until not Same_Dictionary
+				If ( not Same_Dictionary ) {
+					Break
+				}
+			} ; Until not Same_Dictionary
 			If ( Same_Dictionary ) {
 				Return, Language
 			}

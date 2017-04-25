@@ -266,22 +266,22 @@ SWITCH_TEXT_LAYOUT:
 	Clipboard_Tmp := Clipboard
 	If ( Selected_Text := Edit_Text.Select() ) {
 		Selected_Text_Dictionary := Edit_Text.Dictionary( Selected_Text )
-		If ( not Selected_Text_Dictionary ) {
+		If ( Selected_Text_Dictionary ) {
+			Text_Layout_Index := Layout.Get_Index_By_Name( Selected_Text_Dictionary )
+		} Else {
 			Text_Layout_Index := Layout.Get_Index( Layout.Get_HKL( "A" ) )
 			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
-		} Else {
-			Text_Layout_Index := Layout.Get_Index_By_Name( Selected_Text_Dictionary )
 		}
 		If ( Text_Layout_Index ) {
 			Next_Layout_Index := Text_Layout_Index + 1 > Layout.Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
 			Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
 			Converted_Text := Edit_Text.Replace_By_Dictionaries( Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name )
 			Edit_Text.Paste( Converted_Text )
-			Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
-			Layout.Change( Next_Layout_HKL )
-			
-			Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
-			ToolTip( Next_Layout_Full_Name " - " Next_Layout_Display_Name )
+			If ( Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL ) {
+				Layout.Change( Next_Layout_HKL )
+				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
+				ToolTip( Next_Layout_Full_Name " - " Next_Layout_Display_Name )
+			}
 		}
 		If ( sound_enable and FileExist( sound_switch_text_layout ) ) {
 			SoundPlay, %sound_switch_text_layout%
@@ -1356,7 +1356,7 @@ class Task_Sheduler
 	}
 	
 	Task_Exists( ByRef Task_Name, ByRef Command := 0 )
-	{
+	{ ; функция проверки наличия задания в планировщике
 		static Task_File
 		static Task_Command
 		Task_File := This.Tasks_Dir "\" RegExReplace( Task_Name, "^\\", "" )

@@ -160,8 +160,8 @@ READ_CONFIG_FILE:
 	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, %dictionary_russian%
 	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
 	
-	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_" )
-	Remove_Unused_Dictionaries()
+	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_", True )
+	; Remove_Unused_Dictionaries()
 	
 	Get_Binds( Config_File, "HotKeys", "key_" )
 	
@@ -251,6 +251,7 @@ SWITCH_TEXT_CASE:
 	Return
 }
 
+/*
 SWITCH_TEXT_LAYOUT:
 {
 	Clipboard_Tmp = ; Null
@@ -284,40 +285,94 @@ SWITCH_TEXT_LAYOUT:
 	ClipWait, 0.05
 	Return
 }
+*/
 
-Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "" )
+SWITCH_TEXT_LAYOUT:
 {
+	Clipboard_Tmp = ; Null
+	Clipboard_Tmp := Clipboard
+	If ( Selected_Text := Edit_Text.Select() )
+	{
+		Selected_Text_Dictionary := Edit_Text.Dictionary( Selected_Text )
+		If ( not Selected_Text_Dictionary )
+		{
+			Text_Layout_Index := Layout.Get_Index( Layout.Get_HKL( "A" ) )
+			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
+		}
+		If ( Selected_Text_Dictionary )
+		{			
+			Text_Dictionary_Index := Table.Get_Key_Index( Edit_Text.Dictionaries_Order, Selected_Text_Dictionary )
+			Next_Dictionary_Index := Text_Dictionary_Index + 1 > Edit_Text.Dictionaries_Order.MaxIndex() ? 1 : Text_Dictionary_Index + 1
+			Next_Dictionary_Name := Edit_Text.Dictionaries_Order[Next_Dictionary_Index]
+						
+			Converted_Text := Edit_Text.Replace_By_Dictionaries( Selected_Text, Selected_Text_Dictionary, Next_Dictionary_Name )
+			Edit_Text.Paste( Converted_Text )
+			
+			If ( Next_Layout_Index :=  Layout.Get_Index_By_Name( Next_Dictionary_Name ) )
+			{
+				Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
+				Layout.Change( Next_Layout_HKL )
+				Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
+				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
+				ToolTip( Next_Layout_Full_Name " - " Next_Layout_Display_Name )
+			} Else {
+				ToolTip( Next_Dictionary_Name )
+			}
+		}
+		; MsgBox, % Selected_Text_Dictionary
+		If ( sound_enable and FileExist( sound_switch_text_layout ) )
+		{
+			SoundPlay, %sound_switch_text_layout%
+		}
+	}
+	Sleep, 50
+	Clipboard = ; Null
+	Clipboard := Clipboard_Tmp
+	ClipWait, 0.05
+	Return
+}
+
+Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Skip_Unused := False )
+{ ; функция получения словарей из файла настроек
 	static Dictionaries_List
 	static Match
 	static Key
 	static Value
 	IniRead, Dictionaries_List, %Config_File%, %Section%
+	Edit_Text.Dictionaries := {}
+	Edit_Text.Dictionaries_Order := []
 	Loop, Parse, Dictionaries_List, `n, `r
 	{
 		If ( RegExMatch( A_LoopField, Prefix . "(.*?)=(.*)", Match ) ) {
 			Key := Trim( Match1 )
-			If ( Layout.Get_Index_By_Name( Key ) ) {
-				IniRead, Value, %Config_File%, %Section%, % Prefix . Key
-				Edit_Text.Dictionaries[Key] := Value
-				; MsgBox, % Prefix . Key "`n" Value
+			If ( Skip_Unused and not Layout.Get_Index_By_Name( Key ) )
+			{ ; пропуск словарей, для которых нет раскладки
+				Continue
 			}
+			IniRead, Value, %Config_File%, %Section%, % Prefix . Key
+			Edit_Text.Dictionaries[Key] := Value
+			Edit_Text.Dictionaries_Order.Push( Key )
+			; MsgBox, % Prefix . Key "`n" Value
 		}
 	}
 }
 
+/*
 Remove_Unused_Dictionaries()
-{
+{ ; функция удаления словарей, для которых нет раскладки
 	static Dictionary_Name
 	For Dictionary_Name in Edit_Text.Dictionaries {
 		If ( not Layout.Get_Index_By_Name( Dictionary_Name ) ) {
 			Edit_Text.Dictionaries.Delete( Dictionary_Name )
+			Edit_Text.Dictionaries_Order.Delete( Table.Get_Key_Index( Edit_Text.Dictionaries_Order, Dictionary_Name ) )
 			; MsgBox, % Dictionary_Name
 		}
 	}
 }
+*/
 
 Get_Binds( ByRef Config_File, ByRef Section, ByRef Prefix := ""  )
-{
+{ ; функция получения назначений клавиш из файла настроек
 	IniRead, Binds_List, %Config_File%, %Section%
 	Loop, Parse, Binds_List, `n, `r
 	{
@@ -847,6 +902,8 @@ class Edit_Text
 	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	
+	static Dictionaries_Order := ["English", "Russian", "Ukrainian"]
+	
 	Select()
 	{ ; функция получения выделенного текста либо выделения текста влево до первого пробела
 		static Selected_Text
@@ -1003,6 +1060,21 @@ class Edit_Text
 		; -----------------------------------------------------------------------------------
 		Return, Clipboard
 	}
+	
+	/*
+	Get_Index_By_Name( Byref Name )
+	{ ; функция получения порядкового номера словаря по полному имени ( "English" )
+		static Index, Dictionary
+		Index := 1
+		For Dictionary in This.Dictionaries
+		{
+			If ( Dictionary = Name ) {
+				Return, Index
+			}
+			Index += 1
+		}
+	}
+	*/
 }
 
 class Script
@@ -1281,3 +1353,52 @@ class Task_Sheduler
 	}
 }
 
+class Table
+{
+	Get_Key_Index( ByRef Table, ByRef Key_Name )
+	{ ; функция получения порядкового номера ключа по его имени
+		static Key, Index
+		If not isObject( Table ) {
+			Return
+		}
+		For Key in Table
+		{
+			If ( Key = Key_Name ) {
+				Return, A_Index
+			}
+		}
+		For Index, Key in Table
+		{
+			If ( Key = Key_Name ) {
+				Return, A_Index
+			}
+		}
+	}
+	
+	Get_Key_Name( ByRef Table, ByRef Index )
+	{ ; функция получения имени ключа словаря по порядковому номеру
+		static Key
+		If not isObject( Table ) {
+			Return
+		}
+		For Key in Table
+		{
+			If ( A_Index = Index ) {
+				Return, Key
+			}
+		}
+	}
+	
+	Max_Index( ByRef Table )
+	{
+		static Key, Index
+		If not isObject( Table ) {
+			Return
+		}
+		For Key in Table
+		{
+			Index := A_Index
+		}
+		Return, Index
+	}
+}

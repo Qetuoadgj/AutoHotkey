@@ -259,7 +259,7 @@ SWITCH_TEXT_CASE:
 	Return
 }
 
-/*
+; /*
 SWITCH_TEXT_LAYOUT:
 {
 	Clipboard_Tmp = ; Null
@@ -293,8 +293,9 @@ SWITCH_TEXT_LAYOUT:
 	ClipWait, 0.05
 	Return
 }
-*/
+; */
 
+/*
 SWITCH_TEXT_LAYOUT:
 {
 	Clipboard_Tmp = ; Null
@@ -312,6 +313,8 @@ SWITCH_TEXT_LAYOUT:
 			Text_Dictionary_Index := Table.Get_Key_Index( Edit_Text.Dictionaries_Order, Selected_Text_Dictionary )
 			Next_Dictionary_Index := Text_Dictionary_Index + 1 > Edit_Text.Dictionaries_Order.MaxIndex() ? 1 : Text_Dictionary_Index + 1
 			Next_Dictionary_Name := Edit_Text.Dictionaries_Order[Next_Dictionary_Index]
+			
+			MsgBox, % Selected_Text_Dictionary "`n" Next_Dictionary_Name
 						
 			Converted_Text := Edit_Text.Replace_By_Dictionaries( Selected_Text, Selected_Text_Dictionary, Next_Dictionary_Name )
 			Edit_Text.Paste( Converted_Text )
@@ -338,6 +341,7 @@ SWITCH_TEXT_LAYOUT:
 	ClipWait, 0.05
 	Return
 }
+*/
 
 Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Skip_Unused := False )
 { ; функция получения словарей из файла настроек
@@ -347,7 +351,7 @@ Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Sk
 	static Value
 	IniRead, Dictionaries_List, %Config_File%, %Section%
 	Edit_Text.Dictionaries := {}
-	Edit_Text.Dictionaries_Order := []
+	; Edit_Text.Dictionaries_Order := []
 	Loop, Parse, Dictionaries_List, `n, `r
 	{
 		If ( RegExMatch( A_LoopField, Prefix . "(.*?)=(.*)", Match ) ) {
@@ -358,9 +362,9 @@ Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Sk
 			}
 			IniRead, Value, %Config_File%, %Section%, % Prefix . Key
 			Edit_Text.Dictionaries[Key] := Value
-			If not In_Array( Edit_Text.Dictionaries_Order, Key ) {
-				Edit_Text.Dictionaries_Order.Push( Key )
-			}
+			; If not In_Array( Edit_Text.Dictionaries_Order, Key ) {
+				; Edit_Text.Dictionaries_Order.Push( Key )
+			; }
 			; MsgBox, % Prefix . Key "`n" Value
 		}
 	}
@@ -926,7 +930,7 @@ class Edit_Text
 	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	
-	static Dictionaries_Order := ["English", "Russian", "Ukrainian"]
+	; static Dictionaries_Order := ["English", "Russian", "Ukrainian"]
 	
 	Select()
 	{ ; функция получения выделенного текста либо выделения текста влево до первого пробела
@@ -944,7 +948,7 @@ class Edit_Text
 				Clipboard = ; Null
 				SendInput, % This.Select_Left . This.Ctrl_C
 				ClipWait, 0.5
-				If ( not Clipboard )
+				If ( StrLen( Clipboard ) = 0 )
 				{ ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					Return
 				}
@@ -1377,6 +1381,7 @@ class Task_Sheduler
 	}
 }
 
+/*
 class Table
 {
 	Get_Key_Index( ByRef Table, ByRef Key_Name )
@@ -1443,3 +1448,4 @@ In_Array( ByRef Array, ByRef Value )
 	}
 	Return, False
 }
+*/

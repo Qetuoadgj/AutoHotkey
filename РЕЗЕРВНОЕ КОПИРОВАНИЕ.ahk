@@ -186,7 +186,7 @@ If (CreateNewArchives) {
 	ArchiveCount := 0
 	Loop,Files,%Archive%*%ArchiveType%,F
 	{
-		MatchString := ConvertToString(Name) . " - (\d+)( .*?)?" . ConvertToString("." . ArchiveType)
+		MatchString := "^" . ConvertToString(Name) . " - (\d+)( .*?)?" . ConvertToString("." . ArchiveType) . "$"
 		If (RegExMatch(A_LoopFileName,MatchString,Match,1)) {
 			ArchiveCount := Match1 + 1
 		}

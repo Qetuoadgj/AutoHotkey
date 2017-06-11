@@ -1,13 +1,13 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn,All ; Enable warnings to assist with detecting common errors.
 SendMode,Input ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
+; SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 
 Script.Force_Single_Instance()
 
 WinRAR = "C:\Program Files\WinRAR\WinRAR.exe"
 Set_CD = cd /d "%A_WorkingDir%"
-Output_Dir := "Extracted" . "\"
+Output_Dir := A_WorkingDir . "\" . "Extracted" . "\"
 
 If FileExist("Extracted\") {
 	FileRemoveDir, Extracted, 1
@@ -40,6 +40,11 @@ For File_Index, File in File_List {
 }
 
 MsgBox, F I N I S H E D
+
+IfExist, %Output_Dir%
+{
+	Run, %Output_Dir%
+}
 
 ExitApp
 

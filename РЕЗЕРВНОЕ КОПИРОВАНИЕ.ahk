@@ -1,4 +1,4 @@
-ï»¿; https://github.com/Qetuoadgj/AutoHotkey
+; https://github.com/Qetuoadgj/AutoHotkey
 ; https://raw.githubusercontent.com/Qetuoadgj/AutoHotkey/master/%D0%A0%D0%95%D0%97%D0%95%D0%A0%D0%92%D0%9D%D0%9E%D0%95%20%D0%9A%D0%9E%D0%9F%D0%98%D0%A0%D0%9E%D0%92%D0%90%D0%9D%D0%98%D0%95.ahk | v1.0.0
 
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -9,15 +9,15 @@ SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 ; run,%comspec% /k ipconfig /all & pause & exit
 ; run,%comspec% /k Command & pause & exit
 
-; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ½Ğ°Ğ»Ğ¸Ñ‡Ğ¸Ñ "Ğ¤Ğ°Ğ¹Ğ»Ğ°-Ğ˜ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°"
+; Ïğîâåğêà íàëè÷èÿ "Ôàéëà-Èñòî÷íèêà"
 If (not %0%) {
-	MsgBox,3,,Ğ¡Ğ¾Ğ·Ğ´Ğ°Ñ‚ÑŒ Ğ¿ÑƒÑÑ‚Ğ¾Ğ¹ Ñ„Ğ°Ğ¹Ğ»?`n%A_ScriptDir%\ĞŸÑƒÑÑ‚Ğ¾Ğ¹ BACKUP.ini,5  ; 5-second timeout.
+	MsgBox,3,,Ñîçäàòü ïóñòîé ôàéë?`n%A_ScriptDir%\Ïóñòîé BACKUP.ini,5  ; 5-second timeout.
 	IfMsgBox,No
 		ExitApp  ; User pressed the "No" button.
 
 	IfMsgBox,Yes
 	{
-		EmptyFile = %A_ScriptDir%\ĞŸÑƒÑÑ‚Ğ¾Ğ¹ BACKUP.ini
+		EmptyFile = %A_ScriptDir%\Ïóñòîé BACKUP.ini
 		Encoding = CP1251
 
 		IfExist,%EmptyFile%
@@ -25,37 +25,38 @@ If (not %0%) {
 
 		MsgText =
 		( LTrim RTrim Join`r`n
-			; Ğ”Ğ›Ğ¯ ĞŸĞ ĞĞ’Ğ˜Ğ›Ğ¬ĞĞĞ“Ğ Ğ§Ğ¢Ğ•ĞĞ˜Ğ¯ Ğ¡Ğ˜ĞœĞ’ĞĞ›ĞĞ’ ĞšĞĞ”Ğ˜Ğ ĞĞ’ĞšĞ Ğ­Ğ¢ĞĞ“Ğ Ğ¤ĞĞ™Ğ›Ğ ĞĞ‘Ğ¯Ğ—ĞĞ¢Ğ•Ğ›Ğ¬ĞĞ Ğ”ĞĞ›Ğ–ĞĞ Ğ‘Ğ«Ğ¢Ğ¬: WIN-1251 | CP1251
+			; ÄËß ÏĞÀÂÈËÜÍÎÃÎ ×ÒÅÍÈß ÑÈÌÂÎËÎÂ ÊÎÄÈĞÎÂÊÀ İÒÎÃÎ ÔÀÉËÀ ÎÁßÇÀÒÅËÜÍÎ ÄÎËÆÍÀ ÁÛÒÜ: WIN-1251 | CP1251
 
 			[Description]
-			; Name = ;Ğ˜Ğ¼Ñ Ğ¤Ğ°Ğ¹Ğ»Ğ° (Ğ² ĞºĞ°Ğ²Ñ‹Ñ‡ĞºĞ°Ñ…)
-			; Password = ;ĞŸĞ°Ñ€Ğ¾Ğ»ÑŒ (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
-			; RootDir = "`%AppData`%" ;ĞšĞ¾Ñ€Ğ½ĞµĞ²Ğ°Ñ ĞŸĞ°Ğ¿ĞºĞ° (Ğ² ĞºĞ°Ğ²Ñ‹Ñ‡ĞºĞ°Ñ…)
-			; SevenZip = "`%ProgramFiles`%\7-Zip\7z.exe" ;Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ‚Ğ¾Ñ€ 7-Zip (Ğ² ĞºĞ°Ğ²Ñ‹Ñ‡ĞºĞ°Ñ…)
-			; WinRAR = "`%ProgramFiles`%\WinRAR\Rar.exe" ;Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ‚Ğ¾Ñ€ WinRAR (Ğ² ĞºĞ°Ğ²Ñ‹Ñ‡ĞºĞ°Ñ…)
-			ArchiveType = zip,7z,rar ;Ğ¢Ğ¸Ğ¿Ñ‹ ÑĞ¾Ğ·Ğ´Ğ°Ğ²Ğ°ĞµĞ¼Ñ‹Ñ… Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ¾Ğ² (zip,7z,rar) (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
-			; TimeStamp = yyyy.MM.dd ;Ğ¤Ğ¾Ñ€Ğ¼Ğ°Ñ‚ Ğ²Ñ€ĞµĞ¼ĞµĞ½Ğ½Ğ¾Ğ³Ğ¾ ÑˆÑ‚Ğ°Ğ¼Ğ¿Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ° (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
-			; CreateNewArchives = false ;Ğ¡Ğ¾Ğ·Ğ´Ğ°Ğ½Ğ¸Ğµ Ğ½Ğ¾Ğ²Ñ‹Ñ… Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ¾Ğ² Ğ²Ğ¼ĞµÑÑ‚Ğ¾ Ğ¾Ğ±Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ñ ÑÑƒÑ‰ĞµÑÑ‚Ğ²ÑƒÑÑ‰ĞµĞ¹ ĞºĞ¾Ğ¿Ğ¸Ğ¸ (true,false) (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
-			; NewArchiveNumeration = 0.2d ;Ğ¤Ğ¾Ñ€Ğ¼Ğ°Ñ‚ Ğ½ÑƒĞ¼ĞµÑ€Ğ°Ñ†Ğ¸Ğ¸ Ğ½Ğ¾Ğ²Ñ‹Ñ… Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ¾Ğ² (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
-			; LockArchive = true ;Ğ—Ğ°Ğ¿Ñ€ĞµÑ‚Ğ¸Ñ‚ÑŒ Ğ´Ğ°Ğ»ÑŒĞ½ĞµĞ¹ÑˆĞµĞµ Ğ¸Ğ·Ğ¼ĞµĞ½ĞµĞ½Ğ¸Ğµ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ° (true,false) (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
-						; IncludeThisFile = false ;ĞĞµ Ğ²ĞºĞ»ÑÑ‡Ğ°Ñ‚ÑŒ ÑÑ‚Ğ¾Ñ‚ Ñ„Ğ°Ğ¹Ğ» Ñ€ĞµĞ·ĞµÑ€Ğ²Ğ½Ğ¾Ğ³Ğ¾ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ğ² Ğ°Ñ€Ñ…Ğ¸Ğ² Ñ€ĞµĞ·ĞµÑ€Ğ²Ğ½Ğ¾Ğ¹ ĞºĞ¾Ğ¿Ğ¸Ğ¸ (true,false) (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
+			; Name = ;Èìÿ Ôàéëà (â êàâû÷êàõ)
+			; Password = ;Ïàğîëü (áåç êàâû÷åê)
+			; RootDir = "`%AppData`%" ;Êîğíåâàÿ Ïàïêà (â êàâû÷êàõ)
+			; SevenZip = "`%ProgramFiles`%\7-Zip\7z.exe" ;àğõèâàòîğ 7-Zip (â êàâû÷êàõ)
+			; WinRAR = "`%ProgramFiles`%\WinRAR\Rar.exe" ;àğõèâàòîğ WinRAR (â êàâû÷êàõ)
+			ArchiveType = zip,7z,rar ;Òèïû ñîçäàâàåìûõ àğõèâîâ (zip,7z,rar) (áåç êàâû÷åê)
+			; TimeStamp = yyyy.MM.dd ;Ôîğìàò âğåìåííîãî øòàìïà àğõèâà (áåç êàâû÷åê)
+			; CreateNewArchives = false ;Ñîçäàíèå íîâûõ àğõèâîâ âìåñòî îáíîâëåíèÿ ñóùåñòâóşùåé êîïèè (true,false) (áåç êàâû÷åê)
+			; NewArchiveNumeration = 0.2d ;Ôîğìàò íóìåğàöèè íîâûõ àğõèâîâ (áåç êàâû÷åê)
+			; LockArchive = true ;Çàïğåòèòü äàëüíåéøåå èçìåíåíèå àğõèâà (true,false) (áåç êàâû÷åê)
+			; IncludeThisFile = false ;Íå âêëş÷àòü ıòîò ôàéë ğåçåğâíîãî êîïèğîâàíèÿ â àğõèâ ğåçåğâíîé êîïèè (true,false) (áåç êàâû÷åê)
+			; WriteComment = true ;Äîáâèòü ê àğõèâó êîììåíòàğèé, ñîçäàííûé èç ñåêöèè [IncludeList].
 
-						[Zip_Options]
-						Method = Deflate ; Copy,Deflate,Deflate64,BZip2,LZMA,PPMd
-						Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
+			[Zip_Options]
+			Method = Deflate ; Copy,Deflate,Deflate64,BZip2,LZMA,PPMd
+			Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
 
-						[7z_Options]
-						Method = LZMA2  ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
-						Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
+			[7z_Options]
+			Method = LZMA2  ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
+			Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
 
-						[Rar_Options]
-						Compression = 5 ; 0 | 1 | 3 | 5
+			[Rar_Options]
+			Compression = 5 ; 0 | 1 | 3 | 5
 
 			[IncludeList]
-			; Ğ’ĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ğµ Ñ„Ğ°Ğ¹Ğ»Ñ‹ (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
+			; Âêëş÷àåìûå ôàéëû (áåç êàâû÷åê)
 
 			[ExcludeList]
-			; Ğ˜ÑĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ğµ Ñ„Ğ°Ğ¹Ğ»Ñ‹ (Ğ±ĞµĞ· ĞºĞ°Ğ²Ñ‹Ñ‡ĞµĞº)
+			; Èñêëş÷àåìûå ôàéëû (áåç êàâû÷åê)
 			*Thumbs.db
 
 		)
@@ -68,7 +69,7 @@ If (not %0%) {
 	ExitApp
 }
 
-; Ğ¦Ğ¸ĞºĞ» Ğ´Ğ»Ñ Ğ²ÑĞµÑ… Ğ¿Ğ°Ñ€Ğ°Ğ¼ĞµÑ‚Ñ€Ğ¾Ğ² / Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ² Ğ¾Ñ‚ĞºÑ€Ñ‹Ñ‚Ñ‹Ñ… Ğ² ÑÑ‚Ğ¾Ğ¼ Ğ¿Ñ€Ğ¸Ğ»Ğ¾Ğ¶ĞµĞ½Ğ¸Ğ¸
+; Öèêë äëÿ âñåõ ïàğàìåòğîâ / ôàéëîâ îòêğûòûõ â ıòîì ïğèëîæåíèè
 Loop,%0%
 {
 	GivenPath := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
@@ -78,53 +79,58 @@ Loop,%0%
 	}
 }
 
-; ĞĞ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ Ğ¿Ğ¾Ğ»Ğ½Ğ¾Ğ³Ğ¾ Ğ¿ÑƒÑ‚Ğ¸ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
+; Îïğåäåëåíèå ïîëíîãî ïóòè ôàéëà-èñòî÷íèêà
 SourceFile := FullPath
 
-; ĞĞ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ Ğ¿ÑƒÑ‚ĞµĞ¹ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
+; Îïğåäåëåíèå ïóòåé ôàéëà-èñòî÷íèêà
 SplitPath,SourceFile,SourceFileShort,SourceFileDir,SourceFileExtension,SourceFileName,SourceFileDrive
 
-; ĞĞ°Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ğµ Ñ€Ğ°Ğ±Ğ¾Ñ‡ĞµĞ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ¿Ñ€Ğ¾Ğ³Ñ€Ğ°Ğ¼Ğ¼Ñ‹
+; Íàçíà÷åíèå ğàáî÷åãî êàòàëîãà ïğîãğàììû
 SetWorkingDir,%SourceFileDir%
 
-; ĞŸĞ¾Ğ»ÑƒÑ‡ĞµĞ½Ğ¸Ğµ Ğ¿ĞµÑ€ĞµĞ¼ĞµĞ½Ğ½Ñ‹Ñ… Ğ¸Ğ· Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
-IniRead,Name,%SourceFile%,Description,Name,%SourceFileName% ; GetValue(SourceFile,"^Name[\s+]?=[\s+]?(.*)") ; Ğ˜Ğ¼Ñ
+; Ïîëó÷åíèå ïåğåìåííûõ èç ôàéëà-èñòî÷íèêà
+IniRead,Name,%SourceFile%,Description,Name,%SourceFileName% ; GetValue(SourceFile,"^Name[\s+]?=[\s+]?(.*)") ; Èìÿ
 Name := RegExReplace(Name,"[ \t]+;.*$","")
 
 If (Name == "") {
-	MsgBox,ĞĞ¨Ğ˜Ğ‘ĞšĞ:`nĞÑ‚ÑÑƒÑ‚ÑÑ‚Ğ²ÑƒĞµÑ‚ Ğ¿Ğ°Ñ€Ğ°Ğ¼ĞµÑ‚Ñ€ "Name"
+	MsgBox,ÎØÈÁÊÀ:`nÎòñóòñòâóåò ïàğàìåòğ "Name"
 	ExitApp
 }
 
-IniRead,Password,%SourceFile%,Description,Password,%A_Space% ; GetValue(SourceFile,"^Password[\s+]?=[\s+]?(.*)") ; ĞŸĞ°Ñ€Ğ¾Ğ»ÑŒ
+IniRead,Password,%SourceFile%,Description,Password,%A_Space% ; GetValue(SourceFile,"^Password[\s+]?=[\s+]?(.*)") ; Ïàğîëü
 Password := RegExReplace(Password,"[ \t]+;.*$","")
 
-IniRead,RootDir,%SourceFile%,Description,RootDir,%A_Space%      ; GetValue(SourceFile,"^RootDir[\s+]?=[\s+]?(.*)") ; ĞšĞ¾Ñ€Ğ½ĞµĞ²Ğ°Ñ Ğ¿Ğ°Ğ¿ĞºĞ°
+IniRead,RootDir,%SourceFile%,Description,RootDir,%A_Space%      ; GetValue(SourceFile,"^RootDir[\s+]?=[\s+]?(.*)") ; Êîğíåâàÿ ïàïêà
 RootDir := RegExReplace(RootDir,"[ \t]+;.*$","")
-RootDir := ParseEnvironmentVariables(RootDir)                   ; ĞĞ±Ñ€Ğ°Ğ±Ğ¾Ñ‚ĞºĞ° Ğ¿ĞµÑ€ĞµĞ¼ĞµĞ½Ğ½Ñ‹Ñ… ÑÑ€ĞµĞ´Ñ‹
-RootDir := FileGetLongPath(RootDir)                             ; ĞŸĞ¾Ğ»ÑƒÑ‡ĞµĞ½Ğ¸Ğµ Ğ´Ğ»Ğ¸Ğ½Ğ½Ğ¾Ğ³Ğ¾ Ğ¿ÑƒÑ‚Ğ¸
-global RootDir := RootDir                                       ; ĞĞ°Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ğµ Ğ³Ğ»Ğ¾Ğ±Ğ°Ğ»ÑŒĞ½Ğ¾Ğ¹ Ğ¿ĞµÑ€ĞµĞ¼ĞµĞ½Ğ½Ğ¾Ğ¹ Ğ´Ğ»Ñ Ğ¿Ñ€Ğ¸Ğ¼ĞµĞ½ĞµĞ½Ğ¸Ñ Ğ²Ğ¾ Ğ²ÑĞµÑ… Ñ„ÑƒĞ½ĞºÑ†Ğ¸ÑÑ…
+RootDir := ParseEnvironmentVariables(RootDir)                   ; Îáğàáîòêà ïåğåìåííûõ ñğåäû
+RootDir := FileGetLongPath(RootDir)                             ; Ïîëó÷åíèå äëèííîãî ïóòè
+global RootDir := RootDir                                       ; Íàçíà÷åíèå ãëîáàëüíîé ïåğåìåííîé äëÿ ïğèìåíåíèÿ âî âñåõ ôóíêöèÿõ
 
-IniRead,TimeStamp,%SourceFile%,Description,TimeStamp,yyyy.MM.dd ; Ğ’Ñ€ĞµĞ¼ĞµĞ½Ğ½Ğ¾Ğ¹ ÑˆÑ‚Ğ°Ğ¼Ğ¿
+IniRead,TimeStamp,%SourceFile%,Description,TimeStamp,yyyy.MM.dd ; Âğåìåííîé øòàìï
 TimeStamp := RegExReplace(TimeStamp,"[ \t]+;.*$","")
 
-IniRead,CreateNewArchives,%SourceFile%,Description,CreateNewArchives,%A_Space% ; Ğ¡Ğ¾Ğ·Ğ´Ğ°Ğ²Ğ°Ñ‚ÑŒ Ğ½Ğ¾Ğ²Ñ‹Ğ¹ Ğ°Ñ€Ñ…Ğ¸Ğ² Ğ²Ğ¼ĞµÑÑ‚Ğ¾ ÑĞ¸Ğ½Ñ…Ñ€Ğ¾Ğ½Ğ¸Ğ·Ğ°Ñ†Ğ¸Ğ¸
+IniRead,CreateNewArchives,%SourceFile%,Description,CreateNewArchives,%A_Space% ; Ñîçäàâàòü íîâûé àğõèâ âìåñòî ñèíõğîíèçàöèè
 CreateNewArchives := RegExReplace(CreateNewArchives,"[ \t]+;.*$","")
 CreateNewArchives := StrToBool(CreateNewArchives) ; to boolean
 CreateNewArchivesStr := BoolToStr(CreateNewArchives) ; to string
 
-IniRead,NewArchiveNumeration,%SourceFile%,Description,NewArchiveNumeration,0.2d ; ĞÑƒĞ¼ĞµÑ€Ğ°Ñ†Ğ¸Ñ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ¾Ğ²
+IniRead,NewArchiveNumeration,%SourceFile%,Description,NewArchiveNumeration,0.2d ; Íóìåğàöèÿ àğõèâîâ
 NewArchiveNumeration := RegExReplace(NewArchiveNumeration,"[ \t]+;.*$","")
 
-IniRead,LockArchive,%SourceFile%,Description,LockArchive,%A_Space% ; Ğ—Ğ°Ğ¿Ñ€ĞµÑ‚Ğ¸Ñ‚ÑŒ Ğ¸Ğ·Ğ¼ĞµĞ½ĞµĞ½Ğ¸Ğµ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
+IniRead,LockArchive,%SourceFile%,Description,LockArchive,%A_Space% ; Çàïğåòèòü èçìåíåíèå àğõèâà
 LockArchive := RegExReplace(LockArchive,"[ \t]+;.*$","")
 LockArchive := StrToBool(LockArchive) ; to boolean
 LockArchiveStr := BoolToStr(LockArchive) ; to string
 
-IniRead,IncludeThisFile,%SourceFile%,Description,IncludeThisFile,true ; Ğ’ĞºĞ»ÑÑ‡Ğ¸Ñ‚ÑŒ Ğ² Ğ°Ñ€Ñ…Ğ¸Ğ² Ñ„Ğ°Ğ¹Ğ» Ñ‚ĞµĞºÑƒÑ‰Ğ¸Ğ¹ Ñ€ĞµĞ·ĞµÑ€Ğ²Ğ½Ğ¾Ğ³Ğ¾ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ
+IniRead,IncludeThisFile,%SourceFile%,Description,IncludeThisFile,true ; Âêëş÷èòü â àğõèâ ôàéë òåêóùèé ğåçåğâíîãî êîïèğîâàíèÿ
 IncludeThisFile := RegExReplace(IncludeThisFile,"[ \t]+;.*$","")
 IncludeThisFile := StrToBool(IncludeThisFile) ; to boolean
 IncludeThisFileStr := BoolToStr(IncludeThisFile) ; to string
+
+IniRead,WriteComment,%SourceFile%,Description,WriteComment,%A_Space% ; Äîáàâèòü ê àğõèâó êîììåíòàğèé
+WriteComment := RegExReplace(WriteComment,"[ \t]+;.*$","")
+WriteComment := StrToBool(WriteComment) ; to boolean
+WriteCommentStr := BoolToStr(WriteComment) ; to string
 
 IniRead,ZipMethod,%SourceFile%,Zip_Options,Method,Deflate
 ZipMethod := RegExReplace(ZipMethod,"[ \t]+;.*$","")
@@ -141,25 +147,25 @@ IniRead,7zCompression,%SourceFile%,7z_Options,Compression,9
 IniRead,RarCompression,%SourceFile%,Rar_Options,Compression,5
 RarCompression := RegExReplace(RarCompression,"[ \t]+;.*$","")
 
-; ĞĞ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ Ğ¸Ğ¼ĞµĞ½Ğ¸ Ğ±ÑƒĞ´ÑƒÑ‰ĞµĞ³Ğ¾ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
+; Îïğåäåëåíèå èìåíè áóäóùåãî àğõèâà
 If (RegExMatch(TimeStamp,"^false$")) {
 	Name = %Name%
 } else {
-	FormatTime,Date,,%TimeStamp% ; ĞŸĞ¾Ğ»ÑƒÑ‡ĞµĞ½Ğ¸Ğµ Ñ‚ĞµĞºÑƒÑ‰ĞµĞ¹ Ğ´Ğ°Ñ‚Ñ‹ (2015.11.29)
+	FormatTime,Date,,%TimeStamp% ; Ïîëó÷åíèå òåêóùåé äàòû (2015.11.29)
 	Name = %Name% (%Date%)
 }
 
 IniRead,SevenZip,%SourceFile%,Description,SevenZip,%ProgramFiles%\7-Zip\7z.exe  ; GetValue(SourceFile,"^SevenZip[\s+]?=[\s+]?(.*)") ; 7-Zip
 SevenZip := RegExReplace(SevenZip,"[ \t]+;.*$","")
-SevenZip := ParseEnvironmentVariables(SevenZip)                                 ; ĞĞ±Ñ€Ğ°Ğ±Ğ¾Ñ‚ĞºĞ° Ğ¿ĞµÑ€ĞµĞ¼ĞµĞ½Ğ½Ñ‹Ñ… ÑÑ€ĞµĞ´Ñ‹
-SevenZip := FileGetLongPath(SevenZip)                                           ; ĞŸĞ¾Ğ»ÑƒÑ‡ĞµĞ½Ğ¸Ğµ Ğ´Ğ»Ğ¸Ğ½Ğ½Ğ¾Ğ³Ğ¾ Ğ¿ÑƒÑ‚Ğ¸
+SevenZip := ParseEnvironmentVariables(SevenZip)                                 ; Îáğàáîòêà ïåğåìåííûõ ñğåäû
+SevenZip := FileGetLongPath(SevenZip)                                           ; Ïîëó÷åíèå äëèííîãî ïóòè
 
 IniRead,WinRAR,%SourceFile%,Description,WinRAR,%ProgramFiles%\WinRAR\Rar.exe    ; GetValue(SourceFile,"^WinRAR[\s+]?=[\s+]?(.*)") ; WinRAR
 WinRAR := RegExReplace(WinRAR,"[ \t]+;.*$","")
-WinRAR := ParseEnvironmentVariables(WinRAR)                                     ; ĞĞ±Ñ€Ğ°Ğ±Ğ¾Ñ‚ĞºĞ° Ğ¿ĞµÑ€ĞµĞ¼ĞµĞ½Ğ½Ñ‹Ñ… ÑÑ€ĞµĞ´Ñ‹
-WinRAR := FileGetLongPath(WinRAR)                                               ; ĞŸĞ¾Ğ»ÑƒÑ‡ĞµĞ½Ğ¸Ğµ Ğ´Ğ»Ğ¸Ğ½Ğ½Ğ¾Ğ³Ğ¾ Ğ¿ÑƒÑ‚Ğ¸
+WinRAR := ParseEnvironmentVariables(WinRAR)                                     ; Îáğàáîòêà ïåğåìåííûõ ñğåäû
+WinRAR := FileGetLongPath(WinRAR)                                               ; Ïîëó÷åíèå äëèííîãî ïóòè
 
-IniRead,ArchiveType,%SourceFile%,Description,ArchiveType,zip                    ; GetValue(SourceFile,"^ArchiveType[\s+]?=[\s+]?(.*)") ; Ğ¢Ğ¸Ğ¿Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ¾Ğ²
+IniRead,ArchiveType,%SourceFile%,Description,ArchiveType,zip                    ; GetValue(SourceFile,"^ArchiveType[\s+]?=[\s+]?(.*)") ; Òèïû àğõèâîâ
 ArchiveType := RegExReplace(ArchiveType,"[ \t]+;.*$","")
 ; ArchiveType := Trim(ArchiveType," " . "`t" . """")
 
@@ -176,9 +182,10 @@ If (ArchiveType = "") {
 	MsgBox,0,Error,ArchiveType was not set!,1.5
 }
 
-; ĞĞ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ²-ÑĞ¿Ğ¸ÑĞºĞ¾Ğ² Ğ´Ğ»Ñ Ğ¾Ğ±Ñ€Ğ°Ğ±Ğ¾Ñ‚ĞºĞ¸ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ‚Ğ¾Ñ€Ğ°Ğ¼Ğ¸
+; Îïğåäåëåíèå ôàéëîâ-ñïèñêîâ äëÿ îáğàáîòêè àğõèâàòîğàìè
 IncludeList=%A_Temp%\IncludeList.txt ;%SourceFileDir%\IncludeList.txt
 ExcludeList=%A_Temp%\ExcludeList.txt ;%SourceFileDir%\ExcludeList.txt
+CommentFile=%A_Temp%\CommentFile.txt
 
 ArchiveName := Name
 
@@ -211,7 +218,8 @@ DebugMsgText =
 	CreateNewArchives = %CreateNewArchivesStr%
 	NewArchiveNumeration = %NewArchiveNumeration%
 	LockArchive = %LockArchiveStr%
-		IncludeThisFile = %IncludeThisFileStr%
+	IncludeThisFile = %IncludeThisFileStr%
+	WriteComment = %WriteCommentStr%
 )
 */
 
@@ -237,6 +245,7 @@ If (InStr(ArchiveType,"rar")) {
 		DebugMsgText := DebugMsgText . "`r`n" . "LockArchive = " . LockArchiveStr
 }
 DebugMsgText := DebugMsgText . "`r`n" . "IncludeThisFile = " . IncludeThisFileStr
+DebugMsgText := DebugMsgText . "`r`n" . "WriteComment = " . WriteCommentStr
 
 If InStr(ArchiveType,"zip") {
 		DebugMsgText := DebugMsgText . "`r`n" . "`r`n[Zip_Options]"
@@ -258,180 +267,190 @@ MsgBox,1,,%DebugMsgText%
 IfMsgBox,Cancel
 	ExitApp  ; User pressed the "No" button.
 
-; Ğ¡Ğ¾Ğ·Ğ´Ğ°Ğ½Ğ¸Ğµ zip Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ° Ñ Ğ¿Ğ¾Ğ¼Ğ¾Ñ‰ÑŒÑ 7-Zip
+; Ñîçäàíèå zip àğõèâà ñ ïîìîùüş 7-Zip
 If (FileExist(SevenZip) && InStr(ArchiveType,"zip")) {
-	; Ğ Ğ°Ğ·Ğ´ĞµĞ»ĞµĞ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ½Ğ° Ñ„Ğ°Ğ¹Ğ»Ñ‹-ÑĞ¿Ğ¸ÑĞºĞ¸ Ğ²ĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ñ… Ğ¸ Ğ¸ÑĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ñ… Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ² (ĞºĞ¾Ğ´Ğ¸Ñ€Ğ¾Ğ²ĞºĞ° UTF-8)
+	; Ğàçäåëåíèå ôàéëà-èñòî÷íèêà íà ôàéëû-ñïèñêè âêëş÷àåìûõ è èñêëş÷àåìûõ ôàéëîâ (êîäèğîâêà UTF-8)
 	SplitTextFile(SourceFile,IncludeList,"[IncludeList]","[ExcludeList]","UTF-8")
 	SplitTextFile(SourceFile,ExcludeList,"[ExcludeList]","","UTF-8")
 
-	Type:="zip"                     ; Ğ¢Ğ¸Ğ¿ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
-	; Ğ•ÑĞ»Ğ¸ Ğ¿Ğ°Ñ€Ğ¾Ğ»ÑŒ Ğ·Ğ°Ğ´Ğ°Ğ½
+	Type:="zip"                     ; Òèï àğõèâà
+	; Åñëè ïàğîëü çàäàí
 	If (Password != "") {
-		Password=-p%Password%         ; ĞŸĞ°Ñ€Ğ¾Ğ»ÑŒ Ğ½Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²
+		Password=-p%Password%         ; Ïàğîëü íà àğõèâ
 	}
-	Compression=-mm=%ZipMethod% -mx%ZipCompression% ; ĞĞ»Ğ³Ğ¾Ñ€Ğ¸Ñ‚Ğ¼ ÑĞ¶Ğ°Ñ‚Ğ¸Ñ
-	Include=-i@"%IncludeList%"      ; Ğ¤Ğ°Ğ¹Ğ»-ÑĞ¿Ğ¸ÑĞ¾Ğº Ğ²ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğ¹
-	Exclude=-x@"%ExcludeList%"      ; Ğ¤Ğ°Ğ¹Ğ»-ÑĞ¿Ğ¸ÑĞ¾Ğº Ğ¸ÑĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğ¹
-	Synchronize:="p0q0r2x1y2z1w2"   ; ĞšĞ»ÑÑ‡ ÑĞ¸Ğ½Ñ…Ñ€Ğ¾Ğ½Ğ¸Ğ·Ğ°Ñ†Ğ¸Ğ¸
-	Incrimental:="p1q1r0x1y2z1w2"   ; ĞšĞ»ÑÑ‡ ÑĞ¾Ğ·Ğ´Ğ°Ğ½Ğ¸Ñ Ğ¸Ğ½ĞºÑ€Ğ¸Ğ¼ĞµĞ½Ñ‚Ğ½Ğ¾Ğ³Ğ¾ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
+	Compression=-mm=%ZipMethod% -mx%ZipCompression% ; Àëãîğèòì ñæàòèÿ
+	Include=-i@"%IncludeList%"      ; Ôàéë-ñïèñîê âêëş÷åíèé
+	Exclude=-x@"%ExcludeList%"      ; Ôàéë-ñïèñîê èñêëş÷åíèé
+	Synchronize:="p0q0r2x1y2z1w2"   ; Êëş÷ ñèíõğîíèçàöèè
+	Incrimental:="p1q1r0x1y2z1w2"   ; Êëş÷ ñîçäàíèÿ èíêğèìåíòíîãî àğõèâà
 
-	; ĞĞ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ½Ğ° Ğ²Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
+	; Îïğåäåëåíèå êîìàíäû íà âûïîëíåíèå àğõèâàöèè
 		If (IncludeThisFile) {
 		Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%" -spf2 -w"%A_Temp%"
 		} Else {
 		Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% -spf2 -w"%A_Temp%"
 		}
 
-	; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ½Ğ°Ğ»Ğ¸Ñ‡Ğ¸Ñ Ğ¿Ğ°Ñ€Ğ°Ğ¼ĞµÑ‚Ñ€Ğ° %RootDir% (Ğ¾Ğ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸)
-	; Ğ•ÑĞ»Ğ¸ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ½Ğµ Ğ·Ğ°Ğ´Ğ°Ğ½:
+	; Ïğîâåğêà íàëè÷èÿ ïàğàìåòğà %RootDir% (îïğåäåëåíèå êîğíåâîãî êàòàëîãà àğõèâàöèè)
+	; Åñëè êîğíåâîé êàòàëîã àğõèâàöèè íå çàäàí:
 	If (RootDir == "") {
-		; RunWait,%Command% ; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ² ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ğ½Ğ¾Ğ¹ ÑÑ‚Ñ€Ğ¾ĞºĞµ
+		; RunWait,%Command% ; Âûïîëíåíèå êîìàíäû àğõèâàöèè â êîìàíäíîé ñòğîêå
 		RunWait,%comspec% /k cd /d "%SourceFileDir%" & %Command% & pause & exit
 
-	; Ğ•ÑĞ»Ğ¸ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ·Ğ°Ğ´Ğ°Ğ½:
+	; Åñëè êîğíåâîé êàòàëîã àğõèâàöèè çàäàí:
 	} else {
-		SetWorkingDir,%RootDir% ; ĞĞ°Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ñ€Ğ°Ğ±Ğ¾Ñ‡Ğ¸Ğ¼ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ¾Ğ¼ Ğ¿Ñ€Ğ¾Ğ³Ñ€Ğ°Ğ¼Ğ¼Ñ‹
+		SetWorkingDir,%RootDir% ; Íàçíà÷åíèå êîğíåâîãî êàòàëîãà àğõèâàöèè ğàáî÷èì êàòàëîãîì ïğîãğàììû
 				SourceCopy := RootDir . "\" . SourceFileShort
 				NoDelete := FileExist(SourceCopy)
 
-		; ĞšĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ² ĞºĞ¾Ñ€Ğ½ĞµĞ²ÑƒĞ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		If (SourceCopy!=SourceFile and IncludeThisFile) { ; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° ÑĞ¾Ğ²Ğ¿Ğ°Ğ´ĞµĞ½Ğ¸Ñ Ğ¿ÑƒÑ‚Ğ¸ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ñ Ğ¿ÑƒÑ‚Ñ‘Ğ¼ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
-			FileCopy,%SourceFile%,%SourceCopy%,1 ; ĞšĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ / Ğ¿ĞµÑ€ĞµĞ·Ğ°Ğ¿ĞµÑÑŒ Ñ„Ğ°Ğ¹Ğ»Ğ° Ğ² ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
+		; Êîïèğîâàíèå ôàéëà-èñòî÷íèêà â êîğíåâóîé êàòàëîã àğõèâàöèè
+		If (SourceCopy!=SourceFile and IncludeThisFile) { ; Ïğîâåğêà ñîâïàäåíèÿ ïóòè ôàéëà-èñòî÷íèêà ñ ïóò¸ì êîïèğîâàíèÿ ôàéëà-èñòî÷íèêà
+			FileCopy,%SourceFile%,%SourceCopy%,1 ; Êîïèğîâàíèå / ïåğåçàïåñü ôàéëà â êîğíåâîé êàòàëîã àğõèâàöèè
 		}
 
-		; RunWait,%Command% ; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ² ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ğ½Ğ¾Ğ¹ ÑÑ‚Ñ€Ğ¾ĞºĞµ
+		; RunWait,%Command% ; Âûïîëíåíèå êîìàíäû àğõèâàöèè
+		; Âûïîëíåíèå êîìàíäû àğõèâàöèè â êîìàíäíîé ñòğîêå
 		RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-		If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° ÑĞ¾Ğ²Ğ¿Ğ°Ğ´ĞµĞ½Ğ¸Ñ Ğ¿ÑƒÑ‚Ğ¸ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ñ Ğ¿ÑƒÑ‚Ñ‘Ğ¼ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
-			FileDelete,%SourceCopy% ; Ğ£Ğ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ ÑĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¾Ğ³Ğ¾ Ñ€Ğ°Ğ½ĞµĞµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ¸Ğ· ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
+		If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; Ïğîâåğêà ñîâïàäåíèÿ ïóòè ôàéëà-èñòî÷íèêà ñ ïóò¸ì êîïèğîâàíèÿ ôàéëà-èñòî÷íèêà
+			FileDelete,%SourceCopy% ; Óäàëåíèå ñêîïèğîâàíîãî ğàíåå ôàéëà-èñòî÷íèêà èç êîğíåâîãî êàòàëîãà àğõèâàöèè
 		}
-		SetWorkingDir,%SourceFileDir% ; Ğ’Ğ¾ÑÑÑ‚Ğ°Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ğµ Ñ€Ğ°Ğ±Ğ¾Ñ‡ĞµĞ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ¿Ñ€Ğ¾Ğ³Ñ€Ğ°Ğ¼Ğ¼Ñ‹
+		SetWorkingDir,%SourceFileDir% ; Âîññòàíîâëåíèå ğàáî÷åãî êàòàëîãà ïğîãğàììû
 	}
 
-	; Ğ£Ğ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ²-ÑĞ¿Ğ¸ÑĞºĞ¾Ğ²
+	; Óäàëåíèå ôàéëîâ-ñïèñêîâ
 	FileDelete,%IncludeList%
 	FileDelete,%ExcludeList%
 }
 
-; Ğ¡Ğ¾Ğ·Ğ´Ğ°Ğ½Ğ¸Ğµ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ° Ñ Ğ¿Ğ¾Ğ¼Ğ¾Ñ‰ÑŒÑ 7-Zip
+; Ñîçäàíèå àğõèâà ñ ïîìîùüş 7-Zip
 If (FileExist(SevenZip) && InStr(ArchiveType,"7z")) {
-	; Ğ Ğ°Ğ·Ğ´ĞµĞ»ĞµĞ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ½Ğ° Ñ„Ğ°Ğ¹Ğ»Ñ‹-ÑĞ¿Ğ¸ÑĞºĞ¸ Ğ²ĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ñ… Ğ¸ Ğ¸ÑĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ñ… Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ² (ĞºĞ¾Ğ´Ğ¸Ñ€Ğ¾Ğ²ĞºĞ° UTF-8)
+	; Ğàçäåëåíèå ôàéëà-èñòî÷íèêà íà ôàéëû-ñïèñêè âêëş÷àåìûõ è èñêëş÷àåìûõ ôàéëîâ (êîäèğîâêà UTF-8)
 	SplitTextFile(SourceFile,IncludeList,"[IncludeList]","[ExcludeList]","UTF-8")
 	SplitTextFile(SourceFile,ExcludeList,"[ExcludeList]","","UTF-8")
 
-	Type:="7z"                      ; Ğ¢Ğ¸Ğ¿ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
-	; Ğ•ÑĞ»Ğ¸ Ğ¿Ğ°Ñ€Ğ¾Ğ»ÑŒ Ğ·Ğ°Ğ´Ğ°Ğ½
+	Type:="7z"                      ; Òèï àğõèâà
+	; Åñëè ïàğîëü çàäàí
 	If (Password != "") {
-		Password=-p%Password%         ; ĞŸĞ°Ñ€Ğ¾Ğ»ÑŒ Ğ½Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²
+		Password=-p%Password%         ; Ïàğîëü íà àğõèâ
 	}
-	Compression=-mm=%7zMethod% -mx%7zCompression%   ; ĞĞ»Ğ³Ğ¾Ñ€Ğ¸Ñ‚Ğ¼ ÑĞ¶Ğ°Ñ‚Ğ¸Ñ
-	Include=-i@"%IncludeList%"      ; Ğ¤Ğ°Ğ¹Ğ»-ÑĞ¿Ğ¸ÑĞ¾Ğº Ğ²ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğ¹
-	Exclude=-x@"%ExcludeList%"      ; Ğ¤Ğ°Ğ¹Ğ»-ÑĞ¿Ğ¸ÑĞ¾Ğº Ğ¸ÑĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğ¹
-	Synchronize:="p0q0r2x1y2z1w2"   ; ĞšĞ»ÑÑ‡ ÑĞ¸Ğ½Ñ…Ñ€Ğ¾Ğ½Ğ¸Ğ·Ğ°Ñ†Ğ¸Ğ¸
-	Incrimental:="p1q1r0x1y2z1w2"   ; ĞšĞ»ÑÑ‡ ÑĞ¾Ğ·Ğ´Ğ°Ğ½Ğ¸Ñ Ğ¸Ğ½ĞºÑ€Ğ¸Ğ¼ĞµĞ½Ñ‚Ğ½Ğ¾Ğ³Ğ¾ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
+	Compression=-mm=%7zMethod% -mx%7zCompression%   ; Àëãîğèòì ñæàòèÿ
+	Include=-i@"%IncludeList%"      ; Ôàéë-ñïèñîê âêëş÷åíèé
+	Exclude=-x@"%ExcludeList%"      ; Ôàéë-ñïèñîê èñêëş÷åíèé
+	Synchronize:="p0q0r2x1y2z1w2"   ; Êëş÷ ñèíõğîíèçàöèè
+	Incrimental:="p1q1r0x1y2z1w2"   ; Êëş÷ ñîçäàíèÿ èíêğèìåíòíîãî àğõèâà
 
-	; ĞĞ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ½Ğ° Ğ²Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		If (IncludeThisFile) {
+	; Îïğåäåëåíèå êîìàíäû íà âûïîëíåíèå àğõèâàöèè
+	If (IncludeThisFile) {
 		Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%" -spf2 -w"%A_Temp%"
-		} Else {
+	} Else {
 		Command="%SevenZip%" u -u%Synchronize% %Compression% -r0 -slp -t%Type% %Password% "%Archive%.%Type%" %Exclude% %Include% -spf2 -w"%A_Temp%"
-		}
+	}
 
-	; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ½Ğ°Ğ»Ğ¸Ñ‡Ğ¸Ñ Ğ¿Ğ°Ñ€Ğ°Ğ¼ĞµÑ‚Ñ€Ğ° %RootDir% (Ğ¾Ğ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸)
-	; Ğ•ÑĞ»Ğ¸ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ½Ğµ Ğ·Ğ°Ğ´Ğ°Ğ½:
+	; Ïğîâåğêà íàëè÷èÿ ïàğàìåòğà %RootDir% (îïğåäåëåíèå êîğíåâîãî êàòàëîãà àğõèâàöèè)
+	; Åñëè êîğíåâîé êàòàëîã àğõèâàöèè íå çàäàí:
 	If (RootDir == "") {
-		; RunWait,%Command% ; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ² ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ğ½Ğ¾Ğ¹ ÑÑ‚Ñ€Ğ¾ĞºĞµ
+		; RunWait,%Command% ; Âûïîëíåíèå êîìàíäû àğõèâàöèè â êîìàíäíîé ñòğîêå
 		RunWait,%comspec% /k cd /d "%SourceFileDir%" & %Command% & pause & exit
 
-	; Ğ•ÑĞ»Ğ¸ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ·Ğ°Ğ´Ğ°Ğ½:
+	; Åñëè êîğíåâîé êàòàëîã àğõèâàöèè çàäàí:
 	} else {
-		SetWorkingDir,%RootDir% ; ĞĞ°Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ñ€Ğ°Ğ±Ğ¾Ñ‡Ğ¸Ğ¼ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ¾Ğ¼ Ğ¿Ñ€Ğ¾Ğ³Ñ€Ğ°Ğ¼Ğ¼Ñ‹
+		SetWorkingDir,%RootDir% ; Íàçíà÷åíèå êîğíåâîãî êàòàëîãà àğõèâàöèè ğàáî÷èì êàòàëîãîì ïğîãğàììû
 				SourceCopy := RootDir . "\" . SourceFileShort
 				NoDelete := FileExist(SourceCopy)
 
-		; ĞšĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ² ĞºĞ¾Ñ€Ğ½ĞµĞ²ÑƒĞ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		If (SourceCopy!=SourceFile and IncludeThisFile) { ; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° ÑĞ¾Ğ²Ğ¿Ğ°Ğ´ĞµĞ½Ğ¸Ñ Ğ¿ÑƒÑ‚Ğ¸ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ñ Ğ¿ÑƒÑ‚Ñ‘Ğ¼ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
-			FileCopy,%SourceFile%,%SourceCopy%,1 ; ĞšĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ / Ğ¿ĞµÑ€ĞµĞ·Ğ°Ğ¿ĞµÑÑŒ Ñ„Ğ°Ğ¹Ğ»Ğ° Ğ² ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
+		; Êîïèğîâàíèå ôàéëà-èñòî÷íèêà â êîğíåâóîé êàòàëîã àğõèâàöèè
+		If (SourceCopy!=SourceFile and IncludeThisFile) { ; Ïğîâåğêà ñîâïàäåíèÿ ïóòè ôàéëà-èñòî÷íèêà ñ ïóò¸ì êîïèğîâàíèÿ ôàéëà-èñòî÷íèêà
+			FileCopy,%SourceFile%,%SourceCopy%,1 ; Êîïèğîâàíèå / ïåğåçàïåñü ôàéëà â êîğíåâîé êàòàëîã àğõèâàöèè
 		}
 
-		; RunWait,%Command% ; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ² ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ğ½Ğ¾Ğ¹ ÑÑ‚Ñ€Ğ¾ĞºĞµ
+		; RunWait,%Command% ; Âûïîëíåíèå êîìàíäû àğõèâàöèè
+		; Âûïîëíåíèå êîìàíäû àğõèâàöèè â êîìàíäíîé ñòğîêå
 		RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-		If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° ÑĞ¾Ğ²Ğ¿Ğ°Ğ´ĞµĞ½Ğ¸Ñ Ğ¿ÑƒÑ‚Ğ¸ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ñ Ğ¿ÑƒÑ‚Ñ‘Ğ¼ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
-			FileDelete,%SourceCopy% ; Ğ£Ğ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ ÑĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¾Ğ³Ğ¾ Ñ€Ğ°Ğ½ĞµĞµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ¸Ğ· ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
+		If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; Ïğîâåğêà ñîâïàäåíèÿ ïóòè ôàéëà-èñòî÷íèêà ñ ïóò¸ì êîïèğîâàíèÿ ôàéëà-èñòî÷íèêà
+			FileDelete,%SourceCopy% ; Óäàëåíèå ñêîïèğîâàíîãî ğàíåå ôàéëà-èñòî÷íèêà èç êîğíåâîãî êàòàëîãà àğõèâàöèè
 		}
-		SetWorkingDir,%SourceFileDir% ; Ğ’Ğ¾ÑÑÑ‚Ğ°Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ğµ Ñ€Ğ°Ğ±Ğ¾Ñ‡ĞµĞ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ¿Ñ€Ğ¾Ğ³Ñ€Ğ°Ğ¼Ğ¼Ñ‹
+		SetWorkingDir,%SourceFileDir% ; Âîññòàíîâëåíèå ğàáî÷åãî êàòàëîãà ïğîãğàììû
 	}
 
-	; Ğ£Ğ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ²-ÑĞ¿Ğ¸ÑĞºĞ¾Ğ²
+	; Óäàëåíèå ôàéëîâ-ñïèñêîâ
 	FileDelete,%IncludeList%
 	FileDelete,%ExcludeList%
 }
 
-; Ğ¡Ğ¾Ğ·Ğ´Ğ°Ğ½Ğ¸Ğµ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ° Ñ Ğ¿Ğ¾Ğ¼Ğ¾Ñ‰ÑŒÑ WinRAR
+; Ñîçäàíèå àğõèâà ñ ïîìîùüş WinRAR
 If (FileExist(WinRAR) && InStr(ArchiveType,"rar")) {
-	; Ğ Ğ°Ğ·Ğ´ĞµĞ»ĞµĞ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ½Ğ° Ñ„Ğ°Ğ¹Ğ»Ñ‹-ÑĞ¿Ğ¸ÑĞºĞ¸ Ğ²ĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ñ… Ğ¸ Ğ¸ÑĞºĞ»ÑÑ‡Ğ°ĞµĞ¼Ñ‹Ñ… Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ² (ĞºĞ¾Ğ´Ğ¸Ñ€Ğ¾Ğ²ĞºĞ° Windows-1251)
+	; Ğàçäåëåíèå ôàéëà-èñòî÷íèêà íà ôàéëû-ñïèñêè âêëş÷àåìûõ è èñêëş÷àåìûõ ôàéëîâ (êîäèğîâêà Windows-1251)
 	SplitTextFile(SourceFile,IncludeList,"[IncludeList]","[ExcludeList]","CP1251")
 	SplitTextFile(SourceFile,ExcludeList,"[ExcludeList]","","CP1251")
+	
+	If ( WriteComment ) {
+		SplitTextFile(SourceFile,CommentFile,"[IncludeList]","[ExcludeList]","CP1251",false,false)
+	}
 
-	Type:="rar"                     ; Ğ¢Ğ¸Ğ¿ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
-	; Ğ•ÑĞ»Ğ¸ Ğ¿Ğ°Ñ€Ğ¾Ğ»ÑŒ Ğ·Ğ°Ğ´Ğ°Ğ½
+	Type:="rar"                     ; Òèï àğõèâà
+	; Åñëè ïàğîëü çàäàí
 	If (Password != "") {
-		Password=-p%Password%         ; ĞŸĞ°Ñ€Ğ¾Ğ»ÑŒ Ğ½Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²
+		Password=-p%Password%         ; Ïàğîëü íà àğõèâ
 	}
-	Compression=-m%RarCompression% -rr5p        ; ĞĞ»Ğ³Ğ¾Ñ€Ğ¸Ñ‚Ğ¼ ÑĞ¶Ğ°Ñ‚Ğ¸Ñ
-	Include=@"%IncludeList%"        ; Ğ¤Ğ°Ğ¹Ğ»-ÑĞ¿Ğ¸ÑĞ¾Ğº Ğ²ĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğ¹
-	Exclude=-x@"%ExcludeList%"      ; Ğ¤Ğ°Ğ¹Ğ»-ÑĞ¿Ğ¸ÑĞ¾Ğº Ğ¸ÑĞºĞ»ÑÑ‡ĞµĞ½Ğ¸Ğ¹
-	Synchronize:=" -as"             ; ĞšĞ»ÑÑ‡ ÑĞ¸Ğ½Ñ…Ñ€Ğ¾Ğ½Ğ¸Ğ·Ğ°Ñ†Ğ¸Ğ¸
-	Incrimental:="p1q1r0x1y2z1w2"   ; ĞšĞ»ÑÑ‡ ÑĞ¾Ğ·Ğ´Ğ°Ğ½Ğ¸Ñ Ğ¸Ğ½ĞºÑ€Ğ¸Ğ¼ĞµĞ½Ñ‚Ğ½Ğ¾Ğ³Ğ¾ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°
+	Compression=-m%RarCompression% -rr5p        ; Àëãîğèòì ñæàòèÿ
+	Include=@"%IncludeList%"        ; Ôàéë-ñïèñîê âêëş÷åíèé
+	Exclude=-x@"%ExcludeList%"      ; Ôàéë-ñïèñîê èñêëş÷åíèé
+	Synchronize:=" -as"             ; Êëş÷ ñèíõğîíèçàöèè
+	Incrimental:="p1q1r0x1y2z1w2"   ; Êëş÷ ñîçäàíèÿ èíêğèìåíòíîãî àğõèâà
 
-	; ĞĞ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ½Ğ° Ğ²Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		If (IncludeThisFile) {
+	; Îïğåäåëåíèå êîìàíäû íà âûïîëíåíèå àğõèâàöèè
+	If (IncludeThisFile) {
 		Command="%WinRAR%" u -u%Synchronize% %Compression% -r0 %Password% "%Archive%.%Type%" %Exclude% %Include% "%SourceFileShort%"
-		} Else {
-				Command="%WinRAR%" u -u%Synchronize% %Compression% -r0 %Password% "%Archive%.%Type%" %Exclude% %Include%
-		}
+	} Else {
+		Command="%WinRAR%" u -u%Synchronize% %Compression% -r0 %Password% "%Archive%.%Type%" %Exclude% %Include%
+	}
+	If (WriteComment) {
+		Command = %Command% -z"%CommentFile%"
+	}
 	If (LockArchive) {
-		Command = %Command% & "%WinRAR%" k "%Archive%.%Type%"
+		Command = %Command% & "%WinRAR%" k %Compression% "%Archive%.%Type%"
 	}
 
-	; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ½Ğ°Ğ»Ğ¸Ñ‡Ğ¸Ñ Ğ¿Ğ°Ñ€Ğ°Ğ¼ĞµÑ‚Ñ€Ğ° %RootDir% (Ğ¾Ğ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸)
-	; Ğ•ÑĞ»Ğ¸ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ½Ğµ Ğ·Ğ°Ğ´Ğ°Ğ½:
+	; Ïğîâåğêà íàëè÷èÿ ïàğàìåòğà %RootDir% (îïğåäåëåíèå êîğíåâîãî êàòàëîãà àğõèâàöèè)
+	; Åñëè êîğíåâîé êàòàëîã àğõèâàöèè íå çàäàí:
 	If (RootDir == "") {
-		; RunWait,%Command% ; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ² ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ğ½Ğ¾Ğ¹ ÑÑ‚Ñ€Ğ¾ĞºĞµ
+		; RunWait,%Command% ; Âûïîëíåíèå êîìàíäû àğõèâàöèè â êîìàíäíîé ñòğîêå
 		RunWait,%comspec% /k cd /d "%SourceFileDir%" & %Command% & pause & exit
 
-	; Ğ•ÑĞ»Ğ¸ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ·Ğ°Ğ´Ğ°Ğ½:
+	; Åñëè êîğíåâîé êàòàëîã àğõèâàöèè çàäàí:
 	} else {
-		SetWorkingDir,%RootDir% ; ĞĞ°Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ñ€Ğ°Ğ±Ğ¾Ñ‡Ğ¸Ğ¼ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ¾Ğ¼ Ğ¿Ñ€Ğ¾Ğ³Ñ€Ğ°Ğ¼Ğ¼Ñ‹
-				SourceCopy := RootDir . "\" . SourceFileShort
-				NoDelete := FileExist(SourceCopy)
+		SetWorkingDir,%RootDir% ; Íàçíà÷åíèå êîğíåâîãî êàòàëîãà àğõèâàöèè ğàáî÷èì êàòàëîãîì ïğîãğàììû
+		SourceCopy := RootDir . "\" . SourceFileShort
+		NoDelete := FileExist(SourceCopy)
 
-		; ĞšĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ² ĞºĞ¾Ñ€Ğ½ĞµĞ²ÑƒĞ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		If (SourceCopy!=SourceFile and IncludeThisFile) { ; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° ÑĞ¾Ğ²Ğ¿Ğ°Ğ´ĞµĞ½Ğ¸Ñ Ğ¿ÑƒÑ‚Ğ¸ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ñ Ğ¿ÑƒÑ‚Ñ‘Ğ¼ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
-			FileCopy,%SourceFile%,%SourceCopy%,1 ; ĞšĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ / Ğ¿ĞµÑ€ĞµĞ·Ğ°Ğ¿ĞµÑÑŒ Ñ„Ğ°Ğ¹Ğ»Ğ° Ğ² ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ¹ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
+		; Êîïèğîâàíèå ôàéëà-èñòî÷íèêà â êîğíåâóîé êàòàëîã àğõèâàöèè
+		If (SourceCopy!=SourceFile and IncludeThisFile) { ; Ïğîâåğêà ñîâïàäåíèÿ ïóòè ôàéëà-èñòî÷íèêà ñ ïóò¸ì êîïèğîâàíèÿ ôàéëà-èñòî÷íèêà
+			FileCopy,%SourceFile%,%SourceCopy%,1 ; Êîïèğîâàíèå / ïåğåçàïåñü ôàéëà â êîğíåâîé êàòàëîã àğõèâàöèè
 		}
 
-		; RunWait,%Command% ; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
-		; Ğ’Ñ‹Ğ¿Ğ¾Ğ»Ğ½ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ñ‹ Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸ Ğ² ĞºĞ¾Ğ¼Ğ°Ğ½Ğ´Ğ½Ğ¾Ğ¹ ÑÑ‚Ñ€Ğ¾ĞºĞµ
+		; RunWait,%Command% ; Âûïîëíåíèå êîìàíäû àğõèâàöèè
+		; Âûïîëíåíèå êîìàíäû àğõèâàöèè â êîìàíäíîé ñòğîêå
 		RunWait,%comspec% /k cd /d "%RootDir%" & %Command% & pause & exit
 
-		If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; ĞŸÑ€Ğ¾Ğ²ĞµÑ€ĞºĞ° ÑĞ¾Ğ²Ğ¿Ğ°Ğ´ĞµĞ½Ğ¸Ñ Ğ¿ÑƒÑ‚Ğ¸ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ñ Ğ¿ÑƒÑ‚Ñ‘Ğ¼ ĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¸Ñ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ°
-			FileDelete,%SourceCopy% ; Ğ£Ğ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ ÑĞºĞ¾Ğ¿Ğ¸Ñ€Ğ¾Ğ²Ğ°Ğ½Ğ¾Ğ³Ğ¾ Ñ€Ğ°Ğ½ĞµĞµ Ñ„Ğ°Ğ¹Ğ»Ğ°-Ğ¸ÑÑ‚Ğ¾Ñ‡Ğ½Ğ¸ĞºĞ° Ğ¸Ğ· ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ°Ñ€Ñ…Ğ¸Ğ²Ğ°Ñ†Ğ¸Ğ¸
+		If (SourceCopy!=SourceFile and IncludeThisFile and not NoDelete) { ; Ïğîâåğêà ñîâïàäåíèÿ ïóòè ôàéëà-èñòî÷íèêà ñ ïóò¸ì êîïèğîâàíèÿ ôàéëà-èñòî÷íèêà
+			FileDelete,%SourceCopy% ; Óäàëåíèå ñêîïèğîâàíîãî ğàíåå ôàéëà-èñòî÷íèêà èç êîğíåâîãî êàòàëîãà àğõèâàöèè
 		}
-		SetWorkingDir,%SourceFileDir% ; Ğ’Ğ¾ÑÑÑ‚Ğ°Ğ½Ğ¾Ğ²Ğ»ĞµĞ½Ğ¸Ğµ Ñ€Ğ°Ğ±Ğ¾Ñ‡ĞµĞ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ¿Ñ€Ğ¾Ğ³Ñ€Ğ°Ğ¼Ğ¼Ñ‹
+		SetWorkingDir,%SourceFileDir% ; Âîññòàíîâëåíèå ğàáî÷åãî êàòàëîãà ïğîãğàììû
 	}
 
-	; Ğ£Ğ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ²-ÑĞ¿Ğ¸ÑĞºĞ¾Ğ²
+	; Óäàëåíèå ôàéëîâ-ñïèñêîâ
 	FileDelete,%IncludeList%
 	FileDelete,%ExcludeList%
+	If ( WriteComment ) {
+		FileDelete,%CommentFile%
+	}
 }
 
 /*
 ; ===================================================================================
-;                 Ğ¤Ğ£ĞĞšĞ¦Ğ˜Ğ¯ ĞŸĞĞ›Ğ£Ğ§Ğ•ĞĞ˜Ğ¯ Ğ—ĞĞĞ§Ğ•ĞĞ˜Ğ™ Ğ˜Ğ— Ğ¡Ğ¢Ğ ĞĞš Ğ¤ĞĞ™Ğ›Ğ-Ğ˜Ğ¡Ğ¢ĞĞ§ĞĞ˜ĞšĞ
+;                 ÔÓÍÊÖÈß ÏÎËÓ×ÅÍÈß ÇÍÀ×ÅÍÈÉ ÈÇ ÑÒĞÎÊ ÔÀÉËÀ-ÈÑÒÎ×ÍÈÊÀ
 ; ===================================================================================
 GetValue(SourceFile,SearchPattern)
 {
@@ -447,9 +466,9 @@ GetValue(SourceFile,SearchPattern)
 */
 
 ; ===================================================================================
-;                 Ğ¤Ğ£ĞĞšĞ¦Ğ˜Ğ¯ Ğ ĞĞ—Ğ”Ğ•Ğ›Ğ•ĞĞ˜Ğ¯ Ğ¤ĞĞ™Ğ›Ğ-Ğ˜Ğ¡Ğ¢ĞĞ§ĞĞ˜ĞšĞ ĞĞ Ğ¤ĞĞ™Ğ›Ğ«-Ğ¡ĞŸĞ˜Ğ¡ĞšĞ˜
+;                 ÔÓÍÊÖÈß ĞÀÇÄÅËÅÍÈß ÔÀÉËÀ-ÈÑÒÎ×ÍÈÊÀ ÍÀ ÔÀÉËÛ-ÑÏÈÑÊÈ
 ; ===================================================================================
-SplitTextFile(SourceFile,OutputFile,StartString,EndString = "",Encoding = "")
+SplitTextFile( ByRef SourceFile, ByRef OutputFile, ByRef StartString, ByRef EndString := "", ByRef Encoding := "", ByRef SkipComments := true, ByRef TrimLines := true )
 {
 	If (Encoding == "") { ; if no Encoding defined
 		Encoding := A_FileEncoding
@@ -473,23 +492,26 @@ SplitTextFile(SourceFile,OutputFile,StartString,EndString = "",Encoding = "")
 
 	Loop,Read,%SourceFile%
 	{
-		If A_LoopReadLine = ; if looped line is empty
-			Continue ; skip the current Loop instance
+		If ( SkipComments ) {
+			If A_LoopReadLine = ; if looped line is empty
+				Continue ; skip the current Loop instance
 
-		If RegExMatch(A_LoopReadLine,"^(\s+)?;") ; if looped line is commented
-			Continue ; skip the current Loop instance
+			If RegExMatch(A_LoopReadLine,"^(\s+)?;") ; if looped line is commented
+				Continue ; skip the current Loop instance
 
-		If RegExMatch(A_LoopReadLine,"^(\s+)?//") ; if looped line is commented
-			Continue ; skip the current Loop instance
+			If RegExMatch(A_LoopReadLine,"^(\s+)?//") ; if looped line is commented
+				Continue ; skip the current Loop instance
+		}
 
 		CurrentLine:=A_Index
 		If (CurrentLine > StartLine) && (CurrentLine < EndLine)
 		{
-			CurrentString := RegExReplace(A_LoopReadLine,"^[ \t]+","")
+			; CurrentString := RegExReplace(A_LoopReadLine,"^[ \t]+","")
+			CurrentString := TrimLines ? Trim( A_LoopReadLine ) : A_LoopReadLine ; Óäàëåíèå íà÷àëüíûõ è çàìûêàşùèõ ïğîáåëîâ
 			CurrentString := ParseEnvironmentVariables(CurrentString)
 			If (RootDir != "") {
 				RootDirSlash:=RootDir "`\"
-				CurrentString := StrReplace(CurrentString,RootDirSlash,"") ; Ğ£Ğ´Ğ°Ğ»ĞµĞ½Ğ¸Ğµ ĞºĞ¾Ñ€Ğ½ĞµĞ²Ğ¾Ğ³Ğ¾ ĞºĞ°Ñ‚Ğ°Ğ»Ğ¾Ğ³Ğ° Ğ¸Ğ· Ğ¿ÑƒÑ‚ĞµĞ¹ Ñ„Ğ°Ğ¹Ğ»Ğ°-ÑĞ¿Ğ¸ÑĞºĞ°
+				CurrentString := StrReplace(CurrentString,RootDirSlash,"") ; Óäàëåíèå êîğíåâîãî êàòàëîãà èç ïóòåé ôàéëà-ñïèñêà
 			}
 			FileAppend,%CurrentString%`n,%OutputFile%,%Encoding%
 		}
@@ -505,7 +527,7 @@ SplitTextFile(SourceFile,OutputFile,StartString,EndString = "",Encoding = "")
 }
 
 ; ===================================================================================
-;                 Ğ¤Ğ£ĞĞšĞ¦Ğ˜Ğ¯ ĞŸĞ•Ğ Ğ•Ğ’ĞĞ”Ğ Ğ—ĞĞĞ§Ğ•ĞĞ˜Ğ™ BOOOLEAN Ğ’ STRING
+;                 ÔÓÍÊÖÈß ÏÅĞÅÂÎÄÀ ÇÍÀ×ÅÍÈÉ BOOOLEAN Â STRING
 ; ===================================================================================
 BoolToStr(v) {
 		If (v and (v == "true" or v = 1)) {

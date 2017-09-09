@@ -11,8 +11,6 @@ SCRIPT_NAME := "CopyAddons" ; GetScriptName()
 SCRIPT_VERSION := "1.1.2"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION . " (by Ægir)"
 
-; FileEncoding, UTF-8
-
 /*
 CreateLogo:
 {
@@ -67,16 +65,13 @@ DefineGlobals:
 	IniRead,SEPARATE_DIRS,%INI_FILE%,OPTIONS,SeparateDirs,1
 	IniRead,CONFIGS,%INI_FILE%,OPTIONS,Configs,1
 
+	READ_ME_FILE := COPY_TO_DIR . "\README.txt"
+
 	IniRead,TIMESTAMPS,%INI_FILE%,OPTIONS,Timestamps,%A_Space%
 	If (TIMESTAMPS && TIMESTAMPS != "") {
 		FormatTime,Date,,%TIMESTAMPS% ; Получение текущей даты (2015.11.29)
 		COPY_TO_DIR := COPY_TO_DIR . " (" . Date . ")"
 	}
-	
-	READ_ME_FILE := COPY_TO_DIR . "\README.txt"
-	FIX_IT_FILE := COPY_TO_DIR . "\FIX_IT.txt"
-	
-	IniRead,CLEANING_MODE,%INI_FILE%,OPTIONS,CleaningMode,0
 }
 
 ; Создание списка секций INI_FILE
@@ -225,48 +220,12 @@ ProcessFilesList:
 		Loop, Files, % COPY_TO_DIR "\WTF\*.lua", RF
 		{
 			GuiControl,MsgBox1_:Text,MsgBox1_Text,Идет обработка файлов...`n`n%A_LoopFileFullPath%
-			FileEncoding_tmp := A_FileEncoding
-			CurFile := A_LoopFileFullPath
-			FileEncoding, UTF-8
-			Loop, Read, % CurFile
-			{
-				CurLine := Trim( A_LoopReadLine )
-				Find = .*%REALM_2% - %CHARACTER_1%.* ;["WoW Circle 3.3.5a Fun - Злаяпадла"] = {
-				; MsgBox, % CurLine "`n" Find
-				If RegExMatch( CurLine,  Find )
-				{
-					; MsgBox, % A_LoopFileFullPath
-					Info := "FILE: " A_LoopFileFullPath "`n" "LINE: " A_Index "`n" "TEXT: " CurLine
-					FileAppend,%Info%`n,%FIX_IT_FILE% ;,UTF-8
-				}
-			}
-			FileEncoding, %FileEncoding_tmp%
-		}
-		Loop, Files, % COPY_TO_DIR "\WTF\*.lua", RF
-		{
-			GuiControl,MsgBox1_:Text,MsgBox1_Text,Идет обработка файлов...`n`n%A_LoopFileFullPath%
-			find = ((.*)\["%CHARACTER_2% - %REALM_2%"\] = "(.*)",)
-			replace := "" ; 
+			find = ((.*)\["%CHARACTER_1% - %REALM_1%"\] = "(.*)",)
+			replace = $1`n$2["%CHARACTER_2% - %REALM_2%"] = "$3",
 			; MsgBox, % A_LoopFileFullPath "`n" find "`n" replace
-			FileEncoding_tmp := A_FileEncoding
 			FileEncoding, CP65001
 			TF_RegExReplace( "!" . A_LoopFileFullPath, find, replace )
-			FileEncoding, %FileEncoding_tmp%
 			; MsgBox % TF_CountLines( "!" . A_LoopFileFullPath )
-		}
-		If ( CLEANING_MODE = 0 ) {
-			Loop, Files, % COPY_TO_DIR "\WTF\*.lua", RF
-			{
-				GuiControl,MsgBox1_:Text,MsgBox1_Text,Идет обработка файлов...`n`n%A_LoopFileFullPath%
-				find = ((.*)\["%CHARACTER_1% - %REALM_1%"\] = "(.*)",)
-				replace = $1`n$2["%CHARACTER_2% - %REALM_2%"] = "$3",
-				; MsgBox, % A_LoopFileFullPath "`n" find "`n" replace
-				FileEncoding_tmp := A_FileEncoding
-				FileEncoding, CP65001
-				TF_RegExReplace( "!" . A_LoopFileFullPath, find, replace )
-				FileEncoding, %FileEncoding_tmp%
-				; MsgBox % TF_CountLines( "!" . A_LoopFileFullPath )
-			}
 		}
 	}
 
@@ -286,7 +245,7 @@ ProcessFilesList:
 		Key := StrReplace(Key,"$REALM$",REALM_2)
 		Key := StrReplace(Key,"$CHARACTER$",CHARACTER_2)
 
-		FileAppend,%Key%`n,%READ_ME_FILE% ;,UTF-8
+		FileAppend,%Key%`n,%READ_ME_FILE%,UTF-8
 	}
 
 	; Завершающий диалог
@@ -303,8 +262,6 @@ ProcessFilesList:
 		MsgBox,0,Error,Not found:`n%COPY_TO_DIR%,1.5
 	}
 }
-
-; Run, % READ_ME_FILE
 
 Exit
 

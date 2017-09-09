@@ -5,50 +5,98 @@ SendMode,Input ; Recommended for new scripts due to its superior speed and relia
 
 Script.Force_Single_Instance()
 
-WinRAR = "C:\Program Files\WinRAR\WinRAR.exe"
-Set_CD = cd /d "%A_WorkingDir%"
-Output_Dir := A_WorkingDir . "\" . "Extracted" . "\"
+SetWorkingDir, % "D:\Downloads\Sounds\sox-14.4.2\converted"
 
-If FileExist("Extracted\") {
-	FileRemoveDir, Extracted, 1
-}
+SoX := "D:\Downloads\Sounds\sox-14.4.2\sox.exe"
+Output_Dir := A_WorkingDir "\SoX_Output"
 
-File_List := []
-Loop, Read, % "List_File.txt"
+Command = ; null
+
+inFilePath := "flyby_004.wav"
+inFileExt := RegExReplace( inFilePath, ".*\.(.*)", "$1" )
+inFileName := RegExReplace(  RegExReplace( inFilePath, ".*\\(.*)", "$1" ), "(.*)\..*", "$1" )
+
+rpm = 400
+shots = 5
+step := 60/rpm
+pitch := 200
+
+pitch_min := -(pitch/2)
+pitch_max := +(pitch/2)
+
+outFilesArray := []
+outFilesList := ""
+
+cleanUpArray := []
+
+count := 0
+
+Loop, % shots - 1
 {
-	Loop, Parse, A_LoopReadLine, `n, `r
+	count := A_Index
+	Random, pitchValue, % pitch_min, % pitch_max
+	outFileName := Format( "{1:s}.{2:s}", inFileName " - " count, inFileExt )
+	outFilePath := outFileName
+	Command = "%SoX%" "%inFilePath%" "%outFilePath%"
+	Command .= " pitch " pitchValue
+	RunWait, %Command%
+	If FileExist( outFilePath )
 	{
-		Read_Line := Trim(A_LoopReadLine)
-		If RegExMatch( Read_Line, "^;" ) {
-			Continue
-		}
-		File_List.Push( Read_Line )
+		outFilesArray.Push( outFilePath )
+		; outFilesList .= """" outFilePath """"
+		; outFilesList .= " "
+		cleanUpArray.Push( outFilePath )
 	}
 }
 
-Archive_List := []
-Loop, Files, % "*.pak", RF
+For outFileIndex, outFilePath1 in outFilesArray
 {
-	Archive_List.Push( A_LoopFileFullPath )
-}
-
-For File_Index, File in File_List {
-	For Archive_Index, Archive in Archive_List {
-		Parsed := File_Index/File_List.MaxIndex() + (Archive_Index/Archive_List.MaxIndex() - 1)/100
-		Pct := Round( Parsed * 100, 2 ) . "%"
-		Tip := "File:   " File " (" File_Index " of " File_List.MaxIndex() ")" . "`n" . "In:     " Archive " (" Archive_Index " of " Archive_List.MaxIndex() ")" . "`n" . "Total: " Pct
-		Extract_CMD = %WinRAR% x -INUL -o+ "%Archive%" "%File%" "%Output_Dir%"
-		RunWait, %Extract_CMD%
-		ToolTip( Tip )
+	count := outFileIndex
+	Random, stepError, 0.95, 1.05
+	outFileName := Format( "{1:s}.{2:s}", inFileName " - cut_" count, inFileExt )
+	outFilePath := outFileName
+	Command = "%SoX%" "%outFilePath1%" "%outFilePath%"
+	Command .= " trim 0 " (step * stepError)
+	RunWait, %Command%
+	If FileExist( outFilePath )
+	{
+		; outFilesArray.Push( outFilePath )
+		outFilesList .= """" outFilePath """"
+		outFilesList .= " "
+		cleanUpArray.Push( outFilePath )
 	}
 }
 
-MsgBox, F I N I S H E D
-
-IfExist, %Output_Dir%
+outFileName := Format( "{1:s}.{2:s}", inFileName " - cut_" count+1, inFileExt )
+outFilePath := outFileName
+FileCopy, %inFilePath%, %outFilePath%, 1
+If FileExist( outFilePath )
 {
-	Run, %Output_Dir%
+	outFilesArray.Push( outFilePath )
+	outFilesList .= """" outFilePath """"
+	outFilesList .= " "
+	cleanUpArray.Push( outFilePath )
 }
+
+outFilesList := Trim( outFilesList )
+
+outFileName := Format( "{1:s}.{2:s}", inFileName " - Burst " shots, inFileExt )
+outFilePath := outFileName
+
+Command = "%SoX%" %outFilesList% "%outFilePath%"
+If ( StrLen( Command ) > 0 )
+{
+	MsgBox, %Command%
+	RunWait, %Command%
+}
+
+Msg :=  ""
+For cleanUpFileIndex, cleanUpFilePath in cleanUpArray
+{
+	FileDelete, %cleanUpFilePath%
+	Msg .= cleanUpFilePath "`n"
+}
+MsgBox, %Msg%
 
 ExitApp
 
@@ -119,3 +167,4 @@ class Script
 		Return, Name
 	}
 }
+

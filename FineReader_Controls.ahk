@@ -9,97 +9,257 @@ Script.Run_As_Admin()
 Win_Title := "Сканування ABBYY FineReader ahk_exe FineReader.exe ahk_class #32770"
 WinGetPos,,, Win_Width, Win_Height, %Win_Title%
 
+If not ( Win_Width or Win_Height ) {
+	MsgBox, Не найдено окно:`n%Win_Title%
+	ExitApp
+}
+
 Step := 5
 Scale := 2
 
-Numpad5::
-	Win_ID := WinExist( Win_Title )
-	If ( Win_ID )
-	{	
-		WinActivate, ahk_id %Win_ID%
-		If WinActive( "ahk_id " Win_ID )
-		{			
-			Max := Get_Max()
-			SendMessage, 0x0422, 0, 0, msctls_trackbar321, ahk_id %Win_ID%
-			Cur := To_Percent( Get_Pos(), Max, False )
-			Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
-			ToolTip( Tip )
+Text_1 := "Для ЧБ текста: +20%`n`nДля Цветного / Серого изображения: -50%`nОсветление фона`nУровни (0, 0.3, 255)  -  Numpad *  `nОсветление фона`nУровни (0, 1.0, 179)  -  Numpad /  `n"
+
+ToolTip_Time := 800*3
+
+pixelsPerMove := 1
+
+#IfWinActive, ahk_exe FineReader.exe
+{
+	Numpad9:: ; Установить 20 единиц яркости
+		Win_ID := WinExist( Win_Title )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{			
+				Max := Get_Max()
+				Pct := 20 ; To_Percent( Get_Pos(), Max, False ) + Step
+				Pos := To_Pos( Pct, Max, False )
+				SendMessage, 0x0422, 0, %Pos%, msctls_trackbar321, ahk_id %Win_ID%
+				Cur := To_Percent( Get_Pos(), Max, False )
+				Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
+				Tip := Tip "`n`n" Text_1
+				ToolTip( Tip, ToolTip_Time )
+			}
 		}
-	}
+	Return
+	
+	Numpad7:: ; Установить -50 единиц яркости
+		Win_ID := WinExist( Win_Title )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{			
+				Max := Get_Max()
+				Pct := -50 ; To_Percent( Get_Pos(), Max, False ) + Step
+				Pos := To_Pos( Pct, Max, False )
+				SendMessage, 0x0422, 0, %Pos%, msctls_trackbar321, ahk_id %Win_ID%
+				Cur := To_Percent( Get_Pos(), Max, False )
+				Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
+				Tip := Tip "`n`n" Text_1
+				ToolTip( Tip, ToolTip_Time )
+			}
+		}
+	Return
+	
+	Numpad5:: ; Сбросить яркость на 0
+		Win_ID := WinExist( Win_Title )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{			
+				Max := Get_Max()
+				SendMessage, 0x0422, 0, 0, msctls_trackbar321, ahk_id %Win_ID%
+				Cur := To_Percent( Get_Pos(), Max, False )
+				Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
+				Tip := Tip "`n`n" Text_1
+				ToolTip( Tip, ToolTip_Time )
+			}
+		}
+	Return
+
+	Numpad6:: ; Добавить 5 единиц яркости
+		Win_ID := WinExist( Win_Title )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{			
+				Max := Get_Max()
+				Pct := To_Percent( Get_Pos(), Max, False ) + Step
+				Pos := To_Pos( Pct, Max, False )
+				SendMessage, 0x0422, 0, %Pos%, msctls_trackbar321, ahk_id %Win_ID%
+				Cur := To_Percent( Get_Pos(), Max, False )
+				Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
+				Tip := Tip "`n`n" Text_1
+				ToolTip( Tip, ToolTip_Time )
+			}
+		}
+	Return
+
+	Numpad4:: ; Убрать 5 единиц яркости
+		Win_ID := WinExist( Win_Title )
+		If ( Win_ID )
+		{
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{			
+				Max := Get_Max()
+				Pct := To_Percent( Get_Pos(), Max, False ) - Step
+				Pos := To_Pos( Pct, Max, False )
+				SendMessage, 0x0422, 0, %Pos%, msctls_trackbar321, ahk_id %Win_ID%
+				Cur := To_Percent( Get_Pos(), Max, False )
+				Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
+				Tip := Tip "`n`n" Text_1
+				ToolTip( Tip, ToolTip_Time )
+			}
+		}
+	Return
+
+	NumpadAdd:: ; Увеличить окно
+		Win_ID := WinExist( Win_Title )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{			
+			; Center Win
+			; --------------------------------------
+			; WinGetPos,,, Width, Height, ahk_id %Win_ID%
+			Scale := ( A_ScreenHeight - 100 ) / Win_Height
+			Width := Win_Width * Scale
+			Height := Win_Height * Scale
+			WinMove, ahk_id %Win_ID%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2), Width, Height
+			; --------------------------------------
+			}
+		}
+	Return
+
+	NumpadSub:: ; Уменьшить окно
+		Win_ID := WinExist( Win_Title )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{			
+			; Center Win
+			; --------------------------------------
+			; WinGetPos,,, Width, Height, ahk_id %Win_ID%
+			Width := Win_Width
+			Height := Win_Height
+			WinMove, ahk_id %Win_ID%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2), Width, Height
+			; --------------------------------------
+			}
+		}
+	Return
+
+	NumpadMult:: ; Уровни (0, 0.3, 255)
+		Win_ID := WinExist( "ahk_exe FineReader.exe ahk_class FineReader12MainWindowClass" )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{
+				Val = 0,30
+				ControlSetText, Edit9, %Val%, ahk_id %Win_ID%
+				ControlSend, Edit9, {Space}
+			}
+		}
+	Return
+
+	NumpadDiv:: ; Уровни (0, 1.0, 179)
+		Win_ID := WinExist( "ahk_exe FineReader.exe ahk_class FineReader12MainWindowClass" )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{
+				Val := Round( (1 - 0.30) * 255, 0 )
+				ControlSetText, Edit10, %Val%, ahk_id %Win_ID%
+				ControlSend, Edit10, {Space}
+			}
+		}
+	Return
+
+	Right:: ; Сдигает рамку вправо
+		Win_ID := WinExist( "ahk_exe FineReader.exe ahk_class FineReader12MainWindowClass" )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{
+				MouseClickDrag,Left,,,% pixelsPerMove,0,,R
+			}
+		}
+	Return
+
+	Left:: ; Сдигает рамку влево
+		Win_ID := WinExist( "ahk_exe FineReader.exe ahk_class FineReader12MainWindowClass" )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{
+				MouseClickDrag,Left,,,% -pixelsPerMove,0,,R
+			}
+		}
+	Return
+
+	Up:: ; Сдигает рамку вверх
+		Win_ID := WinExist( "ahk_exe FineReader.exe ahk_class FineReader12MainWindowClass" )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{
+				MouseClickDrag,Left,,,0,% pixelsPerMove,,R
+			}
+		}
+	Return
+
+	Down:: ; Сдигает рамку вниз
+		Win_ID := WinExist( "ahk_exe FineReader.exe ahk_class FineReader12MainWindowClass" )
+		If ( Win_ID )
+		{	
+			WinActivate, ahk_id %Win_ID%
+			If WinActive( "ahk_id " Win_ID )
+			{
+				MouseClickDrag,Left,,,0,% -pixelsPerMove,,R
+			}
+		}
+	Return
+}
+
+F12::			
+	WinGet, ActiveControlList, ControlList, A
+	out := ""
+	; Loop, Parse, ActiveControlList, `n
+	; {
+		; ControlGet, theList, List,, %A_LoopField%, A
+		; ControlGetText, theText, %A_LoopField%
+		; val := theText ? theText : theList
+		; out .= "Control #" a_index " is " A_LoopField "`t===>`t" val "`n"
+	; }
+	ControlGetFocus, OutputVar, A
+	out := OutputVar
+	MsgBox, % out
 Return
 
-Numpad6::
-	Win_ID := WinExist( Win_Title )
+/*
+NumpadEnter:: ; Сдигает рамку вниз
+	Win_ID := WinExist( "ahk_exe FineReader.exe ahk_class FineReader12MainWindowClass" )
 	If ( Win_ID )
 	{	
-		WinActivate, ahk_id %Win_ID%
-		If WinActive( "ahk_id " Win_ID )
-		{			
-			Max := Get_Max()
-			Pct := To_Percent( Get_Pos(), Max, False ) + Step
-			Pos := To_Pos( Pct, Max, False )
-			SendMessage, 0x0422, 0, %Pos%, msctls_trackbar321, ahk_id %Win_ID%
-			Cur := To_Percent( Get_Pos(), Max, False )
-			Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
-			ToolTip( Tip )
-		}
+		ClassNN := "AWL:2EE50000:80:0:0:0:02"
+		ControlGetFocus, OutputVar, A
+		Control, ShowDropDown, , %OutputVar%, A
+		Control, Choose, 2, %OutputVar%, A
+		Control, ChooseString, "Чорно-білий", %OutputVar%, A
 	}
 Return
-
-Numpad4::
-	Win_ID := WinExist( Win_Title )
-	If ( Win_ID )
-	{
-		WinActivate, ahk_id %Win_ID%
-		If WinActive( "ahk_id " Win_ID )
-		{			
-			Max := Get_Max()
-			Pct := To_Percent( Get_Pos(), Max, False ) - Step
-			Pos := To_Pos( Pct, Max, False )
-			SendMessage, 0x0422, 0, %Pos%, msctls_trackbar321, ahk_id %Win_ID%
-			Cur := To_Percent( Get_Pos(), Max, False )
-			Tip := Cur > 0 ? "+" Cur "%" : Cur "%"
-			ToolTip( Tip )
-		}
-	}
-Return
-
-NumpadAdd::
-	Win_ID := WinExist( Win_Title )
-	If ( Win_ID )
-	{	
-		WinActivate, ahk_id %Win_ID%
-		If WinActive( "ahk_id " Win_ID )
-		{			
-		; Center Win
-		; --------------------------------------
-		; WinGetPos,,, Width, Height, ahk_id %Win_ID%
-		Scale := ( A_ScreenHeight - 100 ) / Win_Height
-		Width := Win_Width * Scale
-		Height := Win_Height * Scale
-		WinMove, ahk_id %Win_ID%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2), Width, Height
-		; --------------------------------------
-		}
-	}
-Return
-
-NumpadSub::
-	Win_ID := WinExist( Win_Title )
-	If ( Win_ID )
-	{	
-		WinActivate, ahk_id %Win_ID%
-		If WinActive( "ahk_id " Win_ID )
-		{			
-		; Center Win
-		; --------------------------------------
-		; WinGetPos,,, Width, Height, ahk_id %Win_ID%
-		Width := Win_Width
-		Height := Win_Height
-		WinMove, ahk_id %Win_ID%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2), Width, Height
-		; --------------------------------------
-		}
-	}
-Return
+*/
 
 ExitApp
 

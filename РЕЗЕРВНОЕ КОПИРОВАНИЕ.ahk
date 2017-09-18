@@ -40,6 +40,7 @@ If (not %0%) {
 			; LockArchive = true ;Запретить дальнейшее изменение архива (true,false) (без кавычек)
 			; IncludeThisFile = false ;Не включать этот файл резервного копирования в архив резервной копии (true,false) (без кавычек)
 			; WriteComment = true ;Добвить к архиву комментарий, созданный из секции [IncludeList].
+			; AddSuffix = true ; Показать диалоговое окно
 
 			[Zip_Options]
 			Method = Deflate ; Copy,Deflate,Deflate64,BZip2,LZMA,PPMd
@@ -132,6 +133,11 @@ WriteComment := RegExReplace(WriteComment,"[ \t]+;.*$","")
 WriteComment := StrToBool(WriteComment) ; to boolean
 WriteCommentStr := BoolToStr(WriteComment) ; to string
 
+IniRead,AddSuffix,%SourceFile%,Description,AddSuffix,%A_Space% ; Показать диалоговое окно
+AddSuffix := RegExReplace(AddSuffix,"[ \t]+;.*$","")
+AddSuffix := StrToBool(AddSuffix) ; to boolean
+AddSuffixStr := BoolToStr(AddSuffix) ; to string
+
 IniRead,ZipMethod,%SourceFile%,Zip_Options,Method,Deflate
 ZipMethod := RegExReplace(ZipMethod,"[ \t]+;.*$","")
 IniRead,ZipCompression,%SourceFile%,Zip_Options,Compression,9
@@ -202,6 +208,14 @@ If (CreateNewArchives) {
 	ArchiveName := Name . " - " . ArchiveCount
 }
 
+If (AddSuffix) {
+	; InputBox, OutputVar [, Title, Prompt, HIDE, Width, Height, X, Y, Font, Timeout, Default]
+	InputBox, ArchiveSuffix, %ArchiveName%.%ArchiveType%,,,, 100
+	If ( StrLen(ArchiveSuffix) > 0 ) {
+		ArchiveName .= " [" ArchiveSuffix "]"
+	}
+}
+
 Archive=%SourceFileDir%\%ArchiveName%
 
 /*
@@ -220,6 +234,7 @@ DebugMsgText =
 	LockArchive = %LockArchiveStr%
 	IncludeThisFile = %IncludeThisFileStr%
 	WriteComment = %WriteCommentStr%
+	AddSuffix = %AddSuffixStr%
 )
 */
 
@@ -246,6 +261,7 @@ If (InStr(ArchiveType,"rar")) {
 }
 DebugMsgText := DebugMsgText . "`r`n" . "IncludeThisFile = " . IncludeThisFileStr
 DebugMsgText := DebugMsgText . "`r`n" . "WriteComment = " . WriteCommentStr
+DebugMsgText := DebugMsgText . "`r`n" . "AddSuffix = " . AddSuffixStr
 
 If InStr(ArchiveType,"zip") {
 		DebugMsgText := DebugMsgText . "`r`n" . "`r`n[Zip_Options]"

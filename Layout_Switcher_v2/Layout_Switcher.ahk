@@ -100,6 +100,9 @@ SET_DEFAULTS:
 	key_switch_text_case := "NumPad0" ;"$~!Break"
 	key_switch_text_layout := "NumPad2" ;"$~Break"
 	
+	; KeyCombos
+	combo_change_layout := "{Shift Down}{Alt}{Shift Up}"
+	
 	; Text
 	text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
 	text_title_case_match := "(.)"
@@ -148,6 +151,10 @@ READ_CONFIG_FILE:
 	IniRead, key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, %key_switch_keyboard_layout%
 	IniRead, key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, %key_switch_text_case%
 	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, %key_switch_text_layout%
+	
+	; KeyCombos
+	IniRead, combo_change_layout, %Config_File%, KeyCombos, combo_change_layout, %combo_change_layout%
+	Layout.CHANGE_LAYOUT_KEY_COMBO := combo_change_layout
 	
 	; Text
 	IniRead, text_title_case_symbols, %Config_File%, Text, text_title_case_symbols, %text_title_case_symbols%
@@ -214,6 +221,9 @@ SAVE_CONFIG_FILE:
 	IniWrite( "key_switch_keyboard_layout", Config_File, "HotKeys", key_switch_keyboard_layout )
 	IniWrite( "key_switch_text_case", Config_File, "HotKeys", key_switch_text_case )
 	IniWrite( "key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout )
+	
+	; KeyCombos
+	IniWrite( "combo_change_layout", Config_File, "KeyCombos", combo_change_layout )
 	
 	; Text
 	IniWrite( "text_title_case_symbols", Config_File, "Text", text_title_case_symbols )
@@ -793,6 +803,8 @@ class Layout
 	
 	static Layouts_List := Layout.Get_Layouts_List()
 	
+	static CHANGE_LAYOUT_KEY_COMBO := "{Shift Down}{Alt}{Shift Up}"
+	
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок
 		static Layouts_List, Layouts_List_Size
@@ -841,7 +853,7 @@ class Layout
 		Return, Display_Name
 	}
 	
-	KLID( Byref HKL )
+	KLID( ByRef HKL )
 	{ ; функция получения названия "KLID" раскладки по её "HKL" 
 		static KLID, Prior_HKL
 		VarSetCapacity( KLID, 8 * ( A_IsUnicode ? 2 : 1 ) )
@@ -875,19 +887,40 @@ class Layout
 	
 	Next( ByRef Window := "A" )
 	{ ; функция смены раскладки ( вперед )
+		static This_Layout_Index
+		static Next_Layout_Index
+		static Next_Layout_HKL
+		This_Layout_Index := This.Get_Index( This.Get_HKL( Window ) )
+		Next_Layout_Index := This_Layout_Index + 1 > This.Layouts_List.MaxIndex() ? 1 : This_Layout_Index + 1
+		Next_Layout_HKL := This.Layouts_List[Next_Layout_Index].HKL
 		If ( Window_ID := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
 		}
+		If ( Next_Layout_Index and Next_Layout_Index != This.Get_Index( This.Get_HKL( Window ) ) ) {
+			Layout.Change( Next_Layout_HKL )
+		}
 	}
 	
-	Change( Byref HKL, ByRef Window := "A" )
+	Change( ByRef HKL, ByRef Window := "A" )
 	{ ; функция смены раскладки по "HKL"
 		If ( Window_ID := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
 		}
+		If ( This.Get_HKL( Window ) != HKL ) {
+			This.TryChangeByCombo( HKL, Window )
+		}
 	}
 	
-	Get_Index( Byref HKL )
+	TryChangeByCombo( ByRef HKL, ByRef Window )
+	{ ; функция смены раскладки по "HKL" (используя комбинацию зажатия кнопок типа: Ctrl+Shift)
+		While ( This.Get_HKL( Window ) != HKL and A_Index < This.Layouts_List.MaxIndex() )
+		{
+			SendInput, % This.CHANGE_LAYOUT_KEY_COMBO
+			Sleep,50
+		}
+	}
+	
+	Get_Index( ByRef HKL )
 	{ ; функция получения порядкового номера раскладки по "HKL"
 		static Index, Layout
 		For Index, Layout in This.Layouts_List
@@ -898,7 +931,7 @@ class Layout
 		}
 	}
 	
-	Get_Index_By_Name( Byref Full_Name )
+	Get_Index_By_Name( ByRef Full_Name )
 	{ ; функция получения порядкового номера раскладки по полному имени ( "English" )
 		static Index, Layout
 		For Index, Layout in This.Layouts_List
@@ -1093,7 +1126,7 @@ class Edit_Text
 	}
 	
 	/*
-	Get_Index_By_Name( Byref Name )
+	Get_Index_By_Name( ByRef Name )
 	{ ; функция получения порядкового номера словаря по полному имени ( "English" )
 		static Index, Dictionary
 		Index := 1

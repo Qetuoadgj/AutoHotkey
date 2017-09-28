@@ -1,7 +1,7 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn,All ; Enable warnings to assist with detecting common errors.
-SendMode,Input ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
+#Warn, All ; Enable warnings to assist with detecting common errors.
+SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 Script.Force_Single_Instance()
 
@@ -100,9 +100,6 @@ SET_DEFAULTS:
 	key_switch_text_case := "NumPad0" ;"$~!Break"
 	key_switch_text_layout := "NumPad2" ;"$~Break"
 	
-	; KeyCombos
-	combo_change_layout := "{Shift Down}{Alt}{Shift Up}"
-	
 	; Text
 	text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
 	text_title_case_match := "(.)"
@@ -152,10 +149,6 @@ READ_CONFIG_FILE:
 	IniRead, key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, %key_switch_text_case%
 	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, %key_switch_text_layout%
 	
-	; KeyCombos
-	IniRead, combo_change_layout, %Config_File%, KeyCombos, combo_change_layout, %combo_change_layout%
-	Layout.CHANGE_LAYOUT_KEY_COMBO := combo_change_layout
-	
 	; Text
 	IniRead, text_title_case_symbols, %Config_File%, Text, text_title_case_symbols, %text_title_case_symbols%
 	IniRead, text_title_case_match, %Config_File%, Text, text_title_case_match, %text_title_case_match%
@@ -173,7 +166,7 @@ READ_CONFIG_FILE:
 	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_", system_skip_unused_dictionaries )
 	; Remove_Unused_Dictionaries()
 	
-	; For k,v in Edit_Text.Dictionaries_Order {
+	; For k, v in Edit_Text.Dictionaries_Order {
 		; MsgBox, % v
 	; }
 	
@@ -221,9 +214,6 @@ SAVE_CONFIG_FILE:
 	IniWrite( "key_switch_keyboard_layout", Config_File, "HotKeys", key_switch_keyboard_layout )
 	IniWrite( "key_switch_text_case", Config_File, "HotKeys", key_switch_text_case )
 	IniWrite( "key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout )
-	
-	; KeyCombos
-	IniWrite( "combo_change_layout", Config_File, "KeyCombos", combo_change_layout )
 	
 	; Text
 	IniWrite( "text_title_case_symbols", Config_File, "Text", text_title_case_symbols )
@@ -773,7 +763,7 @@ Generate_Dictionaries( ByRef Prefix := "" )
 			While ( Layout.Get_HKL( Win_Title ) != Layout_Data.HKL and A_Index < 5 )
 			{
 				Layout.Change( Layout_Data.HKL, Win_Title )
-				Sleep,50
+				Sleep, 50
 			}
 			If ( Layout.Get_HKL( Win_Title ) = Layout_Data.HKL )
 			{
@@ -802,8 +792,6 @@ class Layout
 	static INPUTLANGCHANGE_BACKWARD := 0x0004
 	
 	static Layouts_List := Layout.Get_Layouts_List()
-	
-	static CHANGE_LAYOUT_KEY_COMBO := "{Shift Down}{Alt}{Shift Up}"
 	
 	Get_Layouts_List()
 	{ ; функци€ создани€ базы данных дл€ текущих раскладок
@@ -887,17 +875,8 @@ class Layout
 	
 	Next( ByRef Window := "A" )
 	{ ; функци€ смены раскладки ( вперед )
-		static This_Layout_Index
-		static Next_Layout_Index
-		static Next_Layout_HKL
-		This_Layout_Index := This.Get_Index( This.Get_HKL( Window ) )
-		Next_Layout_Index := This_Layout_Index + 1 > This.Layouts_List.MaxIndex() ? 1 : This_Layout_Index + 1
-		Next_Layout_HKL := This.Layouts_List[Next_Layout_Index].HKL
 		If ( Window_ID := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
-		}
-		If ( Next_Layout_Index and Next_Layout_Index != This.Get_Index( This.Get_HKL( Window ) ) ) {
-			Layout.Change( Next_Layout_HKL )
 		}
 	}
 	
@@ -905,18 +884,6 @@ class Layout
 	{ ; функци€ смены раскладки по "HKL"
 		If ( Window_ID := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
-		}
-		If ( This.Get_HKL( Window ) != HKL ) {
-			This.TryChangeByCombo( HKL, Window )
-		}
-	}
-	
-	TryChangeByCombo( ByRef HKL, ByRef Window )
-	{ ; функци€ смены раскладки по "HKL" (использу€ комбинацию зажати€ кнопок типа: Ctrl+Shift)
-		While ( This.Get_HKL( Window ) != HKL and A_Index < This.Layouts_List.MaxIndex() )
-		{
-			SendInput, % This.CHANGE_LAYOUT_KEY_COMBO
-			Sleep,50
 		}
 	}
 	

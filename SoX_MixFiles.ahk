@@ -5,13 +5,87 @@ SendMode,Input ; Recommended for new scripts due to its superior speed and relia
 
 Script.Force_Single_Instance()
 
-SetWorkingDir, % "D:\Downloads\Sounds\sox-14.4.2\converted"
+; Цикл для всех параметров / файлов открытых в этом приложении
+FullPath = ; Null
+Loop,%0%
+{
+	GivenPath := %A_Index%  ; Fetch the contents of the variable whose name is contained in A_Index.
+	Loop,%GivenPath%,1
+	{
+		FullPath := A_LoopFileLongPath
+	}
+}
+; Определение полного пути файла-источника
+SourceFile := FullPath ? FullPath : "D:\Games\Far Cry\Mods\1_505_TEST\Weapon_Sounds__Bullet_Cracks_Full\Sounds\SoX_Mix.sox_mix" ;FullPath
 
+; Определение путей файла-источника
+SplitPath,SourceFile,SourceFileShort,SourceFileDir,SourceFileExtension,SourceFileName,SourceFileDrive
+
+; Назначение рабочего каталога программы
+SetWorkingDir,%SourceFileDir%
+
+; Определение значений переменных по умолчанию
 SoX := "D:\Downloads\Sounds\sox-14.4.2\sox.exe"
+Output_Format := "wav"
+Output_Volume := 1.00
+L1_Channels := 2
+L2_Channels := 2
+L1_Factor := "[ 2.00, 2.00 ]"
+L2_Factor := "[ 1.00, 1.00 ]"
+Output_Channels := 2
 Output_Dir := A_WorkingDir "\SoX_Output"
 Mix_Table := Output_Dir "\Mix_Table.txt"
 Mix_Log := Output_Dir "\Mix_Log.txt"
 
+; Получение переменных из файла-источника
+IniRead,SoX,%SourceFile%,Options,SoX,%SoX%
+SoX := RegExReplace(SoX,"[ \t]+;.*$","")
+
+IniRead,Output_Format,%SourceFile%,Options,Output_Format,%Output_Format%
+Output_Format := RegExReplace(Output_Format,"[ \t]+;.*$","")
+
+IniRead,Output_Volume,%SourceFile%,Options,Output_Volume,%Output_Volume%
+Output_Volume := RegExReplace(Output_Volume,"[ \t]+;.*$","")
+
+IniRead,L1_Channels,%SourceFile%,Options,L1_Channels,%L1_Channels%
+L1_Channels := RegExReplace(L1_Channels,"[ \t]+;.*$","")
+
+IniRead,L2_Channels,%SourceFile%,Options,L2_Channels,%L2_Channels%
+L2_Channels := RegExReplace(L2_Channels,"[ \t]+;.*$","")
+
+IniRead,L1_Factor,%SourceFile%,Options,L1_Factor,%L1_Factor%
+L1_Factor := RegExReplace(L1_Factor,"[ \t]+;.*$","")
+
+IniRead,L2_Factor,%SourceFile%,Options,L2_Factor,%L1_Factor%
+L2_Factor := RegExReplace(L2_Factor,"[ \t]+;.*$","")
+
+IniRead,Output_Channels,%SourceFile%,Options,Output_Channels,%Output_Channels%
+Output_Channels := RegExReplace(Output_Channels,"[ \t]+;.*$","")
+
+IniRead,Output_Dir,%SourceFile%,Options,Output_Dir,%Output_Dir%
+Output_Dir := RegExReplace(Output_Dir,"[ \t]+;.*$","")
+
+IniRead,Mix_Table,%SourceFile%,Options,Mix_Table,%Mix_Table%
+Mix_Table := RegExReplace(Mix_Table,"[ \t]+;.*$","")
+
+IniRead,Mix_Log,%SourceFile%,Options,Mix_Log,%Mix_Log%
+Mix_Log := RegExReplace(Mix_Log,"[ \t]+;.*$","")
+
+IniRead,L1,%SourceFile%,L1
+IniRead,L2,%SourceFile%,L2
+
+L1_Factor := StrSplit(L1_Factor, ",", "[]`s")
+L2_Factor := StrSplit(L2_Factor, ",", "[]`s")
+; ----------------------------------------------------------------------------------------------
+
+; SetWorkingDir, A_WorkingDir ;% "D:\Downloads\Sounds\sox-14.4.2\converted"
+
+; SoX := "D:\Downloads\Sounds\sox-14.4.2\sox.exe"
+; Output_Dir := Output_Dir ;A_WorkingDir "\SoX_Output"
+; Mix_Table := Output_Dir "\Mix_Table.txt"
+; Mix_Log := Output_Dir "\Mix_Log.txt"
+
+/*
 File_List1 := []
 Loop, Files, % "D:\Downloads\Sounds\Bullet_Cracks\223\Stereo\Bullet_Crack_*.wav", F ; RF
 {
@@ -23,10 +97,32 @@ Loop, Files, % "D:\Downloads\Sounds\Bullet_Cracks\308\Stereo\Bullet_Crack_*.wav"
 {
 	File_List2.Push( A_LoopFileLongPath )
 }
+*/
+
+File_List1 := []
+Loop, Parse, L1, `n, `r ; Recommended approach in most cases.
+{
+	Line := Trim( RegExReplace( A_LoopField, "[ \t]+;.*$", "" ) )
+	If StrLen( Line > 0 ) {
+		File_List1.Push( Line )
+	}
+}
+Line = ; Null
+
+File_List2 := []
+Loop, Parse, L2, `n, `r ; Recommended approach in most cases.
+{
+	Line := Trim( RegExReplace( A_LoopField, "[ \t]+;.*$", "" ) )
+	If StrLen( Line > 0 ) {
+		File_List2.Push( Line )
+	}
+}
+Line = ; Null
 
 If ( File_List1.MaxIndex() < 1 or File_List2.MaxIndex() < 1 ) {
 	ExitApp
 }
+
 /*
 If FileExist( Output_Dir "\" ) {
 	FileRemoveDir, %Output_Dir%, 1
@@ -39,7 +135,7 @@ FormatTime,Time_Stamp,, yyyy-MM-dd HH:mm:ss ; 2005-10-30 10:45
 Comment := "REM "
 Separator := Comment . "----------------------------------------------------------------------------------------------------"
 
-Output_Format := "mp3"
+; Output_Format := OutputFormat ;"mp3"
 
 /*
 Volume := 2.0 ;1.0
@@ -48,17 +144,17 @@ Factor1 := [ 1.00, 1.00 ] ;[ 0.70, 1.00 ]
 Factor2 := [ 0.25, 0.25 ] ;[ 0.20, 0.40 ]
 */
 
-Volume := 1.0 ;1.0
+Volume := Output_Volume ;1.0 ;1.0
 
-Factor1 := [ 2.00, 2.00 ] ;[ 0.70, 1.00 ]
-Factor2 := [ 1.00, 1.00 ] ;[ 0.20, 0.40 ]
+Factor1 := L1_Factor ;[ 2.00, 2.00 ] ;[ 0.70, 1.00 ]
+Factor2 := L2_Factor ;[ 1.00, 1.00 ] ;[ 0.20, 0.40 ]
 
 Str_Factor1 := "[ " Factor1[1] ", " Factor1[2] " ]"
 Str_Factor2 := "[ " Factor2[1] ", " Factor2[2] " ]"
 
-Channels1 := 2 ;1
-Channels2 := 1
-Channels3 := 1
+Channels1 := L1_Channels ;2 ;1
+Channels2 := L2_Channels ;1
+Channels3 := Output_Channels ;1
 
 Header = 
 ( LTrim RTrim Join`r`n
@@ -93,6 +189,12 @@ Header =
 
 Output_Data .= Header "`r`n"
 Output_Data .= "`r`n"
+
+If ( not FileExist( SoX ) )
+{
+	MsgBox,ОШИБКА:`nОтсутствует файл: %SoX%
+	ExitApp
+}
 
 If FileExist( Output_Dir "\" )
 {
@@ -152,6 +254,11 @@ If ( StrLen( Command ) > 0 )
 	{
 		Run, notepad.exe %Mix_Table%
 	}
+}
+
+If FileExist( Output_Dir "\" )
+{
+	Run, %Output_Dir%
 }
 
 ExitApp

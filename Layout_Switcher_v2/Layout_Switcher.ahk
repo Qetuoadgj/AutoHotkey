@@ -276,12 +276,13 @@ SWITCH_TEXT_LAYOUT:
 			Next_Layout_Index := Text_Layout_Index + 1 > Layout.Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
 			Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
 			Converted_Text := Edit_Text.Replace_By_Dictionaries( Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name )
-			Edit_Text.Paste( Converted_Text )
+			; Edit_Text.Paste( Converted_Text ) ; перенёс вниз для совместимости текста с новой раскладкой
 			If ( Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL ) {
 				Layout.Change( Next_Layout_HKL )
 				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
 				ToolTip( Next_Layout_Full_Name " - " Next_Layout_Display_Name )
 			}
+			Edit_Text.Paste( Converted_Text ) ; перенёс сюда для совместимости текста с новой раскладкой
 		}
 		If ( sound_enable and FileExist( sound_switch_text_layout ) ) {
 			SoundPlay, %sound_switch_text_layout%

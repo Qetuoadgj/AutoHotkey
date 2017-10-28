@@ -27,6 +27,7 @@ CreateLocalization:
 	; IniRead, l_system_encoding_compatibility_mode, %Translation_File%, System, system_encoding_compatibility_mode, % "Encoding Compatibility Mode"
 	IniRead, l_system_show_tray_icon, %Translation_File%, System, system_show_tray_icon, % "Show Tray Icon"
 	IniRead, l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
+	IniRead, l_system_fix_config_file_encoding, %Translation_File%, System, system_fix_config_file_encoding, % "Fix Config File Encoding"
 
 	; Flag
 	IniRead, l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
@@ -78,6 +79,7 @@ SET_DEFAULTS:
 	; system_encoding_compatibility_mode := 0
 	system_show_tray_icon := 1
 	system_skip_unused_dictionaries := 1
+	system_fix_config_file_encoding := 1
 	
 	; Flag
 	flag_width := 32
@@ -127,6 +129,7 @@ READ_CONFIG_FILE:
 	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, %system_encoding_compatibility_mode%
 	IniRead, system_show_tray_icon, %Config_File%, System, system_show_tray_icon, %system_show_tray_icon%
 	IniRead, system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, %system_skip_unused_dictionaries%
+	IniRead, system_fix_config_file_encoding, %Config_File%, System, system_fix_config_file_encoding, %system_fix_config_file_encoding%
 	
 	; Flag
 	IniRead, flag_width, %Config_File%, Flag, flag_width, %flag_width%
@@ -176,6 +179,23 @@ READ_CONFIG_FILE:
 		; system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
 	; }
 	
+	If ( system_fix_config_file_encoding )
+	{
+		ini := FileOpen( Config_File, "r" )
+		app_ecoding := "CP1251" ;A_FileEncoding ? A_FileEncoding : "CP1251"
+		If ( ini.Encoding != app_ecoding )
+		{
+			ini_data := ini.Read()
+			If ( ini_data )
+			{
+				ini.Close()   
+				MsgBox, 0, Test, % "Encoding of the program: " app_ecoding "`n" "Encoding of " Config_File ": " ini.Encoding
+				FileDelete, %Config_File%
+				FileAppend, %ini_data%, %Config_File%, %app_ecoding%
+			}
+		}
+	}
+	
 	Return
 }
 
@@ -193,6 +213,7 @@ SAVE_CONFIG_FILE:
 	; IniWrite( "system_encoding_compatibility_mode", Config_File, "System", system_encoding_compatibility_mode )
 	IniWrite( "system_show_tray_icon", Config_File, "System", system_show_tray_icon )
 	IniWrite( "system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries )
+	IniWrite( "system_fix_config_file_encoding", Config_File, "System", system_fix_config_file_encoding )
 
 	; Flag
 	IniWrite( "flag_width", Config_File, "Flag", flag_width )
@@ -276,13 +297,12 @@ SWITCH_TEXT_LAYOUT:
 			Next_Layout_Index := Text_Layout_Index + 1 > Layout.Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
 			Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
 			Converted_Text := Edit_Text.Replace_By_Dictionaries( Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name )
-			; Edit_Text.Paste( Converted_Text ) ; перенёс вниз для совместимости текста с новой раскладкой
+			Edit_Text.Paste( Converted_Text )
 			If ( Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL ) {
 				Layout.Change( Next_Layout_HKL )
 				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
 				ToolTip( Next_Layout_Full_Name " - " Next_Layout_Display_Name )
 			}
-			Edit_Text.Paste( Converted_Text ) ; перенёс сюда для совместимости текста с новой раскладкой
 		}
 		If ( sound_enable and FileExist( sound_switch_text_layout ) ) {
 			SoundPlay, %sound_switch_text_layout%
@@ -540,6 +560,11 @@ FLAG_Customize_Menus:
 		Menu, Tray, Check, %l_system_skip_unused_dictionaries%
 	}
 	
+	Menu, Tray, Add, %l_system_fix_config_file_encoding%, Menu_Toggle_Fix_Config_File_Encoding
+	If ( system_fix_config_file_encoding ) {
+		Menu, Tray, Check, %l_system_fix_config_file_encoding%
+	}
+	
 	Menu, Tray, Add
 	
 	Menu, Tray, Add, %l_flag_show_borders%, Menu_Toggle_Show_Borders
@@ -642,6 +667,14 @@ Menu_Toggle_Skip_Unused_Dictionaries:
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	system_skip_unused_dictionaries := not system_skip_unused_dictionaries
 	IniWrite( "system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries )
+	Return
+}
+
+Menu_Toggle_Fix_Config_File_Encoding:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	system_fix_config_file_encoding := not system_fix_config_file_encoding
+	IniWrite( "system_fix_config_file_encoding", Config_File, "System", system_fix_config_file_encoding )
 	Return
 }
 

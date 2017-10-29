@@ -255,6 +255,9 @@ SWITCH_KEYBOARD_LAYOUT:
 		WinActivate, % "ahk_id " Windows.Desktop_ID
 	}
 	Layout.Next( "A" )
+	Sleep, 1
+	Layout_HKL := Layout.Get_HKL( "A" )
+	ToolTip( Layout.Language_Name( Layout_HKL, true ) " - " Layout.Display_Name( Layout_HKL ) )
 	If ( sound_enable and FileExist( sound_switch_keyboard_layout ) ) {
 		SoundPlay, %sound_switch_keyboard_layout%
 	}

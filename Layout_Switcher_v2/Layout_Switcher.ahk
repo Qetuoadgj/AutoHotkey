@@ -255,7 +255,6 @@ SWITCH_KEYBOARD_LAYOUT:
 		WinActivate, % "ahk_id " Windows.Desktop_ID
 	}
 	Layout.Next( "A" )
-	Sleep, 1
 	Layout_HKL := Layout.Get_HKL( "A" )
 	ToolTip( Layout.Language_Name( Layout_HKL, true ) " - " Layout.Display_Name( Layout_HKL ) )
 	If ( sound_enable and FileExist( sound_switch_keyboard_layout ) ) {
@@ -915,6 +914,7 @@ class Layout
 		If ( Window_ID := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
 		}
+		Sleep, 1
 	}
 	
 	Change( ByRef HKL, ByRef Window := "A" )
@@ -922,6 +922,7 @@ class Layout
 		If ( Window_ID := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
 		}
+		Sleep, 1
 	}
 	
 	Get_Index( ByRef HKL )
@@ -1298,7 +1299,7 @@ class Task_Sheduler
 	{ ; функция создания автозагрузки программы в планировщике Windows
 		static Task_XML
 		Task_XML := A_Temp "\" RegExReplace( Task_Name, ".*\\(.*)$", "$1" ) ".xml"
-		This.Create_Auto_Start_XML( A_ScriptFullPath, Admin_Rights, Task_XML )
+		This.Create_Auto_Start_XML( A_ScriptFullPath, Admin_Rights, Task_XML, "PT30S" )
 		If FileExist( Task_XML ) {
 			This.Delete_Task( Task_Name )
 			This.Create_Task_From_XML( Task_Name, Task_XML )
@@ -1323,7 +1324,7 @@ class Task_Sheduler
 		RunWait, *RunAs %Command%
 	}
 	
-	Create_Auto_Start_XML( ByRef Command, ByRef Admin_Rights := false, ByRef Task_XML := "my_task.xml" )
+	Create_Auto_Start_XML( ByRef Command, ByRef Admin_Rights := false, ByRef Task_XML := "my_task.xml", ByRef Delay := "" )
 	{ ; функция создания XML файла задания для планировщика Windows
 		static XML_Text
 		static Registration_Time
@@ -1349,6 +1350,7 @@ class Task_Sheduler
 		    <LogonTrigger>
 		      <StartBoundary>%Start_Time%</StartBoundary>
 		      <Enabled>true</Enabled>
+			  <Delay>%Delay%</Delay>
 		    </LogonTrigger>
 		  </Triggers>
 		  <Settings>

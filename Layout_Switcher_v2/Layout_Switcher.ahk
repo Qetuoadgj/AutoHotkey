@@ -24,6 +24,7 @@ CreateLocalization:
 	IniRead, l_system_suspend_hotkeys, %Translation_File%, System, system_suspend_hotkeys, % "Suspend HotKeys"
 	IniRead, l_system_enable_auto_start, %Translation_File%, System, system_enable_auto_start, % "Auto Start"
 	IniRead, l_system_start_with_admin_rights, %Translation_File%, System, system_start_with_admin_rights, % "Admin Rights"
+	IniRead, l_system_run_with_high_priority, %Translation_File%, System, system_run_with_high_priority, % "High priority"
 	; IniRead, l_system_encoding_compatibility_mode, %Translation_File%, System, system_encoding_compatibility_mode, % "Encoding Compatibility Mode"
 	IniRead, l_system_show_tray_icon, %Translation_File%, System, system_show_tray_icon, % "Show Tray Icon"
 	IniRead, l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
@@ -52,6 +53,13 @@ If ( system_start_with_admin_rights ) {
 	Script.Run_As_Admin( %0% )
 }
 
+App_PID := DllCall("GetCurrentProcessId")
+If ( system_run_with_high_priority ) {
+	Process, Priority, %App_PID%, High
+} Else {
+	Process, Priority, %App_PID%, Normal
+}
+
 GoSub, FLAG_Create_GUI
 
 GoSub, FLAG_Customize_Menus
@@ -74,6 +82,7 @@ SET_DEFAULTS:
 	system_suspend_hotkeys := 0
 	system_enable_auto_start := 0
 	system_start_with_admin_rights := 0
+	system_run_with_high_priority := 1
 	system_check_layout_change_interval := "On" ; 250
 	system_detect_dictionary := 1
 	; system_encoding_compatibility_mode := 0
@@ -124,6 +133,7 @@ READ_CONFIG_FILE:
 	IniRead, system_suspend_hotkeys, %Config_File%, System, system_suspend_hotkeys, %system_suspend_hotkeys%
 	IniRead, system_enable_auto_start, %Config_File%, System, system_enable_auto_start, %system_enable_auto_start%
 	IniRead, system_start_with_admin_rights, %Config_File%, System, system_start_with_admin_rights, %system_start_with_admin_rights%
+	IniRead, system_run_with_high_priority, %Config_File%, System, system_run_with_high_priority, %system_run_with_high_priority%
 	IniRead, system_check_layout_change_interval, %Config_File%, System, system_check_layout_change_interval, %system_check_layout_change_interval%
 	IniRead, system_detect_dictionary, %Config_File%, System, system_detect_dictionary, %system_detect_dictionary%
 	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, %system_encoding_compatibility_mode%
@@ -208,6 +218,7 @@ SAVE_CONFIG_FILE:
 	IniWrite( "system_suspend_hotkeys", Config_File, "System", system_suspend_hotkeys )
 	IniWrite( "system_enable_auto_start", Config_File, "System", system_enable_auto_start )
 	IniWrite( "system_start_with_admin_rights", Config_File, "System", system_start_with_admin_rights )
+	IniWrite( "system_run_with_high_priority", Config_File, "System", system_run_with_high_priority )
 	IniWrite( "system_check_layout_change_interval", Config_File, "System", system_check_layout_change_interval )
 	IniWrite( "system_detect_dictionary", Config_File, "System", system_detect_dictionary )
 	; IniWrite( "system_encoding_compatibility_mode", Config_File, "System", system_encoding_compatibility_mode )
@@ -542,6 +553,11 @@ FLAG_Customize_Menus:
 		Menu, Tray, Check, %l_system_start_with_admin_rights%
 	}
 	
+	Menu, Tray, Add, %l_system_run_with_high_priority%, Menu_Toggle_High_Priority
+	If ( system_run_with_high_priority ) {
+		Menu, Tray, Check, %l_system_run_with_high_priority%
+	}
+	
 	Menu, Tray, Add, %l_system_show_tray_icon%, Menu_Toggle_Show_Tray_Icon
 	If ( system_show_tray_icon ) {
 		Menu, Tray, Check, %l_system_show_tray_icon%
@@ -640,6 +656,15 @@ Menu_Toggle_Admin_Rights:
 	} Else {
 		Reload
 	}
+	Return
+}
+
+Menu_Toggle_High_Priority:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	system_run_with_high_priority := not system_run_with_high_priority
+	IniWrite( "system_run_with_high_priority", Config_File, "System", system_run_with_high_priority )
+	Reload
 	Return
 }
 
@@ -1315,6 +1340,7 @@ class Task_Sheduler
 		Command = schtasks.exe /Create /XML "%Task_XML%" /tn "%Task_Name%"
 		; RunWait, %ComSpec% /k %Command% & pause & exit
 		RunWait, *RunAs %Command%
+		Sleep, 1
 	}
 
 	Delete_Task( ByRef Task_Name )
@@ -1322,6 +1348,7 @@ class Task_Sheduler
 		static Command
 		Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
 		RunWait, *RunAs %Command%
+		Sleep, 1
 	}
 	
 	Create_Auto_Start_XML( ByRef Command, ByRef Admin_Rights := false, ByRef Task_XML := "my_task.xml", ByRef Delay := "" )

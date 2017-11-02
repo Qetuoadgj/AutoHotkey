@@ -608,13 +608,18 @@ FLAG_Customize_Menus:
 	Menu, Tray, Add
 	
 	Menu, Tray, Add, %l_info_app_site%, Menu_App_Site
+	Menu, Tray, Icon, %l_info_app_site%, Icons\Menu\Home.ico,, 0
 	
 	Menu, Tray, Add
 
 	Menu, Tray, Add, %l_app_generate_dictionaries%, Menu_Generate_Dictionaries
+	Menu, Tray, Icon, %l_app_generate_dictionaries%, Icons\Menu\Dictionaries.ico,, 0
 	Menu, Tray, Add, %l_app_options%, Menu_Options
+	Menu, Tray, Icon, %l_app_options%, Icons\Menu\Settings.ico,, 0
 	Menu, Tray, Add, %l_app_restart%, Menu_Reload_App
+	Menu, Tray, Icon, %l_app_restart%, Icons\Menu\Restart.ico,, 0
 	Menu, Tray, Add, %l_app_exit%, Menu_Exit_App
+	Menu, Tray, Icon, %l_app_exit%, Icons\Menu\Shutdown.ico,, 0
 	
 	Return
 }

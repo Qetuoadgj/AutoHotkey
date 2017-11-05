@@ -75,51 +75,52 @@ Exit
 
 SET_DEFAULTS:
 {
+	Defaults := {}
 	; Info
-	info_app_site := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/Layout_Switcher_v2"
+	Defaults.info_app_site := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/Layout_Switcher_v2"
 	
 	; System
-	system_suspend_hotkeys := 0
-	system_enable_auto_start := 0
-	system_start_with_admin_rights := 0
-	system_run_with_high_priority := 1
-	system_check_layout_change_interval := "On" ; 250
-	system_detect_dictionary := 1
-	; system_encoding_compatibility_mode := 0
-	system_show_tray_icon := 1
-	system_skip_unused_dictionaries := 1
-	system_fix_config_file_encoding := 1
+	Defaults.system_suspend_hotkeys := 0
+	Defaults.system_enable_auto_start := 1 ;0
+	Defaults.system_start_with_admin_rights := 1 ;0
+	Defaults.system_run_with_high_priority := 1
+	Defaults.system_check_layout_change_interval := "On" ; 250
+	Defaults.system_detect_dictionary := 1
+	; Defaults.system_encoding_compatibility_mode := 0
+	Defaults.system_show_tray_icon := 1
+	Defaults.system_skip_unused_dictionaries := 1
+	Defaults.system_fix_config_file_encoding := 1
 	
 	; Flag
-	flag_width := 32
-	flag_height := 22
-	flag_position_x := "Center"
-	flag_position_y := "Center"
-	flag_show_borders := 1
-	flag_always_on_top := 1
-	flag_fixed_position := 0
-	flag_hide_in_fullscreen_mode := 1
+	Defaults.flag_width := 32
+	Defaults.flag_height := 22
+	Defaults.flag_position_x := "Center"
+	Defaults.flag_position_y := "Center"
+	Defaults.flag_show_borders := 1
+	Defaults.flag_always_on_top := 1
+	Defaults.flag_fixed_position := 0
+	Defaults.flag_hide_in_fullscreen_mode := 1
 	
 	; Sound
-	sound_enable := 1
-	sound_switch_keyboard_layout := "sounds\switch_keyboard_layout.wav"
-	sound_switch_text_case := "sounds\switch_text_case.wav"
-	sound_switch_text_layout := "sounds\switch_text_layout.wav"
+	Defaults.sound_enable := 1
+	Defaults.sound_switch_keyboard_layout := "sounds\switch_keyboard_layout.wav"
+	Defaults.sound_switch_text_case := "sounds\switch_text_case.wav"
+	Defaults.sound_switch_text_layout := "sounds\switch_text_layout.wav"
 	
 	; HotKeys
-	key_switch_keyboard_layout := "NumPad1" ;"CapsLock"
-	key_switch_text_case := "NumPad0" ;"$~!Break"
-	key_switch_text_layout := "NumPad2" ;"$~Break"
+	Defaults.key_switch_keyboard_layout := "NumPad1" ;"CapsLock"
+	Defaults.key_switch_text_case := "NumPad0" ;"$~!Break"
+	Defaults.key_switch_text_layout := "NumPad2" ;"$~Break"
 	
 	; Text
-	text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
-	text_title_case_match := "(.)"
-	text_upper_case_words := "(ID\b|PID\b|UI\b|HKL\b|KLID\b|AI\b)"
+	Defaults.text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
+	Defaults.text_title_case_match := "(.)"
+	Defaults.text_upper_case_words := "(ID\b|PID\b|UI\b|HKL\b|KLID\b|AI\b)"
 	
 	; Dictionaries
-	dictionary_english := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
-	dictionary_russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
-	dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
+	Defaults.dictionary_english := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
+	Defaults.dictionary_russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
+	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 
 	Return
 }
@@ -127,54 +128,59 @@ SET_DEFAULTS:
 READ_CONFIG_FILE:
 {
 	; Info
-	IniRead, info_app_site, %Config_File%, Info, info_app_site, %info_app_site%
+	IniRead, info_app_site, %Config_File%, Info, info_app_site, % Defaults.info_app_site
 
 	; System
-	IniRead, system_suspend_hotkeys, %Config_File%, System, system_suspend_hotkeys, %system_suspend_hotkeys%
-	IniRead, system_enable_auto_start, %Config_File%, System, system_enable_auto_start, %system_enable_auto_start%
-	IniRead, system_start_with_admin_rights, %Config_File%, System, system_start_with_admin_rights, %system_start_with_admin_rights%
-	IniRead, system_run_with_high_priority, %Config_File%, System, system_run_with_high_priority, %system_run_with_high_priority%
-	IniRead, system_check_layout_change_interval, %Config_File%, System, system_check_layout_change_interval, %system_check_layout_change_interval%
-	IniRead, system_detect_dictionary, %Config_File%, System, system_detect_dictionary, %system_detect_dictionary%
-	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, %system_encoding_compatibility_mode%
-	IniRead, system_show_tray_icon, %Config_File%, System, system_show_tray_icon, %system_show_tray_icon%
-	IniRead, system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, %system_skip_unused_dictionaries%
-	IniRead, system_fix_config_file_encoding, %Config_File%, System, system_fix_config_file_encoding, %system_fix_config_file_encoding%
+	IniRead, system_suspend_hotkeys, %Config_File%, System, system_suspend_hotkeys, % Defaults.system_suspend_hotkeys
+	IniRead, system_enable_auto_start, %Config_File%, System, system_enable_auto_start, % Defaults.system_enable_auto_start
+	IniRead, system_start_with_admin_rights, %Config_File%, System, system_start_with_admin_rights, % Defaults.system_start_with_admin_rights
+	IniRead, system_run_with_high_priority, %Config_File%, System, system_run_with_high_priority, % Defaults.system_run_with_high_priority
+	IniRead, system_check_layout_change_interval, %Config_File%, System, system_check_layout_change_interval, % Defaults.system_check_layout_change_interval
+	IniRead, system_detect_dictionary, %Config_File%, System, system_detect_dictionary, % Defaults.system_detect_dictionary
+	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, % Defaults.system_encoding_compatibility_mode
+	IniRead, system_show_tray_icon, %Config_File%, System, system_show_tray_icon, % Defaults.system_show_tray_icon
+	IniRead, system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, % Defaults.system_skip_unused_dictionaries
+	IniRead, system_fix_config_file_encoding, %Config_File%, System, system_fix_config_file_encoding, % Defaults.system_fix_config_file_encoding
 	
 	; Flag
-	IniRead, flag_width, %Config_File%, Flag, flag_width, %flag_width%
-	IniRead, flag_height, %Config_File%, Flag, flag_height, %flag_height%
-	IniRead, flag_position_x, %Config_File%, Flag, flag_position_x, %flag_position_x%
-	IniRead, flag_position_y, %Config_File%, Flag, flag_position_y, %flag_position_y%
-	IniRead, flag_show_borders, %Config_File%, Flag, flag_show_borders, %flag_show_borders%
-	IniRead, flag_always_on_top, %Config_File%, Flag, flag_always_on_top, %flag_always_on_top%
-	IniRead, flag_fixed_position, %Config_File%, Flag, flag_fixed_position, %flag_fixed_position%
-	IniRead, flag_hide_in_fullscreen_mode, %Config_File%, Flag, flag_hide_in_fullscreen_mode, %flag_hide_in_fullscreen_mode%
+	IniRead, flag_width, %Config_File%, Flag, flag_width, % Defaults.flag_width
+	IniRead, flag_height, %Config_File%, Flag, flag_height, % Defaults.flag_height
+	IniRead, flag_position_x, %Config_File%, Flag, flag_position_x, % Defaults.flag_position_x
+	IniRead, flag_position_y, %Config_File%, Flag, flag_position_y, % Defaults.flag_position_y
+	IniRead, flag_show_borders, %Config_File%, Flag, flag_show_borders, % Defaults.flag_show_borders
+	IniRead, flag_always_on_top, %Config_File%, Flag, flag_always_on_top, % Defaults.flag_always_on_top
+	IniRead, flag_fixed_position, %Config_File%, Flag, flag_fixed_position, % Defaults.flag_fixed_position
+	IniRead, flag_hide_in_fullscreen_mode, %Config_File%, Flag, flag_hide_in_fullscreen_mode, % Defaults.flag_hide_in_fullscreen_mode
+	
+	Normalize( "flag_width", Defaults.flag_width )
+	Normalize( "flag_height", Defaults.flag_height )
+	Normalize( "flag_position_x", Defaults.flag_position_x )
+	Normalize( "flag_position_y", Defaults.flag_position_y )
 
 	; Sound
-	IniRead, sound_enable, %Config_File%, Sound, sound_enable, %sound_enable%
-	IniRead, sound_switch_keyboard_layout, %Config_File%, Sound, sound_switch_keyboard_layout, %sound_switch_keyboard_layout%
-	IniRead, sound_switch_text_case, %Config_File%, Sound, sound_switch_text_case, %sound_switch_text_case%
-	IniRead, sound_switch_text_layout, %Config_File%, Sound, sound_switch_text_layout, %sound_switch_text_layout%
+	IniRead, sound_enable, %Config_File%, Sound, sound_enable, % Defaults.sound_enable
+	IniRead, sound_switch_keyboard_layout, %Config_File%, Sound, sound_switch_keyboard_layout, % Defaults.sound_switch_keyboard_layout
+	IniRead, sound_switch_text_case, %Config_File%, Sound, sound_switch_text_case, % Defaults.sound_switch_text_case
+	IniRead, sound_switch_text_layout, %Config_File%, Sound, sound_switch_text_layout, % Defaults.sound_switch_text_layout
 
 	; HotKeys
-	IniRead, key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, %key_switch_keyboard_layout%
-	IniRead, key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, %key_switch_text_case%
-	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, %key_switch_text_layout%
+	IniRead, key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, % Defaults.key_switch_keyboard_layout
+	IniRead, key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, % Defaults.key_switch_text_case
+	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
 	
 	; Text
-	IniRead, text_title_case_symbols, %Config_File%, Text, text_title_case_symbols, %text_title_case_symbols%
-	IniRead, text_title_case_match, %Config_File%, Text, text_title_case_match, %text_title_case_match%
-	IniRead, text_upper_case_words, %Config_File%, Text, text_upper_case_words, %text_upper_case_words%
+	IniRead, text_title_case_symbols, %Config_File%, Text, text_title_case_symbols, % Defaults.text_title_case_symbols
+	IniRead, text_title_case_match, %Config_File%, Text, text_title_case_match, % Defaults.text_title_case_match
+	IniRead, text_upper_case_words, %Config_File%, Text, text_upper_case_words, % Defaults.text_upper_case_words
 	
 	Edit_Text.Title_Case_Symbols := text_title_case_symbols
 	Edit_Text.Title_Case_Match := text_title_case_match
 	Edit_Text.Upper_Case_Words := text_upper_case_words
 
 	; Dictionaries
-	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, %dictionary_english%
-	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, %dictionary_russian%
-	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, %dictionary_ukrainian%
+	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, % Defaults.dictionary_english
+	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, % Defaults.dictionary_russian
+	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, % Defaults.dictionary_ukrainian
 	
 	Get_Dictionaries( Config_File, "Dictionaries", "dictionary_", system_skip_unused_dictionaries )
 	; Remove_Unused_Dictionaries()
@@ -185,9 +191,10 @@ READ_CONFIG_FILE:
 	
 	Get_Binds( Config_File, "HotKeys", "key_" )
 	
-	; If ( system_enable_auto_start ) {
+	If ( system_enable_auto_start and not Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )) {
+		Task_Sheduler.Create_Auto_Run_Task( Auto_Run_Task_Name, system_start_with_admin_rights, True )
 		; system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
-	; }
+	}
 	
 	If ( system_fix_config_file_encoding )
 	{
@@ -205,6 +212,13 @@ READ_CONFIG_FILE:
 			}
 		}
 	}
+	
+	/*
+	For key, value in Defaults
+	{ ; нормализация переменных
+		Normalize( key, value )
+	}
+	*/
 	
 	Return
 }
@@ -383,6 +397,7 @@ Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Sk
 	static Match
 	static Key
 	static Value
+	;
 	IniRead, Dictionaries_List, %Config_File%, %Section%
 	Edit_Text.Dictionaries := {}
 	; Edit_Text.Dictionaries_Order := []
@@ -408,6 +423,7 @@ Get_Dictionaries( ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Sk
 Remove_Unused_Dictionaries()
 { ; функция удаления словарей, для которых нет раскладки
 	static Dictionary_Name
+	;
 	For Dictionary_Name in Edit_Text.Dictionaries {
 		If ( not Layout.Get_Index_By_Name( Dictionary_Name ) ) {
 			Edit_Text.Dictionaries.Delete( Dictionary_Name )
@@ -420,6 +436,12 @@ Remove_Unused_Dictionaries()
 
 Get_Binds( ByRef Config_File, ByRef Section, ByRef Prefix := ""  )
 { ; функция получения назначений клавиш из файла настроек
+	static Binds_List
+	static Match
+	static Match1
+	static Key
+	static Value
+	;
 	IniRead, Binds_List, %Config_File%, %Section%
 	Loop, Parse, Binds_List, `n, `r
 	{
@@ -608,18 +630,19 @@ FLAG_Customize_Menus:
 	Menu, Tray, Add
 	
 	Menu, Tray, Add, %l_info_app_site%, Menu_App_Site
-	Menu, Tray, Icon, %l_info_app_site%, Icons\Menu\Home.ico,, 0
 	
 	Menu, Tray, Add
 
 	Menu, Tray, Add, %l_app_generate_dictionaries%, Menu_Generate_Dictionaries
-	Menu, Tray, Icon, %l_app_generate_dictionaries%, Icons\Menu\Dictionaries.ico,, 0
 	Menu, Tray, Add, %l_app_options%, Menu_Options
-	Menu, Tray, Icon, %l_app_options%, Icons\Menu\Settings.ico,, 0
 	Menu, Tray, Add, %l_app_restart%, Menu_Reload_App
-	Menu, Tray, Icon, %l_app_restart%, Icons\Menu\Restart.ico,, 0
 	Menu, Tray, Add, %l_app_exit%, Menu_Exit_App
-	Menu, Tray, Icon, %l_app_exit%, Icons\Menu\Shutdown.ico,, 0
+	
+	MenuIcon( "Tray", l_info_app_site, "Icons\Menu\Home.ico", 0, 0 )
+	MenuIcon( "Tray", l_app_generate_dictionaries, "Icons\Menu\Dictionaries.ico", 0, 0 )
+	MenuIcon( "Tray", l_app_options, "Icons\Menu\Settings.ico", 0, 0 )
+	MenuIcon( "Tray", l_app_restart, "Icons\Menu\Restart.ico", 0, 0 )
+	MenuIcon( "Tray", l_app_exit, "Icons\Menu\Shutdown.ico", 0, 0 )
 	
 	Return
 }
@@ -796,6 +819,7 @@ Menu_Exit_App:
 Generate_Dictionaries( ByRef Prefix := "" )
 { ; функция создания словарей для текущих раскладок
 	static Notepad_PID, Notepad_ID, Win_Title, Keys
+	;
 	Run, % "notepad.exe /W",,, Notepad_PID
 
 	WinWait, ahk_pid %Notepad_PID%
@@ -819,7 +843,7 @@ Generate_Dictionaries( ByRef Prefix := "" )
 	
 	static Layout_Index, Layout_Data
 	static Dictionary_Name, k, v
-	
+	;
 	For Layout_Index, Layout_Data in Layout.Layouts_List
 	{
 		WinActivate, %Win_Title%
@@ -856,13 +880,14 @@ class Layout
 	static WM_INPUTLANGCHANGEREQUEST := 0x0050
 	static INPUTLANGCHANGE_FORWARD := 0x0002
 	static INPUTLANGCHANGE_BACKWARD := 0x0004
-	
+	;
 	static Layouts_List := Layout.Get_Layouts_List()
-	
+	;
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок
 		static Layouts_List, Layouts_List_Size
 		static Layout_HKL, Layout_Name, Layout_Full_Name, Layout_Display_Name
+		;
 		VarSetCapacity( List, A_PtrSize * 5 )
 		Layouts_List_Size := DllCall( "GetKeyboardLayoutList", Int, 5, Str, List )
 		Layouts_List := []
@@ -884,6 +909,7 @@ class Layout
 	Language_Name( ByRef HKL, ByRef Full_Name := false )
 	{ ; функция получения наименования ( сокращённого "en" или полного "English") раскладки по её "HKL" 
 		static LocID, LCType, Size
+		;
 		LocID := HKL & 0xFFFF
 		LCType := Full_Name ? This.LOCALE_SENGLANGUAGE : This.SISO639LANGNAME
 		Size := DllCall( "GetLocaleInfo", UInt, LocID, UInt, LCType, UInt, 0, UInt, 0 ) * 2
@@ -895,6 +921,7 @@ class Layout
 	Display_Name( ByRef HKL )
 	{ ; функция получения названия ( "Английская" ) раскладки по её "HKL" 
 		static KLID
+		;
 		KLID := This.KLID( HKL )
 		RegRead, Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Display Name"
 		if (not Display_Name) {
@@ -910,6 +937,7 @@ class Layout
 	KLID( ByRef HKL )
 	{ ; функция получения названия "KLID" раскладки по её "HKL" 
 		static KLID, Prior_HKL
+		;
 		VarSetCapacity( KLID, 8 * ( A_IsUnicode ? 2 : 1 ) )
 		Prior_HKL := DllCall( "GetKeyboardLayout", "Ptr", DllCall( "GetWindowThreadProcessId", "Ptr", 0, "UInt", 0, "Ptr" ), "Ptr" )
 		if ( not DllCall( "ActivateKeyboardLayout", "Ptr", HKL, "UInt", 0 ) or not DllCall( "GetKeyboardLayoutName", "Ptr", &KLID ) or not DllCall( "ActivateKeyboardLayout", "Ptr", Prior_HKL, "UInt", 0 ) ) {
@@ -922,6 +950,7 @@ class Layout
 	{ ; функция получения названия "HKL" текущей раскладки
 		static HKL
 		static Window_Class
+		;
 		If ( Window_ID := WinExist( Window ) ) {
 			WinGetClass, Window_Class
 			If ( Window_Class = "ConsoleWindowClass" ) {
@@ -958,6 +987,7 @@ class Layout
 	Get_Index( ByRef HKL )
 	{ ; функция получения порядкового номера раскладки по "HKL"
 		static Index, Layout
+		;
 		For Index, Layout in This.Layouts_List
 		{
 			If ( This.KLID( Layout.HKL ) = This.KLID( HKL ) ) {
@@ -969,6 +999,7 @@ class Layout
 	Get_Index_By_Name( ByRef Full_Name )
 	{ ; функция получения порядкового номера раскладки по полному имени ( "English" )
 		static Index, Layout
+		;
 		For Index, Layout in This.Layouts_List
 		{
 			If ( Layout.Full_Name = Full_Name ) {
@@ -986,20 +1017,20 @@ class Edit_Text
 	static Select_Right := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}"
 	static Select_No_Starting_Space := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 	static Select_No_Space := "^+{Right 2}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
-
+	;
 	static Title_Case_Symbols := "(\_|\-|\.|\[|\(|\{)"
 	static Title_Case_Match := "(.)"
 	static Upper_Case_Words := "(ID\b|PID\b|UI\b|HKL\b|KLID\b)"
-	
+	;
 	static Next_Case_ID := "U"
-	
+	;
 	static Dictionaries := {}
 	static Dictionaries.English := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
 	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
-	
+	;
 	; static Dictionaries_Order := ["English", "Russian", "Ukrainian"]
-	
+	;
 	Select()
 	{ ; функция получения выделенного текста либо выделения текста влево до первого пробела
 		static Selected_Text
@@ -1164,6 +1195,7 @@ class Edit_Text
 	Get_Index_By_Name( ByRef Name )
 	{ ; функция получения порядкового номера словаря по полному имени ( "English" )
 		static Index, Dictionary
+		;
 		Index := 1
 		For Dictionary in This.Dictionaries
 		{
@@ -1184,6 +1216,7 @@ class Script
 		static Detect_Hidden_Windows_Tmp
 		static File_Types, Index, File_Type
 		static Script_Name, Script_Full_Path
+		;
 		Detect_Hidden_Windows_Tmp := A_DetectHiddenWindows
 		#SingleInstance, Off
 		DetectHiddenWindows, On
@@ -1199,6 +1232,7 @@ class Script
 	Close_Other_Instances( ByRef Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
 		static Process_ID
+		;
 		Script_Full_Path := Script_Full_Path ? Script_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Current_ID, ID, % A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Process_List, List, % Script_Full_Path . " ahk_class AutoHotkey"
@@ -1249,6 +1283,18 @@ ToolTip( ByRef text, ByRef time := 800 )
 	SetTimer, Clear_ToolTips, %time%
 }
 
+MenuIcon( ByRef MenuName := "Tray", ByRef ItemName := "", ByRef IcoFile := "", ByRef IconNumber := "", ByRef IconWidth := 0 )
+{ ; функция добавления иконок в меню приложения ( с проверкой наличия файла иконки )
+	If FileExist( IcoFile ) {
+		Menu, %MenuName%, Icon, %ItemName%, %IcoFile%, %IconNumber%, %IconWidth%
+	}
+}
+
+Normalize( ByRef VarName, ByRef Value := 0 )
+{
+	%VarName% := %VarName% ? %VarName% : Value
+}
+
 Clear_ToolTips:
 { ; рутина очистки подсказок и отключения связанных с ней таймеров
 	ToolTip
@@ -1261,6 +1307,10 @@ class Window
 	Is_Full_Screen( ByRef Win_Title := "A" )
 	{ ; функция проверки полноэкранного режима
 		static Win_ID
+		static Win_Style
+		static Win_W
+		static Win_H
+		;		
 		Win_ID := WinExist( Win_Title )
 		If ( not Win_ID ) {
 			Return, False
@@ -1284,10 +1334,11 @@ class Windows
 { ; получение информации о Windows
 	static Tray_ID := Windows.Get_Tray_ID() ; ID системного трея Windows
 	static Desktop_ID := Windows.Get_Desktop_ID() ; ID рабочего стола Windows
-	
+	;
 	Get_Tray_ID()
 	{ ; функция получения ID системного трея Windows
 		static ID
+		;
 		ID := WinExist( "ahk_class Shell_TrayWnd" )
 		Return, ID
 	}
@@ -1295,6 +1346,7 @@ class Windows
 	Get_Desktop_ID()
 	{ ; функция получения ID рабочего стола Windows
 		static ID
+		;
 		ID := WinExist( "ahk_class Progman ahk_exe Explorer.EXE" ) ;
 		If ( not ID ) {
 			ID := WinExist( "ahk_class WorkerW ahk_exe Explorer.EXE" )
@@ -1307,11 +1359,12 @@ class Task_Sheduler
 {
 	static Tasks_Dir := A_WinDir . "\System32\Tasks"
 	static Tasks_Dir_Lenght := StrLen( Task_Sheduler.Tasks_Dir . "\" )
-	
+	;
 	/*
 	Create_Auto_Run_Task( ByRef Task_Name, ByRef Admin_Rights := False )
 	{ ; функция создания автозагрузки программы в планировщике Windows
 		static Command
+		;
 		Command = "%A_WinDir%\System32\schtasks.exe" /create /TN "%Task_Name%" /TR """"%A_ScriptFullPath%"""" /SC ONLOGON
 		Command .= Admin_Rights ? " /RL HIGHEST /F" : " /F"
 		RunWait, *RunAs %Command%
@@ -1320,6 +1373,7 @@ class Task_Sheduler
 	Delete_Auto_Run_Task( ByRef Task_Name )
 	{ ; функция удаления автозагрузки программы из планировщика Windows
 		static Command
+		;
 		Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
 		RunWait, *RunAs %Command%
 	}
@@ -1328,6 +1382,7 @@ class Task_Sheduler
 	Create_Auto_Run_Task( ByRef Task_Name, ByRef Admin_Rights := False, ByRef Delete_Task_XML := 0 )
 	{ ; функция создания автозагрузки программы в планировщике Windows
 		static Task_XML
+		;
 		Task_XML := A_Temp "\" RegExReplace( Task_Name, ".*\\(.*)$", "$1" ) ".xml"
 		This.Create_Auto_Start_XML( A_ScriptFullPath, Admin_Rights, Task_XML, "PT30S" )
 		If FileExist( Task_XML ) {
@@ -1342,6 +1397,7 @@ class Task_Sheduler
 	Create_Task_From_XML( ByRef Task_Name, ByRef Task_XML )
 	{ ; функция создания задания в планировщике Windows ( из XML файла )
 		static Command
+		;
 		Command = schtasks.exe /Create /XML "%Task_XML%" /tn "%Task_Name%"
 		; RunWait, %ComSpec% /k %Command% & pause & exit
 		RunWait, *RunAs %Command%
@@ -1351,6 +1407,7 @@ class Task_Sheduler
 	Delete_Task( ByRef Task_Name )
 	{ ; функция удаления задания из планировщика Windows
 		static Command
+		;
 		Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
 		RunWait, *RunAs %Command%
 		Sleep, 1
@@ -1360,7 +1417,7 @@ class Task_Sheduler
 	{ ; функция создания XML файла задания для планировщика Windows
 		static XML_Text
 		static Registration_Time
-		
+		;
 		FormatTime, Registration_Time,, yyyy-MM-ddThh:mm:ss
 		FormatTime, Start_Time,, yyyy-MM-ddThh:mm:00
 		
@@ -1430,6 +1487,7 @@ class Task_Sheduler
 	{ ; функция проверки наличия задания в планировщике
 		static Task_File
 		static Task_Command
+		;
 		Task_File := This.Tasks_Dir "\" RegExReplace( Task_Name, "^\\", "" )
 		If FileExist( Task_File ) {
 			If ( Command ) {
@@ -1461,6 +1519,7 @@ class Table
 	Get_Key_Index( ByRef Table, ByRef Key_Name )
 	{ ; функция получения порядкового номера ключа по его имени
 		static Key, Index
+		;
 		If not isObject( Table ) {
 			Return
 		}
@@ -1481,6 +1540,7 @@ class Table
 	Get_Key_Name( ByRef Table, ByRef Index )
 	{ ; функция получения имени ключа словаря по порядковому номеру
 		static Key
+		;
 		If not isObject( Table ) {
 			Return
 		}
@@ -1495,6 +1555,7 @@ class Table
 	Max_Index( ByRef Table )
 	{
 		static Key, Index
+		;
 		If not isObject( Table ) {
 			Return
 		}
@@ -1509,6 +1570,7 @@ class Table
 In_Array( ByRef Array, ByRef Value )
 { ; функция проверки наличия значения во множестве
 	static k, v
+	;
 	If ( not isObject( Array ) ) {
 		Return, False
 	}

@@ -117,7 +117,7 @@ SET_DEFAULTS:
 	Defaults.key_switch_text_layout := "NumPad2" ;"$~Break"
 	
 	; KeyCombos
-	Defaults.combo_switch_layout := "{Shift Down}{Alt}{Shift Up}"
+	Defaults.combo_switch_layout := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
 	
 	; Text
 	Defaults.text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
@@ -900,7 +900,7 @@ class Layout
 	;
 	static Layouts_List := Layout.Get_Layouts_List()
 	;
-	static Switch_Layout_Combo := "{Shift Down}{Alt}{Shift Up}"
+	static Switch_Layout_Combo := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
 	;
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок

@@ -80,11 +80,14 @@ START_UPDATE:
 			Icons\English.ico
 			Icons\Russian.ico
 			Icons\Ukrainian.ico
+			;
 			Icons\Menu\Home.ico
-			Icons\Menu\Disabled\Dictionaries.ico
-			Icons\Menu\Disabled\Restart.ico
-			Icons\Menu\Disabled\Settings.ico
-			Icons\Menu\Disabled\Shutdown.ico
+			Icons\Menu\Update.ico
+			;
+			Dictionaries.ico
+			Restart.ico
+			Settings.ico
+			Shutdown.ico
 			; IMAGES
 			Images\English.png
 			Images\Russian.png

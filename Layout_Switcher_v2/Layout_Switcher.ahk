@@ -1026,13 +1026,15 @@ class Layout
 	
 	Change( ByRef HKL, ByRef Window := "A" )
 	{ ; функция смены раскладки по "HKL"
-		static This_Layout_HKL
+		static This_Layout_KLID
+		static Next_Layout_KLID
 		;
 		If ( Window_ID := WinExist( Window ) ) {
 			Loop, % This.Layouts_List.MaxIndex() {
-				This_Layout_HKL := This.Get_HKL( "ahk_id " Window_ID )
+				This_Layout_KLID := This.KLID( This.Get_HKL( "ahk_id " Window_ID ) )
+				Next_Layout_KLID := This.KLID( HKL )
 				Sleep, 1
-				If (This_Layout_HKL == HKL) {
+				If ( This_Layout_KLID == Next_Layout_KLID ) {
 					Break
 				}
 				SendInput, % This.Switch_Layout_Combo
@@ -1040,6 +1042,7 @@ class Layout
 			}
 		}
 		Sleep, 1
+		; MsgBox, % "T: " This_Layout_KLID " == " Next_Layout_KLID
 	}
 	
 	Get_Index( ByRef HKL )

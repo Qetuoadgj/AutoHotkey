@@ -84,10 +84,10 @@ START_UPDATE:
 			Icons\Menu\Home.ico
 			Icons\Menu\Update.ico
 			;
-			Dictionaries.ico
-			Restart.ico
-			Settings.ico
-			Shutdown.ico
+			Icons\Menu\Dictionaries.ico
+			Icons\Menu\Restart.ico
+			Icons\Menu\Settings.ico
+			Icons\Menu\Shutdown.ico
 			; IMAGES
 			Images\English.png
 			Images\Russian.png

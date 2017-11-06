@@ -53,6 +53,10 @@ If ( system_start_with_admin_rights ) {
 	Script.Run_As_Admin( %0% )
 }
 
+If ( system_enable_auto_start and not Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )) {
+	Task_Sheduler.Create_Auto_Run_Task( Auto_Run_Task_Name, system_start_with_admin_rights, True )
+}
+
 App_PID := DllCall("GetCurrentProcessId")
 If ( system_run_with_high_priority ) {
 	Process, Priority, %App_PID%, High
@@ -199,10 +203,12 @@ READ_CONFIG_FILE:
 	
 	Get_Binds( Config_File, "HotKeys", "key_" )
 	
+	/*
 	If ( system_enable_auto_start and not Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )) {
 		Task_Sheduler.Create_Auto_Run_Task( Auto_Run_Task_Name, system_start_with_admin_rights, True )
 		; system_enable_auto_start := Task_Sheduler.Task_Exists( Auto_Run_Task_Name, A_ScriptFullPath )
 	}
+	*/
 	
 	If ( system_fix_config_file_encoding )
 	{

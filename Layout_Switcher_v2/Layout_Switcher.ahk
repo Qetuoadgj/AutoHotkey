@@ -112,6 +112,9 @@ SET_DEFAULTS:
 	Defaults.key_switch_text_case := "NumPad0" ;"$~!Break"
 	Defaults.key_switch_text_layout := "NumPad2" ;"$~Break"
 	
+	; KeyCombos
+	Defaults.combo_switch_layout := "{Shift Down}{Alt}{Shift Up}"
+	
 	; Text
 	Defaults.text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
 	Defaults.text_title_case_match := "(.)"
@@ -167,6 +170,11 @@ READ_CONFIG_FILE:
 	IniRead, key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, % Defaults.key_switch_keyboard_layout
 	IniRead, key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, % Defaults.key_switch_text_case
 	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
+	
+	; KeyCombos
+	IniRead, combo_switch_layout, %Config_File%, KeyCombos, combo_switch_layout, % Defaults.combo_switch_layout
+	Normalize( "combo_switch_layout", Defaults.combo_switch_layout )
+	Layout.Switch_Layout_Combo := combo_switch_layout
 	
 	; Text
 	IniRead, text_title_case_symbols, %Config_File%, Text, text_title_case_symbols, % Defaults.text_title_case_symbols
@@ -260,6 +268,9 @@ SAVE_CONFIG_FILE:
 	IniWrite( "key_switch_keyboard_layout", Config_File, "HotKeys", key_switch_keyboard_layout )
 	IniWrite( "key_switch_text_case", Config_File, "HotKeys", key_switch_text_case )
 	IniWrite( "key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout )
+	
+	; KeyCombos
+	IniWrite( "combo_switch_layout", Config_File, "KeyCombos", combo_switch_layout )
 	
 	; Text
 	IniWrite( "text_title_case_symbols", Config_File, "Text", text_title_case_symbols )
@@ -883,6 +894,8 @@ class Layout
 	;
 	static Layouts_List := Layout.Get_Layouts_List()
 	;
+	static Switch_Layout_Combo := "{Shift Down}{Alt}{Shift Up}"
+	;
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок
 		static Layouts_List, Layouts_List_Size
@@ -970,8 +983,22 @@ class Layout
 	
 	Next( ByRef Window := "A" )
 	{ ; функция смены раскладки ( вперед )
+		static This_Layout_HKL
+		static This_Layout_Index
+		static Next_Layout_Index
+		static Next_Layout_HKL
+		;
 		If ( Window_ID := WinExist( Window ) ) {
+			This_Layout_HKL := This.Get_HKL( "ahk_id " Window_ID )
+			This_Layout_Index := This.Get_Index( This_Layout_HKL )
+			Next_Layout_Index := This_Layout_Index + 1 > This.Layouts_List.MaxIndex() ? 1 : This_Layout_Index + 1
+			Next_Layout_HKL := This.Layouts_List[Next_Layout_Index].HKL
+			Sleep, 1
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
+			Sleep, 1
+			If ( Next_Layout_HKL != This.Get_HKL( "ahk_id " Window_ID ) ) {
+				This.Change( Next_Layout_HKL, "ahk_id " Window_ID )
+			}
 		}
 		Sleep, 1
 	}
@@ -980,6 +1007,11 @@ class Layout
 	{ ; функция смены раскладки по "HKL"
 		If ( Window_ID := WinExist( Window ) ) {
 			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
+			Sleep, 1
+			Loop, % This.Layouts_List.MaxIndex() {
+				SendInput, % This.Switch_Layout_Combo
+				Sleep, 10
+			} Until ( This.Get_HKL( "ahk_id " Window_ID ) == HKL )
 		}
 		Sleep, 1
 	}

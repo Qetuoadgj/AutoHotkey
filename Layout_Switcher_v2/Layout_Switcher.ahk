@@ -19,6 +19,7 @@ CreateLocalization:
 	
 	; Info
 	IniRead, l_info_app_site, %Translation_File%, Info, info_app_site, % "App Site"
+	IniRead, l_info_app_update, %Translation_File%, Info, info_app_update, % "Update App"
 
 	; System
 	IniRead, l_system_suspend_hotkeys, %Translation_File%, System, system_suspend_hotkeys, % "Suspend HotKeys"
@@ -82,6 +83,7 @@ SET_DEFAULTS:
 	Defaults := {}
 	; Info
 	Defaults.info_app_site := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/Layout_Switcher_v2"
+	Defaults.info_updater := "updater.exe"
 	
 	; System
 	Defaults.system_suspend_hotkeys := 0
@@ -136,6 +138,9 @@ READ_CONFIG_FILE:
 {
 	; Info
 	IniRead, info_app_site, %Config_File%, Info, info_app_site, % Defaults.info_app_site
+	IniRead, info_updater, %Config_File%, Info, info_updater, % Defaults.info_updater
+	
+	Normalize( "info_updater", Defaults.info_updater )
 
 	; System
 	IniRead, system_suspend_hotkeys, %Config_File%, System, system_suspend_hotkeys, % Defaults.system_suspend_hotkeys
@@ -241,6 +246,7 @@ SAVE_CONFIG_FILE:
 {
 	; Info
 	IniWrite( "info_app_site", Config_File, "Info", info_app_site )
+	IniWrite( "info_updater", Config_File, "Info", info_updater )
 
 	; System
 	IniWrite( "system_suspend_hotkeys", Config_File, "System", system_suspend_hotkeys )
@@ -647,6 +653,10 @@ FLAG_Customize_Menus:
 	Menu, Tray, Add
 	
 	Menu, Tray, Add, %l_info_app_site%, Menu_App_Site
+	If FileExist( info_updater ) {
+		Menu, Tray, Add, %l_info_app_update%, Menu_App_Update
+		MenuIcon( "Tray", l_info_app_update, "Icons\Menu\Update.ico", 0, 0 )
+	}
 	
 	Menu, Tray, Add
 
@@ -806,6 +816,12 @@ Menu_Toggle_Hide_In_Fullscreen_Mode:
 Menu_App_Site:
 {
 	Run, %info_app_site%
+	Return
+}
+
+Menu_App_Update:
+{
+	Run, %info_updater% -app_pid="%App_PID%"
 	Return
 }
 
@@ -1007,20 +1023,7 @@ class Layout
 	
 	Next( ByRef Window := "A" )
 	{ ; функция смены раскладки ( вперед )
-		static This_Layout_HKL
-		static This_Layout_Index
-		static Next_Layout_Index
-		static Next_Layout_HKL
-		;
-		If ( Window_ID := WinExist( Window ) ) {
-			This_Layout_HKL := This.Get_HKL( "ahk_id " Window_ID )
-			Sleep, 1
-			This_Layout_Index := This.Get_Index( This_Layout_HKL )
-			Sleep, 1
-			Next_Layout_Index := This_Layout_Index + 1 > This.Layouts_List.MaxIndex() ? 1 : This_Layout_Index + 1
-			Next_Layout_HKL := This.Layouts_List[Next_Layout_Index].HKL	
-			This.Change( Next_Layout_HKL, "ahk_id " Window_ID  )
-		}
+		SendInput, % This.Switch_Layout_Combo
 		Sleep, 1
 	}
 	
@@ -1292,7 +1295,7 @@ class Script
 
 	Close_Other_Instances( ByRef Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
-		static Process_ID
+		static Current_ID, Process_List, Process_Count, Process_ID, Process_PID
 		;
 		Script_Full_Path := Script_Full_Path ? Script_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Current_ID, ID, % A_ScriptFullPath . " ahk_class AutoHotkey"
@@ -1321,6 +1324,8 @@ class Script
 	
 	Name()
 	{ ; функция получения имени текущего скрипта
+		static Name
+		;
 		SplitPath, A_ScriptFullPath,,,, Name
 		Return, Name
 	}
@@ -1328,6 +1333,8 @@ class Script
 
 IniWrite( ByRef Key, ByRef File, ByRef Section, ByRef Value )
 { ; замена стандартонго IniWrite (записывает только измененные параметры)
+	static Test_Value
+	;
 	If ( not File ) {
 		Return
 	}

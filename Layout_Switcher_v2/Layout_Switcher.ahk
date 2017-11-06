@@ -981,6 +981,24 @@ class Layout
 		}
 	}
 	
+	/*
+	Next( ByRef Window := "A" )
+	{ ; функция смены раскладки ( вперед )
+		If ( Window_ID := WinExist( Window ) ) {
+			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
+		}
+		Sleep, 1
+	}
+	
+	Change( ByRef HKL, ByRef Window := "A" )
+	{ ; функция смены раскладки по "HKL"
+		If ( Window_ID := WinExist( Window ) ) {
+			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
+		}
+		Sleep, 1
+	}
+	*/
+	
 	Next( ByRef Window := "A" )
 	{ ; функция смены раскладки ( вперед )
 		static This_Layout_HKL
@@ -990,28 +1008,30 @@ class Layout
 		;
 		If ( Window_ID := WinExist( Window ) ) {
 			This_Layout_HKL := This.Get_HKL( "ahk_id " Window_ID )
+			Sleep, 1
 			This_Layout_Index := This.Get_Index( This_Layout_HKL )
+			Sleep, 1
 			Next_Layout_Index := This_Layout_Index + 1 > This.Layouts_List.MaxIndex() ? 1 : This_Layout_Index + 1
-			Next_Layout_HKL := This.Layouts_List[Next_Layout_Index].HKL
-			Sleep, 1
-			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
-			Sleep, 1
-			If ( Next_Layout_HKL != This.Get_HKL( "ahk_id " Window_ID ) ) {
-				This.Change( Next_Layout_HKL, "ahk_id " Window_ID )
-			}
+			Next_Layout_HKL := This.Layouts_List[Next_Layout_Index].HKL	
+			This.Change( Next_Layout_HKL, "ahk_id " Window_ID  )
 		}
 		Sleep, 1
 	}
 	
 	Change( ByRef HKL, ByRef Window := "A" )
 	{ ; функция смены раскладки по "HKL"
+		static This_Layout_HKL
+		;
 		If ( Window_ID := WinExist( Window ) ) {
-			PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
-			Sleep, 1
 			Loop, % This.Layouts_List.MaxIndex() {
+				This_Layout_HKL := This.Get_HKL( "ahk_id " Window_ID )
+				Sleep, 1
+				If (This_Layout_HKL == HKL) {
+					Break
+				}
 				SendInput, % This.Switch_Layout_Combo
-				Sleep, 10
-			} Until ( This.Get_HKL( "ahk_id " Window_ID ) == HKL )
+				Sleep, 1
+			}
 		}
 		Sleep, 1
 	}

@@ -34,6 +34,7 @@ MakeBackup\*.bat
 MakeBackup\*.exe
 MakeBackup\*.ahk
 MakeBackup\*.ico
+MakeBackup\*.url
 
 [ExcludeList]
 ; Свойства папок

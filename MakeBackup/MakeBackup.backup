@@ -17,17 +17,23 @@ ArchiveType = 7z
 [Zip_Options]
 ; Method = Deflate ; Copy,Deflate,Deflate64,BZip2,LZMA,PPMd
 ; Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
+; Parameters = -mfb=258 -mpass=15
 
 [7z_Options]
 ; Method = LZMA2  ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
 ; Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
+; Parameters = -m0=lzma -mfb=64 -md=32m -ms=on
 
 [Rar_Options]
 ; Compression = 5 ; 0 | 1 | 3 | 5
+; Parameters = 
 
 [IncludeList]
 ; Все файлы
-MakeBackup\*
+MakeBackup\*.bat
+MakeBackup\*.exe
+MakeBackup\*.ahk
+MakeBackup\*.ico
 
 [ExcludeList]
 ; Свойства папок
@@ -39,7 +45,7 @@ MakeBackup\*
 *.zip
 
 ; Мусор
-\*.backup
+MakeBackup\*.backup
 *tmp
 
 _*.*

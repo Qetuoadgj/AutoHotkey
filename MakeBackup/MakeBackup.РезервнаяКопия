@@ -1,0 +1,49 @@
+; ÄËß ÏĞÀÂÈËÜÍÎÃÎ ×ÒÅÍÈß ÑÈÌÂÎËÎÂ ÊÎÄÈĞÎÂÊÀ İÒÎÃÎ ÔÀÉËÀ ÎÁßÇÀÒÅËÜÍÎ ÄÎËÆÍÀ ÁÛÒÜ: WIN-1251 | CP1251
+
+[Description]
+; Name = Far Cry [Configured+IronSights]
+; Password = 567576
+RootDir = D:\Google Äèñê\AutoHotkey\
+; SevenZip = %ProgramFiles%\7-Zip\7z.exe
+; WinRAR = %ProgramFiles%\WinRAR\Rar.exe
+ArchiveType = 7z
+; TimeStamp = false
+; TimeStamp = yyyy.MM.dd
+; CreateNewArchives = true
+; NewArchiveNumeration = 0.3d
+; LockArchive = true
+; IncludeThisFile = false
+
+[Zip_Options]
+; Method = Deflate ; Copy,Deflate,Deflate64,BZip2,LZMA,PPMd
+; Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
+
+[7z_Options]
+; Method = LZMA2  ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
+; Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
+
+[Rar_Options]
+; Compression = 5 ; 0 | 1 | 3 | 5
+
+[IncludeList]
+; Âñå ôàéëû
+MakeBackup\*.bat
+MakeBackup\*.exe
+MakeBackup\*.ahk
+MakeBackup\*.ico
+MakeBackup\*.url
+
+[ExcludeList]
+; Ñâîéñòâà ïàïîê
+*Thumbs.db
+*desktop.ini
+
+*.rar
+*.7z
+*.zip
+
+; Ìóñîğ
+MakeBackup\*.backup
+*tmp
+
+_*.*

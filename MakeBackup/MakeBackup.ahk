@@ -216,6 +216,7 @@ ExcludeList := A_Temp "\ExcludeList.txt" ; Список исключений
 CommentFile := A_Temp "\CommentFile.txt" ; Файл комментария
 
 ArchiveName := Name
+Archive := SourceFileDir "\" ArchiveName ; Определение полного пути к архиву
 
 If ( CreateNewArchives )
 { ; Вычисление порядкового номера архива
@@ -241,8 +242,6 @@ If ( AddSuffix )
 		ArchiveName .= " [" ArchiveSuffix "]"
 	}
 }
-
-Archive := SourceFileDir "\" ArchiveName ; Определение полного пути к архиву
 
 ; Вывод окна с полной информацией о будущем архиве
 DebugMsgText := "[Description]"

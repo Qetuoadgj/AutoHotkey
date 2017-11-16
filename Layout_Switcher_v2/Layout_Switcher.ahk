@@ -63,6 +63,7 @@ CREATE_LOCALIZATION:
 	IniRead l_system_show_tray_icon, %Translation_File%, System, system_show_tray_icon, % "Show Tray Icon"
 	IniRead l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
 	IniRead l_system_fix_config_file_encoding, %Translation_File%, System, system_fix_config_file_encoding, % "Fix Config File Encoding"
+	IniRead l_system_switch_layouts_by_send, %Translation_File%, System, system_switch_layouts_by_send, % "Use Alternative Layout Switch"
 
 	; Flag
 	IniRead l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
@@ -100,6 +101,7 @@ SET_DEFAULTS:
 	Defaults.system_show_tray_icon := 1
 	Defaults.system_skip_unused_dictionaries := 1
 	Defaults.system_fix_config_file_encoding := 1
+	Defaults.system_switch_layouts_by_send := 1
 	
 	; Flag
 	Defaults.flag_width := 32
@@ -157,6 +159,7 @@ READ_CONFIG_FILE:
 	IniRead system_show_tray_icon, %Config_File%, System, system_show_tray_icon, % Defaults.system_show_tray_icon
 	IniRead system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, % Defaults.system_skip_unused_dictionaries
 	IniRead system_fix_config_file_encoding, %Config_File%, System, system_fix_config_file_encoding, % Defaults.system_fix_config_file_encoding
+	IniRead system_switch_layouts_by_send, %Config_File%, System, system_switch_layouts_by_send, % Defaults.system_switch_layouts_by_send
 	
 	; Flag
 	IniRead flag_width, %Config_File%, Flag, flag_width, % Defaults.flag_width
@@ -260,6 +263,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("system_show_tray_icon", Config_File, "System", system_show_tray_icon)
 	IniWrite("system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries)
 	IniWrite("system_fix_config_file_encoding", Config_File, "System", system_fix_config_file_encoding)
+	IniWrite("system_switch_layouts_by_send", Config_File, "System", system_switch_layouts_by_send)
 
 	; Flag
 	IniWrite("flag_width", Config_File, "Flag", flag_width)
@@ -303,7 +307,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	if WinActive("ahk_id " Windows.Tray_ID) {
 		WinActivate % "ahk_id " Windows.Desktop_ID
 	}
-	Layout.Next("A")
+	Layout.Next("A", system_switch_layouts_by_send)
 	Layout_HKL := Layout.Get_HKL("A")
 	ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
@@ -351,7 +355,7 @@ SWITCH_TEXT_LAYOUT:
 			Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name)
 			Edit_Text.Paste(Converted_Text)
 			if (Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL) {
-				Layout.Change(Next_Layout_HKL)
+				Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
 				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
 				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 			}
@@ -391,7 +395,7 @@ SWITCH_TEXT_LAYOUT:
 			
 			if (Next_Layout_Index :=  Layout.Get_Index_By_Name(Next_Dictionary_Name)) {
 				Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
-				Layout.Change(Next_Layout_HKL)
+				Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
 				Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
 				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
 				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
@@ -634,6 +638,11 @@ FLAG_Customize_Menus:
 		Menu Tray, Check, %l_system_fix_config_file_encoding%
 	}
 	
+	Menu Tray, Add, %l_system_switch_layouts_by_send%, Menu_Toggle_Switch_Layouts_By_Send
+	if (system_switch_layouts_by_send) {
+		Menu Tray, Check, %l_system_switch_layouts_by_send%
+	}
+	
 	Menu Tray, Add
 	
 	Menu Tray, Add, %l_flag_show_borders%, Menu_Toggle_Show_Borders
@@ -769,6 +778,14 @@ Menu_Toggle_Fix_Config_File_Encoding:
 	return
 }
 
+Menu_Toggle_Switch_Layouts_By_Send:
+{
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
+	system_switch_layouts_by_send := not system_switch_layouts_by_send
+	IniWrite("system_switch_layouts_by_send", Config_File, "System", system_switch_layouts_by_send)
+	return
+}
+
 Menu_Toggle_Show_Borders:
 {
 	Menu Tray, ToggleCheck, %A_ThisMenuItem%
@@ -865,6 +882,7 @@ Menu_Exit_App:
 Generate_Dictionaries(ByRef Prefix := "")
 { ; функция создания словарей для текущих раскладок
 	static Notepad_PID, Notepad_ID, Win_Title, Keys
+	global system_switch_layouts_by_send
 	;
 	Run % "notepad.exe /W",,, Notepad_PID
 
@@ -896,7 +914,7 @@ Generate_Dictionaries(ByRef Prefix := "")
 		IfWinActive %Win_Title%
 		{			
 			while (Layout.Get_HKL(Win_Title) != Layout_Data.HKL and A_Index < 5) {
-				Layout.Change(Layout_Data.HKL, Win_Title)
+				Layout.Change(Layout_Data.HKL, Win_Title, system_switch_layouts_by_send)
 				Sleep 50
 			}
 			if (Layout.Get_HKL(Win_Title) = Layout_Data.HKL) {

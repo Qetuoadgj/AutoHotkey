@@ -96,58 +96,49 @@ class Layout
 		return StrGet(&KLID)
 	}
 	
-	; /*
-	Next(ByRef Window := "A")
+	Next(ByRef Window := "A", ByRef BySend := false)
 	{ ; функция смены раскладки (вперед)
-		static Window_ID
-		;
-		if (Window_ID := WinExist(Window)) {
-			PostMessage % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
+		if BySend { ; с помощью команды Send
+			SendInput % This.Switch_Layout_Combo
 		}
-		Sleep 1
-	}
-	
-	Change(ByRef HKL, ByRef Window := "A")
-	{ ; функция смены раскладки по "HKL"
-		static Window_ID
-		;
-		if (Window_ID := WinExist(Window)) {
-			PostMessage % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
-		}
-		Sleep 1
-	}
-	; */
-	
-	/*
-	Next(ByRef Window := "A")
-	{ ; функция смены раскладки (вперед)
-		SendInput % This.Switch_Layout_Combo
-		Sleep 1
-	}
-	
-	Change(ByRef HKL, ByRef Window := "A")
-	{ ; функция смены раскладки по "HKL"
-		static This_Layout_KLID
-		static Next_Layout_KLID
-		;
-		if (Window_ID := WinExist(Window)) {
-			Loop % This.Layouts_List.MaxIndex()
-			{
-				This_Layout_KLID := This.Get_KLID(This.Get_HKL("ahk_id " Window_ID))
-				Next_Layout_KLID := This.Get_KLID(HKL)
-				Sleep 1
-				if (This_Layout_KLID == Next_Layout_KLID) {
-					Break
-				}
-				SendInput % This.Switch_Layout_Combo
-				Sleep 1
+		else { ; с помощью команды PostMessage
+			static Window_ID
+			;
+			if (Window_ID := WinExist(Window)) {
+				PostMessage % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
 			}
 		}
 		Sleep 1
-		; MsgBox, % "T: " This_Layout_KLID " == " Next_Layout_KLID
 	}
-	*/
 	
+	Change(ByRef HKL, ByRef Window := "A", ByRef BySend := false)
+	{ ; функция смены раскладки по "HKL"
+		static Window_ID
+		;
+		if (Window_ID := WinExist(Window)) {
+			if BySend { ; с помощью команды Send
+				static This_Layout_KLID
+				static Next_Layout_KLID
+				;
+				Loop % This.Layouts_List.MaxIndex()
+				{
+					This_Layout_KLID := This.Get_KLID(This.Get_HKL("ahk_id " Window_ID))
+					Next_Layout_KLID := This.Get_KLID(HKL)
+					Sleep 1
+					if (This_Layout_KLID == Next_Layout_KLID) {
+						Break
+					}
+					SendInput % This.Switch_Layout_Combo
+					Sleep 1
+				}
+			}
+			else { ; с помощью команды PostMessage
+				PostMessage % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
+			}
+		}
+		Sleep 1
+	}
+
 	Get_Index(ByRef HKL)
 	{ ; функция получения порядкового номера раскладки по "HKL"
 		static Index, Layout

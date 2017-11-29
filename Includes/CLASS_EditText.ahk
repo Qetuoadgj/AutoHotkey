@@ -4,7 +4,7 @@
 	static Ctrl_V := "^{vk56}" . "{Ctrl Up}"
 	static Select_Left := "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 	static Select_Right := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}"
-	static Select_No_Starting_Space := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
+	static Select_No_Starting_Space := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}" ;. "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 	static Select_No_Space := "^+{Right 2}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 	;
 	static Title_Case_Symbols := "(\_|\-|\.|\[|\(|\{)"
@@ -14,9 +14,9 @@
 	static Next_Case_ID := "U"
 	;
 	static Dictionaries := {}
-	static Dictionaries.English := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
-	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
-	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
+	static Dictionaries.English := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:`"`"||ZXCVBNM<>?"
+	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!`"`"№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
+	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!`"`"№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	;
 	; static Dictionaries_Order := ["English", "Russian", "Ukrainian"]
 	;
@@ -29,8 +29,8 @@
 		Clipboard = ; Null
 		SendInput % This.Ctrl_C
 		ClipWait 0.05
-		Selected_Text = ; Null
-		if (not Selected_Text := Clipboard) {
+		Selected_Text := Clipboard
+		if (StrLen(Selected_Text) = 0) {
 			Loop 100 {
 				Clipboard = ; Null
 				SendInput % This.Select_Left . This.Ctrl_C
@@ -41,21 +41,16 @@
 				if (StrLen(Clipboard) = StrLen(Selected_Text)) { ; достигнуто начало строки
 					Break
 				}
-				if RegExMatch(Clipboard, "[\r\n]") { ; в выделение попал перенос на новую строку
-					Clipboard = ; Null
-					SendInput % This.Select_No_Space . This.Ctrl_C
-					ClipWait 0.5
+				if RegExMatch(Clipboard, "^\s+$") { ; строка состоит из пробелов
+					SendInput % "{Right}"
 					Break
 				}
-				if RegExMatch(Clipboard, "^\s.+") { ; строка начинается с пробела
+				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел или перенос на новую строку
 					Clipboard = ; Null
-					SendInput % This.Select_No_Starting_Space . This.Ctrl_C
-					ClipWait 0.5
-					Break
-				}
-				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел
-					Clipboard = ; Null
-					SendInput % This.Select_No_Space . This.Ctrl_C ; This.Select_Right . This.Ctrl_C
+					SendInput % "{Ctrl Down}{Shift Down}"
+					SendInput % "{Right 2}{Left}"
+					SendInput % "{Ctrl Up}{Shift Up}"
+					SendInput % This.Ctrl_C
 					ClipWait 0.5
 					Break
 				}

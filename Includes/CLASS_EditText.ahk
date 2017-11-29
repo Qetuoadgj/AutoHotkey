@@ -1,11 +1,11 @@
 ﻿class Edit_Text
 { ; функции получения / обработки текста
-	static Ctrl_C := "^{vk43}" . "{Ctrl Up}"
-	static Ctrl_V := "^{vk56}" . "{Ctrl Up}"
-	static Select_Left := "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
-	static Select_Right := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}"
-	static Select_No_Starting_Space := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}" ;. "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
-	static Select_No_Space := "^+{Right 2}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
+	; static Ctrl_C := "^{vk43}" . "{Ctrl Up}"
+	; static Ctrl_V := "^{vk56}" . "{Ctrl Up}"
+	; static Select_Left := "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
+	; static Select_Right := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}"
+	; static Select_No_Starting_Space := "^+{Right}" . "{Ctrl Up}" . "{Shift Up}" ;. "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
+	; static Select_No_Space := "^+{Right 2}" . "{Ctrl Up}" . "{Shift Up}" . "^+{Left}" . "{Ctrl Up}" . "{Shift Up}"
 	;
 	static Title_Case_Symbols := "(\_|\-|\.|\[|\(|\{)"
 	static Title_Case_Match := "(.)"
@@ -27,13 +27,25 @@
 		; Выделение текста / получение уже выделенного, назначение переменной "Selected_Text"
 		; -----------------------------------------------------------------------------------
 		Clipboard = ; Null
-		SendInput % This.Ctrl_C
+		SendInput % "{Ctrl Down}"
+		; Sleep 1
+		SendInput % "{vk43}"
+		Sleep 1
+		SendInput % "{Ctrl Up}"
 		ClipWait 0.05
 		Selected_Text := Clipboard
 		if (StrLen(Selected_Text) = 0) {
 			Loop 100 {
 				Clipboard = ; Null
-				SendInput % This.Select_Left . This.Ctrl_C
+				SendInput % "{Ctrl Down}{Shift Down}"
+				; Sleep 1
+				SendInput % "{Left}"
+				; Sleep 1
+				SendInput % "{Shift Up}"
+				Sleep 1
+				SendInput % "{vk43}"
+				Sleep 1
+				SendInput % "{Ctrl Up}"
 				ClipWait 0.5
 				if (StrLen(Clipboard) = 0) { ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					return
@@ -45,29 +57,56 @@
 					SendInput % "{Right}"
 					Break
 				}
-				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел или перенос на новую строку
+				if RegExMatch(Clipboard, "\s+$") { ; курсор стоял перед пробелом, его нужно "перескочить"
 					Clipboard = ; Null
+					SendInput % "{Left}"
+					; Sleep 1
 					SendInput % "{Ctrl Down}{Shift Down}"
-					SendInput % "{Right 2}{Left}"
-					SendInput % "{Ctrl Up}{Shift Up}"
-					SendInput % This.Ctrl_C
+					; Sleep 1
+					SendInput % "{Right}"
+					; Sleep 1
+					SendInput % "{Shift Up}"
+					Sleep 1
+					SendInput % "{vk43}"
+					Sleep 1
+					SendInput % "{Ctrl Up}"
 					ClipWait 0.5
-					/* 
-					if (StrLen(Trim(Clipboard)) = 0) { ; достигнуто начало документа (нужно доработать, срабатывает замыкающих пробелах)
-						Clipboard = ; Null
-						SendInput % "{Ctrl Down}{Shift Down}"
-						SendInput % "{Left}"
-						SendInput % "{Ctrl Up}{Shift Up}"
-						SendInput % This.Ctrl_C
-						ClipWait 0.5
-					}
-					*/
 					Break
 				}
-				Selected_Text := Clipboard
+				if RegExMatch(Clipboard, "^[^\s]+\s+[^\s]+") { ; в выделение попал пробел или перенос на новую строку
+					Clipboard = ; Null
+					SendInput % "{Ctrl Down}{Shift Down}"
+					; Sleep 1
+					SendInput % "{Right 2}{Left}"
+					; Sleep 1
+					SendInput % "{Shift Up}"
+					Sleep 1
+					SendInput % "{vk43}"
+					Sleep 1
+					SendInput % "{Ctrl Up}"
+					ClipWait 0.5
+					Break
+				}
+				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел, который находится в самом начале области редактирования
+					Clipboard = ; Null
+					SendInput % "{Ctrl Down}{Shift Down}"
+					; Sleep 1
+					SendInput % "{Right}{Left}"
+					; Sleep 1
+					SendInput % "{Shift Up}"
+					Sleep 1
+					SendInput % "{vk43}"
+					Sleep 1
+					SendInput % "{Ctrl Up}"
+					ClipWait 0.5
+					Break
+				}
+				Selected_Text := Clipboard ; необходимо для сравнения текущего результата с предидущим
 			}
+			Selected_Text := Clipboard ; конечное (гарантированное) присвоение содержимого буфера обмена
 		}
 		; -----------------------------------------------------------------------------------
+		; ToolTip, '%Selected_Text%'
 		return Selected_Text
 	}
 	
@@ -77,7 +116,7 @@
 		; -----------------------------------------------------------------------------------
 		; Преобразование регистра текста, назначение переменной "Converted_Text"
 		; -----------------------------------------------------------------------------------
-		if (not Selected_Text) {
+		if (StrLen(Selected_Text) = 0) {
 			return
 		}
 		This.Next_Case_ID := Force_Case_ID ? Force_Case_ID : This.Next_Case_ID
@@ -124,7 +163,7 @@
 		; -----------------------------------------------------------------------------------
 		; Определение словаря, полностью соответствующего тексту
 		; -----------------------------------------------------------------------------------
-		if (not Selected_Text) {
+		if (StrLen(Selected_Text) = 0) {
 			return
 		}
 		for Language, Dictionary in This.Dictionaries {
@@ -149,7 +188,7 @@
 		; -----------------------------------------------------------------------------------
 		; Замена символов словаря "Current_Dictionary" соответствующими символами "Next_Dictionary"
 		; -----------------------------------------------------------------------------------
-		if (not Selected_Text) {
+		if (StrLen(Selected_Text) = 0) {
 			return
 		}
 		Converted_Text = ; Null
@@ -171,13 +210,17 @@
 		; -----------------------------------------------------------------------------------
 		; Отправление "Converted_Text" в буфер обменя и отправка команды "Control + V"
 		; -----------------------------------------------------------------------------------
-		if (not Converted_Text) {
+		if (StrLen(Converted_Text) = 0) {
 			return
 		}
 		Clipboard = ; Null
 		Clipboard := Converted_Text
 		ClipWait 1.0
-		SendInput % This.Ctrl_V
+		SendInput % "{Ctrl Down}"
+		Sleep 1
+		SendInput % "{vk56}" 
+		Sleep 1
+		SendInput % "{Ctrl Up}"
 		; -----------------------------------------------------------------------------------
 		return Clipboard
 	}

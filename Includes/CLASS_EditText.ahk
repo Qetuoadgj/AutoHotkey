@@ -52,6 +52,16 @@
 					SendInput % "{Ctrl Up}{Shift Up}"
 					SendInput % This.Ctrl_C
 					ClipWait 0.5
+					/* 
+					if (StrLen(Trim(Clipboard)) = 0) { ; достигнуто начало документа (нужно доработать, срабатывает замыкающих пробелах)
+						Clipboard = ; Null
+						SendInput % "{Ctrl Down}{Shift Down}"
+						SendInput % "{Left}"
+						SendInput % "{Ctrl Up}{Shift Up}"
+						SendInput % This.Ctrl_C
+						ClipWait 0.5
+					}
+					*/
 					Break
 				}
 				Selected_Text := Clipboard

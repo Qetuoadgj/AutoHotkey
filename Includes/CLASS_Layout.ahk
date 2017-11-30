@@ -36,7 +36,7 @@ class Layout
 	}
 	
 	Language_Name(ByRef HKL, ByRef Full_Name := false)
-	{ ; функция получения наименования (сокращённого "en" или полного "English") раскладки по её "HKL" 
+	{ ; функция получения наименования (сокращенного "en" или полного "English") раскладки по ее "HKL" 
 		static LocID, LCType, Size
 		;
 		LocID := HKL & 0xFFFF
@@ -48,7 +48,7 @@ class Layout
 	}
 	
 	Display_Name(ByRef HKL)
-	{ ; функция получения названия ("Английская") раскладки по её "HKL" 
+	{ ; функция получения названия ("Английская") раскладки по ее "HKL" 
 		static KLID, Display_Name, outBufSize
 		;
 		KLID := This.Get_KLID(HKL)
@@ -85,7 +85,7 @@ class Layout
 	}
 	
 	Get_KLID(ByRef HKL)
-	{ ; функция получения названия "KLID" раскладки по её "HKL" 
+	{ ; функция получения названия "KLID" раскладки по ее "HKL" 
 		static Prior_HKL, KLID
 		;
 		Prior_HKL := DllCall("GetKeyboardLayout", "Ptr", DllCall("GetWindowThreadProcessId", "Ptr", 0, "UInt", 0, "Ptr"), "Ptr")

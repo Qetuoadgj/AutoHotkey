@@ -1,5 +1,5 @@
 ﻿IniWrite(ByRef Key, ByRef File, ByRef Section, ByRef Value)
-{ ; замена стандартонго IniWrite (записывает только измененные параметры)
+{ ; замена стандартного IniWrite (записывает только измененные параметры)
 	static Test_Value
 	;
 	if (not File) {

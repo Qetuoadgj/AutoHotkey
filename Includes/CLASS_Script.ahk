@@ -39,7 +39,7 @@
 	}
 
 	Run_As_Admin(ByRef Params := "")
-	{ ; функция запуска скрипта с правами адиминистратора
+	{ ; функция запуска скрипта с правами администратора
 		if (not A_IsAdmin) {
 			Try {
 				Run *RunAs "%A_ScriptFullPath%" %Params%

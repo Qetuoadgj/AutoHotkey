@@ -20,7 +20,7 @@ class Window
 		if (Win_Style & 0x20800000) { ; 0x800000 is WS_BORDER, 0x20000000 is WS_MINIMIZE, no border and not minimized
 			return False
 		}
-		WinGetPos ,, Win_W, Win_H, %Win_Title%
+		WinGetPos ,,, Win_W, Win_H, %Win_Title%
 		if (Win_H < A_ScreenHeight or Win_W < A_ScreenWidth) {
 			return False
 		}

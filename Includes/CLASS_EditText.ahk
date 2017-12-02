@@ -26,7 +26,7 @@
 		; -----------------------------------------------------------------------------------
 		; Выделение текста / получение уже выделенного, назначение переменной "Selected_Text"
 		; -----------------------------------------------------------------------------------
-		Clipboard = ; Null
+		Clipboard := "" ; Null
 		SendInput % "{Ctrl Down}"
 		; Sleep 1
 		SendInput % "{vk43}"
@@ -36,7 +36,7 @@
 		Selected_Text := Clipboard
 		if (StrLen(Selected_Text) = 0) {
 			Loop 100 {
-				Clipboard = ; Null
+				Clipboard := "" ; Null
 				SendInput % "{Ctrl Down}{Shift Down}"
 				; Sleep 1
 				SendInput % "{Left}"
@@ -58,7 +58,7 @@
 					Break
 				}
 				if RegExMatch(Clipboard, "\s+$") { ; курсор стоял перед пробелом, его нужно "перескочить"
-					Clipboard = ; Null
+					Clipboard := "" ; Null
 					SendInput % "{Left}"
 					; Sleep 1
 					SendInput % "{Ctrl Down}{Shift Down}"
@@ -74,7 +74,7 @@
 					Break
 				}
 				if RegExMatch(Clipboard, "^[^\s]+\s+[^\s]+") { ; в выделение попал пробел или перенос на новую строку
-					Clipboard = ; Null
+					Clipboard := "" ; Null
 					SendInput % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
 					SendInput % "{Right 2}{Left}"
@@ -88,7 +88,7 @@
 					Break
 				}
 				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел, который находится в самом начале области редактирования
-					Clipboard = ; Null
+					Clipboard := "" ; Null
 					SendInput % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
 					SendInput % "{Right}{Left}"
@@ -191,7 +191,7 @@
 		if (StrLen(Selected_Text) = 0) {
 			return
 		}
-		Converted_Text = ; Null
+		Converted_Text := "" ; Null
 		Loop Parse, Selected_Text
 		{
 			if (Current_Dictionary_Match := InStr(This.Dictionaries[Current_Dictionary], A_LoopField, 1)) {
@@ -213,7 +213,7 @@
 		if (StrLen(Converted_Text) = 0) {
 			return
 		}
-		Clipboard = ; Null
+		Clipboard := "" ; Null
 		Clipboard := Converted_Text
 		ClipWait 1.0
 		SendInput % "{Ctrl Down}"

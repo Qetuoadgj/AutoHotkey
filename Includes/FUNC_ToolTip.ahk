@@ -1,6 +1,6 @@
 ﻿ToolTip(ByRef text, ByRef time := 800)
 { ; функция вывода всплывающей подсказки с последующим (убирается по таймеру)
-	Tooltip %text%
+	ToolTip %text%
 	SetTimer Clear_ToolTips, %time%
 }
 

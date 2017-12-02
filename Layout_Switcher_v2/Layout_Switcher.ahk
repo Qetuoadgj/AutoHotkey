@@ -11,7 +11,7 @@ Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
 
-Clipboard_Tmp = ; Null
+Clipboard_Tmp := "" ; Null
 
 gosub CREATE_LOCALIZATION
 gosub SET_DEFAULTS
@@ -319,7 +319,7 @@ SWITCH_KEYBOARD_LAYOUT:
 
 SWITCH_TEXT_CASE:
 {
-	Clipboard_Tmp = ; Null
+	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
 	if (Selected_Text := Edit_Text.Select()) {
 		Converted_Text := Edit_Text.Convert_Case(Selected_Text, false)
@@ -329,7 +329,7 @@ SWITCH_TEXT_CASE:
 		}
 	}
 	Sleep 50
-	Clipboard = ; Null
+	Clipboard := "" ; Null
 	Clipboard := Clipboard_Tmp
 	ClipWait 0.05
 	return
@@ -338,7 +338,7 @@ SWITCH_TEXT_CASE:
 ; /*
 SWITCH_TEXT_LAYOUT:
 {
-	Clipboard_Tmp = ; Null
+	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
 	if (Selected_Text := Edit_Text.Select()) {
 		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
@@ -365,7 +365,7 @@ SWITCH_TEXT_LAYOUT:
 		}
 	}
 	Sleep 50
-	Clipboard = ; Null
+	Clipboard := "" ; Null
 	Clipboard := Clipboard_Tmp
 	ClipWait 0.05
 	return
@@ -375,7 +375,7 @@ SWITCH_TEXT_LAYOUT:
 /*
 SWITCH_TEXT_LAYOUT:
 {
-	Clipboard_Tmp = ; Null
+	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
 	if (Selected_Text := Edit_Text.Select()) {
 		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
@@ -409,7 +409,7 @@ SWITCH_TEXT_LAYOUT:
 		}
 	}
 	Sleep 50
-	Clipboard = ; Null
+	Clipboard := "" ; Null
 	Clipboard := Clipboard_Tmp
 	ClipWait 0.05
 	return

@@ -19,7 +19,7 @@ ArchiveType = 7z
 ; Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
 
 [7z_Options]
-; Method = LZMA2  ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
+; Method = LZMA2:27 ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
 ; Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
 
 [Rar_Options]

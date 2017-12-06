@@ -47,7 +47,7 @@ If (not %0%) {
 			Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
 
 			[7z_Options]
-			Method = LZMA2  ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
+			Method = LZMA2:21 ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
 			Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
 
 			[Rar_Options]
@@ -143,7 +143,7 @@ ZipMethod := RegExReplace(ZipMethod,"[ \t]+;.*$","")
 IniRead,ZipCompression,%SourceFile%,Zip_Options,Compression,9
 ZipCompression := RegExReplace(ZipCompression,"[ \t]+;.*$","")
 
-IniRead,7zMethod,%SourceFile%,7z_Options,Method,LZMA2
+IniRead,7zMethod,%SourceFile%,7z_Options,Method,LZMA2:21
 7zMethod := RegExReplace(7zMethod,"[ \t]+;.*$","")
 IniRead,7zCompression,%SourceFile%,7z_Options,Compression,9
 7zCompression := RegExReplace(7zCompression,"[ \t]+;.*$","")

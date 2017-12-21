@@ -122,7 +122,7 @@ SET_DEFAULTS:
 	Defaults.sound_switch_keyboard_layout := "sounds\switch_keyboard_layout.wav"
 	Defaults.sound_switch_text_case := "sounds\switch_text_case.wav"
 	Defaults.sound_switch_text_layout := "sounds\switch_text_layout.wav"
-	Defaults.sound_toggle_cursor := "sounds\switch_keyboard_layout.wav"
+	Defaults.sound_toggle_cursor := "sounds\toggle_cursor.mp3"
 	
 	; HotKeys
 	Defaults.key_switch_keyboard_layout := "NumPad1" ;"CapsLock"

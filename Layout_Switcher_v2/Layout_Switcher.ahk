@@ -28,7 +28,7 @@ if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(
 App_PID := DllCall("GetCurrentProcessId")
 if (system_run_with_high_priority) {
 	Process Priority, %App_PID%, High
-} 
+}
 else {
 	Process Priority, %App_PID%, Normal
 }
@@ -42,6 +42,10 @@ SetTimer FLAG_Update, % system_check_layout_change_interval
 
 gosub SAVE_CONFIG_FILE
 
+SystemCursor("On")
+
+OnExit, App_Close
+
 Exit
 
 CREATE_LOCALIZATION:
@@ -53,7 +57,7 @@ CREATE_LOCALIZATION:
 	; Info
 	IniRead l_info_app_site, %Translation_File%, Info, info_app_site, % "App Site"
 	IniRead l_info_app_update, %Translation_File%, Info, info_app_update, % "Update App"
-
+	
 	; System
 	IniRead l_system_suspend_hotkeys, %Translation_File%, System, system_suspend_hotkeys, % "Suspend HotKeys"
 	IniRead l_system_enable_auto_start, %Translation_File%, System, system_enable_auto_start, % "Auto Start"
@@ -64,13 +68,13 @@ CREATE_LOCALIZATION:
 	IniRead l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
 	IniRead l_system_fix_config_file_encoding, %Translation_File%, System, system_fix_config_file_encoding, % "Fix Config File Encoding"
 	IniRead l_system_switch_layouts_by_send, %Translation_File%, System, system_switch_layouts_by_send, % "Use Alternative Layout Switch"
-
+	
 	; Flag
 	IniRead l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
 	IniRead l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
 	IniRead l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
 	IniRead l_flag_hide_in_fullscreen_mode, %Translation_File%, Flag, flag_hide_in_fullscreen_mode, % "Hide In Fullscreen Mode"
-
+	
 	; Sound
 	IniRead l_sound_enable, %Translation_File%, Sound, sound_enable, % "Enable Sounds"
 	
@@ -118,11 +122,13 @@ SET_DEFAULTS:
 	Defaults.sound_switch_keyboard_layout := "sounds\switch_keyboard_layout.wav"
 	Defaults.sound_switch_text_case := "sounds\switch_text_case.wav"
 	Defaults.sound_switch_text_layout := "sounds\switch_text_layout.wav"
+	Defaults.sound_toggle_cursor := "sounds\switch_keyboard_layout.wav"
 	
 	; HotKeys
 	Defaults.key_switch_keyboard_layout := "NumPad1" ;"CapsLock"
 	Defaults.key_switch_text_case := "NumPad0" ;"$~!Break"
 	Defaults.key_switch_text_layout := "NumPad2" ;"$~Break"
+	Defaults.key_toggle_cursor := "#c" ;"#c"
 	
 	; KeyCombos
 	Defaults.combo_switch_layout := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
@@ -136,7 +142,7 @@ SET_DEFAULTS:
 	Defaults.dictionary_english := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$^&*()_+QWERTYUIOP{}ASDFGHJKL:`"`"||ZXCVBNM<>?"
 	Defaults.dictionary_russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!`"`"№;:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!`"`"№;:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
-
+	
 	return
 }
 
@@ -147,7 +153,7 @@ READ_CONFIG_FILE:
 	IniRead info_updater, %Config_File%, Info, info_updater, % Defaults.info_updater
 	
 	Normalize("info_updater", Defaults.info_updater)
-
+	
 	; System
 	IniRead system_suspend_hotkeys, %Config_File%, System, system_suspend_hotkeys, % Defaults.system_suspend_hotkeys
 	IniRead system_enable_auto_start, %Config_File%, System, system_enable_auto_start, % Defaults.system_enable_auto_start
@@ -175,17 +181,19 @@ READ_CONFIG_FILE:
 	Normalize("flag_height", Defaults.flag_height)
 	Normalize("flag_position_x", Defaults.flag_position_x)
 	Normalize("flag_position_y", Defaults.flag_position_y)
-
+	
 	; Sound
 	IniRead sound_enable, %Config_File%, Sound, sound_enable, % Defaults.sound_enable
 	IniRead sound_switch_keyboard_layout, %Config_File%, Sound, sound_switch_keyboard_layout, % Defaults.sound_switch_keyboard_layout
 	IniRead sound_switch_text_case, %Config_File%, Sound, sound_switch_text_case, % Defaults.sound_switch_text_case
 	IniRead sound_switch_text_layout, %Config_File%, Sound, sound_switch_text_layout, % Defaults.sound_switch_text_layout
-
+	IniRead sound_toggle_cursor, %Config_File%, Sound, sound_toggle_cursor, % Defaults.sound_toggle_cursor
+	
 	; HotKeys
 	IniRead key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, % Defaults.key_switch_keyboard_layout
 	IniRead key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, % Defaults.key_switch_text_case
 	IniRead key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
+	IniRead key_toggle_cursor, %Config_File%, HotKeys, key_toggle_cursor, % Defaults.key_toggle_cursor
 	
 	; KeyCombos
 	IniRead combo_switch_layout, %Config_File%, KeyCombos, combo_switch_layout, % Defaults.combo_switch_layout
@@ -200,7 +208,7 @@ READ_CONFIG_FILE:
 	Edit_Text.Title_Case_Symbols := text_title_case_symbols
 	Edit_Text.Title_Case_Match := text_title_case_match
 	Edit_Text.Upper_Case_Words := text_upper_case_words
-
+	
 	; Dictionaries
 	IniRead dictionary_english, %Config_File%, Dictionaries, dictionary_english, % Defaults.dictionary_english
 	IniRead dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, % Defaults.dictionary_russian
@@ -210,15 +218,15 @@ READ_CONFIG_FILE:
 	; Remove_Unused_Dictionaries()
 	
 	; for k, v in Edit_Text.Dictionaries_Order {
-		; MsgBox, % v
+	; MsgBox, % v
 	; }
 	
 	Get_Binds(Config_File, "HotKeys", "key_")
 	
 	/*
 	if (system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
-		Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
-		; system_enable_auto_start := Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)
+	Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+	; system_enable_auto_start := Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)
 	}
 	*/
 	
@@ -228,7 +236,7 @@ READ_CONFIG_FILE:
 		if (ini.Encoding != app_ecoding) {
 			ini_data := ini.Read()
 			if (ini_data) {
-				ini.Close()   
+				ini.Close()
 				MsgBox 0, Test, % "Encoding of the program: " app_ecoding "`n" "Encoding of " Config_File ": " ini.Encoding
 				FileDelete %Config_File%
 				FileAppend %ini_data%, %Config_File%, %app_ecoding%
@@ -239,7 +247,7 @@ READ_CONFIG_FILE:
 	/*
 	for key, value in Defaults
 	{ ; нормализация переменных
-		Normalize(key, value)
+	Normalize(key, value)
 	}
 	*/
 	
@@ -251,7 +259,7 @@ SAVE_CONFIG_FILE:
 	; Info
 	IniWrite("info_app_site", Config_File, "Info", info_app_site)
 	IniWrite("info_updater", Config_File, "Info", info_updater)
-
+	
 	; System
 	IniWrite("system_suspend_hotkeys", Config_File, "System", system_suspend_hotkeys)
 	IniWrite("system_enable_auto_start", Config_File, "System", system_enable_auto_start)
@@ -264,7 +272,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries)
 	IniWrite("system_fix_config_file_encoding", Config_File, "System", system_fix_config_file_encoding)
 	IniWrite("system_switch_layouts_by_send", Config_File, "System", system_switch_layouts_by_send)
-
+	
 	; Flag
 	IniWrite("flag_width", Config_File, "Flag", flag_width)
 	IniWrite("flag_height", Config_File, "Flag", flag_height)
@@ -274,17 +282,19 @@ SAVE_CONFIG_FILE:
 	IniWrite("flag_always_on_top", Config_File, "Flag", flag_always_on_top)
 	IniWrite("flag_fixed_position", Config_File, "Flag", flag_fixed_position)
 	IniWrite("flag_hide_in_fullscreen_mode", Config_File, "Flag", flag_hide_in_fullscreen_mode)
-
+	
 	; Sound
 	IniWrite("sound_enable", Config_File, "Sound", sound_enable)
 	IniWrite("sound_switch_keyboard_layout", Config_File, "Sound", sound_switch_keyboard_layout)
 	IniWrite("sound_switch_text_case", Config_File, "Sound", sound_switch_text_case)
 	IniWrite("sound_switch_text_layout", Config_File, "Sound", sound_switch_text_layout)
-
+	IniWrite("sound_toggle_cursor", Config_File, "Sound", sound_toggle_cursor)
+	
 	; HotKeys
 	IniWrite("key_switch_keyboard_layout", Config_File, "HotKeys", key_switch_keyboard_layout)
 	IniWrite("key_switch_text_case", Config_File, "HotKeys", key_switch_text_case)
 	IniWrite("key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout)
+	IniWrite("key_toggle_cursor", Config_File, "HotKeys", key_toggle_cursor)
 	
 	; KeyCombos
 	IniWrite("combo_switch_layout", Config_File, "KeyCombos", combo_switch_layout)
@@ -293,7 +303,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("text_title_case_symbols", Config_File, "Text", text_title_case_symbols)
 	IniWrite("text_title_case_match", Config_File, "Text", text_title_case_match)
 	IniWrite("text_upper_case_words", Config_File, "Text", text_upper_case_words)
-
+	
 	; Dictionaries
 	IniWrite("dictionary_english", Config_File, "Dictionaries", dictionary_english)
 	IniWrite("dictionary_russian", Config_File, "Dictionaries", dictionary_russian)
@@ -312,6 +322,16 @@ SWITCH_KEYBOARD_LAYOUT:
 	ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
 		SoundPlay %sound_switch_keyboard_layout%
+	}
+	Sleep 50
+	return
+}
+
+TOGGLE_CURSOR:
+{
+	SystemCursor("Toggle")
+	if (sound_enable and FileExist(sound_toggle_cursor)) {
+		SoundPlay %sound_toggle_cursor%
 	}
 	Sleep 50
 	return
@@ -344,7 +364,7 @@ SWITCH_TEXT_LAYOUT:
 		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
 		if (Selected_Text_Dictionary) {
 			Text_Layout_Index := Layout.Get_Index_By_Name(Selected_Text_Dictionary)
-		} 
+		}
 		else {
 			Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
 			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
@@ -375,44 +395,44 @@ SWITCH_TEXT_LAYOUT:
 /*
 SWITCH_TEXT_LAYOUT:
 {
-	Clipboard_Tmp := "" ; Null
-	Clipboard_Tmp := Clipboard
-	if (Selected_Text := Edit_Text.Select()) {
-		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
-		if (not Selected_Text_Dictionary) {
-			Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
-			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
-		}
-		if (Selected_Text_Dictionary) {			
-			Text_Dictionary_Index := Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Selected_Text_Dictionary)
-			Next_Dictionary_Index := Text_Dictionary_Index + 1 > Edit_Text.Dictionaries_Order.MaxIndex() ? 1 : Text_Dictionary_Index + 1
-			Next_Dictionary_Name := Edit_Text.Dictionaries_Order[Next_Dictionary_Index]
-			
-			MsgBox % Selected_Text_Dictionary "`n" Next_Dictionary_Name
-						
-			Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text_Dictionary, Next_Dictionary_Name)
-			Edit_Text.Paste(Converted_Text)
-			
-			if (Next_Layout_Index :=  Layout.Get_Index_By_Name(Next_Dictionary_Name)) {
-				Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
-				Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
-				Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
-				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
-				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
-			}
-			else {
-				ToolTip(Next_Dictionary_Name)
-			}
-		}
-		if (sound_enable and FileExist(sound_switch_text_layout)) {
-			SoundPlay %sound_switch_text_layout%
-		}
-	}
-	Sleep 50
-	Clipboard := "" ; Null
-	Clipboard := Clipboard_Tmp
-	ClipWait 0.05
-	return
+Clipboard_Tmp := "" ; Null
+Clipboard_Tmp := Clipboard
+if (Selected_Text := Edit_Text.Select()) {
+Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
+if (not Selected_Text_Dictionary) {
+Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
+Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
+}
+if (Selected_Text_Dictionary) {
+Text_Dictionary_Index := Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Selected_Text_Dictionary)
+Next_Dictionary_Index := Text_Dictionary_Index + 1 > Edit_Text.Dictionaries_Order.MaxIndex() ? 1 : Text_Dictionary_Index + 1
+Next_Dictionary_Name := Edit_Text.Dictionaries_Order[Next_Dictionary_Index]
+
+MsgBox % Selected_Text_Dictionary "`n" Next_Dictionary_Name
+
+Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text_Dictionary, Next_Dictionary_Name)
+Edit_Text.Paste(Converted_Text)
+
+if (Next_Layout_Index :=  Layout.Get_Index_By_Name(Next_Dictionary_Name)) {
+Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
+Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
+Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
+Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
+ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
+}
+else {
+ToolTip(Next_Dictionary_Name)
+}
+}
+if (sound_enable and FileExist(sound_switch_text_layout)) {
+SoundPlay %sound_switch_text_layout%
+}
+}
+Sleep 50
+Clipboard := "" ; Null
+Clipboard := Clipboard_Tmp
+ClipWait 0.05
+return
 }
 */
 
@@ -436,7 +456,7 @@ Get_Dictionaries(ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Ski
 			IniRead Value, %Config_File%, %Section%, % Prefix . Key
 			Edit_Text.Dictionaries[Key] := Value
 			; if not In_Array(Edit_Text.Dictionaries_Order, Key) {
-				; Edit_Text.Dictionaries_Order.Push(Key)
+			; Edit_Text.Dictionaries_Order.Push(Key)
 			; }
 			; MsgBox, % Prefix . Key "`n" Value
 		}
@@ -446,16 +466,16 @@ Get_Dictionaries(ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Ski
 /*
 Remove_Unused_Dictionaries()
 { ; функция удаления словарей, для которых нет раскладки
-	static Dictionary_Name
-	;
-	for Dictionary_Name in Edit_Text.Dictionaries
-	{
-		if (not Layout.Get_Index_By_Name(Dictionary_Name)) {
-			Edit_Text.Dictionaries.Delete(Dictionary_Name)
-			Edit_Text.Dictionaries_Order.Delete(Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Dictionary_Name))
-			; MsgBox, % Dictionary_Name
-		}
-	}
+static Dictionary_Name
+;
+for Dictionary_Name in Edit_Text.Dictionaries
+{
+if (not Layout.Get_Index_By_Name(Dictionary_Name)) {
+Edit_Text.Dictionaries.Delete(Dictionary_Name)
+Edit_Text.Dictionaries_Order.Delete(Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Dictionary_Name))
+; MsgBox, % Dictionary_Name
+}
+}
 }
 */
 
@@ -488,14 +508,14 @@ FLAG_Create_GUI:
 	
 	if (flag_always_on_top) {
 		Gui FLAG_: +AlwaysOnTop
-	} 
+	}
 	else {
 		Gui FLAG_: -AlwaysOnTop
 	}
 	
 	if (flag_show_borders) {
 		Gui FLAG_: +Border
-	} 
+	}
 	else {
 		Gui FLAG_: -Border
 	}
@@ -596,7 +616,7 @@ FLAG_Customize_Menus:
 		Suspend On
 		Menu Tray, Check, %l_system_suspend_hotkeys%
 	}
-
+	
 	Menu Tray, Add, %l_system_enable_auto_start%, Menu_Toggle_Auto_Start
 	if (system_enable_auto_start and Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
 		Menu Tray, Check, %l_system_enable_auto_start%
@@ -649,7 +669,7 @@ FLAG_Customize_Menus:
 	if (flag_show_borders) {
 		Menu Tray, Check, %l_flag_show_borders%
 	}
-
+	
 	Menu Tray, Add, %l_flag_always_on_top%, Menu_Toggle_Always_On_Top
 	if (flag_always_on_top) {
 		Menu Tray, Check, %l_flag_always_on_top%
@@ -674,7 +694,7 @@ FLAG_Customize_Menus:
 	}
 	
 	Menu Tray, Add
-
+	
 	Menu Tray, Add, %l_app_generate_dictionaries%, Menu_Generate_Dictionaries
 	Menu Tray, Add, %l_app_options%, Menu_Options
 	Menu Tray, Add, %l_app_restart%, Menu_Reload_App
@@ -885,12 +905,12 @@ Generate_Dictionaries(ByRef Prefix := "")
 	global system_switch_layouts_by_send
 	;
 	Run % "notepad.exe /W",,, Notepad_PID
-
+	
 	WinWait ahk_pid %Notepad_PID%
 	WinGet Notepad_ID, ID, ahk_pid %Notepad_PID%
-
+	
 	Win_Title = ahk_id %Notepad_ID%
-
+	
 	Keys := ["SC029","SC002","SC003","SC004"
 	,"SC005","SC006","SC007","SC008","SC009"
 	,"SC00A","SC00B","SC00C","SC00D","SC010"
@@ -912,7 +932,7 @@ Generate_Dictionaries(ByRef Prefix := "")
 		WinActivate %Win_Title%
 		WinWaitActive %Win_Title%
 		IfWinActive %Win_Title%
-		{			
+		{
 			while (Layout.Get_HKL(Win_Title) != Layout_Data.HKL and A_Index < 5) {
 				Layout.Change(Layout_Data.HKL, Win_Title, system_switch_layouts_by_send)
 				Sleep 50
@@ -934,10 +954,18 @@ Generate_Dictionaries(ByRef Prefix := "")
 	}
 }
 
+App_Close:
+{
+	SystemCursor("On")
+	ExitApp
+	return
+}
+
 #Include ..\Includes\FUNC_Normalize.ahk
 #Include ..\Includes\FUNC_IniWrite.ahk
 #Include ..\Includes\FUNC_ToolTip.ahk
 #Include ..\Includes\FUNC_MenuIcon.ahk
+#Include ..\Includes\FUNC_SystemCursor.ahk
 
 #Include ..\Includes\CLASS_Script.ahk
 #Include ..\Includes\CLASS_Task_Sheduler.ahk

@@ -51,7 +51,7 @@ READ_CONFIG_FILE:
 	Normalize("info_run_x32", Defaults.info_run_x32)
 	IniRead info_run_x64, %Config_File%, Info, info_run_x64, % Defaults.info_run_x64
 	Normalize("info_run_x64", Defaults.info_run_x64)
-
+	
 	return
 }
 
@@ -76,32 +76,33 @@ START_UPDATE:
 		default_text =
 		(LTrim RTrim Join`r`n
 			[x86]
-			; ICONS
-			Icons\English.ico
-			Icons\Russian.ico
-			Icons\Ukrainian.ico
-			;
-			Icons\Menu\Home.ico
-			Icons\Menu\Update.ico
-			;
-			Icons\Menu\Dictionaries.ico
-			Icons\Menu\Restart.ico
-			Icons\Menu\Settings.ico
-			Icons\Menu\Shutdown.ico
-			; IMAGES
-			Images\English.png
-			Images\Russian.png
-			Images\Ukrainian.png
-			; SOUNDS
-			Sounds\switch_keyboard_layout.wav
-			Sounds\switch_text_case.wav
-			Sounds\switch_text_layout.wav
-			; TRANSLATIONS
-			Translations\Russian.ini
+				; ICONS
+					Icons\English.ico
+					Icons\Russian.ico
+					Icons\Ukrainian.ico
+					;
+					Icons\Menu\Home.ico
+					Icons\Menu\Update.ico
+					;
+					Icons\Menu\Dictionaries.ico
+					Icons\Menu\Restart.ico
+					Icons\Menu\Settings.ico
+					Icons\Menu\Shutdown.ico
+				; IMAGES
+					Images\English.png
+					Images\Russian.png
+					Images\Ukrainian.png
+				; SOUNDS
+					Sounds\switch_keyboard_layout.wav
+					Sounds\switch_text_case.wav
+					Sounds\switch_text_layout.wav
+					Sounds\toggle_cursor.mp3
+				; TRANSLATIONS
+					Translations\Russian.ini
 			[x32]
-			Layout_Switcher_x32.exe
+				Layout_Switcher_x32.exe
 			[x64]
-			Layout_Switcher_x64.exe
+				Layout_Switcher_x64.exe
 		)
 		;
 		FileAppend %default_text%, %Config_File%		
@@ -114,7 +115,8 @@ START_UPDATE:
 	DownloadFromList(info_download_from, x86_section)
 	if (A_Is64bitOS) {
 		DownloadFromList(info_download_from, x64_section)
-	} else {
+	}
+	else {
 		DownloadFromList(info_download_from, x32_section)
 	}
 	
@@ -131,7 +133,8 @@ RUN_APP:
 		if FileExist(info_run_x64) {
 			Run %info_run_x64%
 		}
-	} else {
+	}
+	else {
 		IniRead info_run_x32, %Config_File%, Info, info_run_x32, % Defaults.info_run_x32
 		Normalize("info_run_x32", Defaults.info_run_x32)
 		IniWrite("info_run_x32", Config_File, "Info", info_run_x32)
@@ -152,11 +155,11 @@ GetUrlStatus(ByRef URL, ByRef Timeout = -1)
 { ; проверка статуса URL
 	ComObjError(0)
 	static WinHttpReq := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-
+	
 	WinHttpReq.Open("HEAD", URL, True)
 	WinHttpReq.Send()
 	WinHttpReq.WaitForResponse(Timeout) ; return: Success = -1, Timeout = 0, No response = Empty String
-
+	
 	return WinHttpReq.Status()
 }
 

@@ -123,14 +123,14 @@ SET_DEFAULTS:
 	Defaults.sound_switch_text_case := "sounds\switch_text_case.wav"
 	Defaults.sound_switch_text_layout := "sounds\switch_text_layout.wav"
 	Defaults.sound_toggle_cursor := "sounds\toggle_cursor.mp3"
-	Defaults.sound_toggle_fullscreen := "sounds\toggle_fullscreen.mp3"
+	; Defaults.sound_toggle_fullscreen := "sounds\toggle_fullscreen.mp3"
 	
 	; HotKeys
 	Defaults.key_switch_keyboard_layout := "NumPad1" ;"CapsLock"
 	Defaults.key_switch_text_case := "NumPad0" ;"$~!Break"
 	Defaults.key_switch_text_layout := "NumPad2" ;"$~Break"
 	Defaults.key_toggle_cursor := "RWin" ;"#c"
-	Defaults.key_toggle_fullscreen := "LWin & LButton"
+	; Defaults.key_toggle_fullscreen := "LWin & LButton"
 	
 	; KeyCombos
 	Defaults.combo_switch_layout := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
@@ -193,14 +193,14 @@ READ_CONFIG_FILE:
 	IniRead sound_switch_text_case, %Config_File%, Sound, sound_switch_text_case, % Defaults.sound_switch_text_case
 	IniRead sound_switch_text_layout, %Config_File%, Sound, sound_switch_text_layout, % Defaults.sound_switch_text_layout
 	IniRead sound_toggle_cursor, %Config_File%, Sound, sound_toggle_cursor, % Defaults.sound_toggle_cursor
-	IniRead sound_toggle_fullscreen, %Config_File%, Sound, sound_toggle_fullscreen, % Defaults.sound_toggle_fullscreen
+	; IniRead sound_toggle_fullscreen, %Config_File%, Sound, sound_toggle_fullscreen, % Defaults.sound_toggle_fullscreen
 	
 	; HotKeys
 	IniRead key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, % Defaults.key_switch_keyboard_layout
 	IniRead key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, % Defaults.key_switch_text_case
 	IniRead key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
 	IniRead key_toggle_cursor, %Config_File%, HotKeys, key_toggle_cursor, % Defaults.key_toggle_cursor
-	IniRead key_toggle_fullscreen, %Config_File%, HotKeys, key_toggle_fullscreen, % Defaults.key_toggle_fullscreen
+	; IniRead key_toggle_fullscreen, %Config_File%, HotKeys, key_toggle_fullscreen, % Defaults.key_toggle_fullscreen
 	
 	; KeyCombos
 	IniRead combo_switch_layout, %Config_File%, KeyCombos, combo_switch_layout, % Defaults.combo_switch_layout
@@ -296,14 +296,14 @@ SAVE_CONFIG_FILE:
 	IniWrite("sound_switch_text_case", Config_File, "Sound", sound_switch_text_case)
 	IniWrite("sound_switch_text_layout", Config_File, "Sound", sound_switch_text_layout)
 	IniWrite("sound_toggle_cursor", Config_File, "Sound", sound_toggle_cursor)
-	IniWrite("sound_toggle_fullscreen", Config_File, "Sound", sound_toggle_fullscreen)
+	; IniWrite("sound_toggle_fullscreen", Config_File, "Sound", sound_toggle_fullscreen)
 	
 	; HotKeys
 	IniWrite("key_switch_keyboard_layout", Config_File, "HotKeys", key_switch_keyboard_layout)
 	IniWrite("key_switch_text_case", Config_File, "HotKeys", key_switch_text_case)
 	IniWrite("key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout)
 	IniWrite("key_toggle_cursor", Config_File, "HotKeys", key_toggle_cursor)
-	IniWrite("key_toggle_fullscreen", Config_File, "HotKeys", key_toggle_fullscreen)
+	; IniWrite("key_toggle_fullscreen", Config_File, "HotKeys", key_toggle_fullscreen)
 	
 	; KeyCombos
 	IniWrite("combo_switch_layout", Config_File, "KeyCombos", combo_switch_layout)
@@ -345,7 +345,7 @@ TOGGLE_CURSOR:
 	Sleep 50
 	return
 }
-
+/*
 TOGGLE_FULLSCREEN:
 {
 	WinGet, Win_PID, PID, A
@@ -368,7 +368,7 @@ TOGGLE_FULLSCREEN:
 	}
 	return
 }
-
+*/
 SWITCH_TEXT_CASE:
 {
 	Clipboard_Tmp := "" ; Null

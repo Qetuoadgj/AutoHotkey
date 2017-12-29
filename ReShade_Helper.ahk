@@ -43,7 +43,7 @@ RESET_SETTINGS:
 CREATE_MAIN_WINDOW:
 {
 	global MainGUI := APP_NAME . "_"
-	Gui %MainGUI%: Add, Button, x12 y10 w460 h70 gBrowseOpen, % "Select game"
+	Gui %MainGUI%: Add, Button, x12 y10 w460 h70 gBrowseOpen vSelectGame Disabled, % "Select game"
 	Gui %MainGUI%: Add, Radio, x197 y80 w90 h30 gSelectDriver vdxgi Group, % "Direct3D 10+"
 	Gui %MainGUI%: Add, Radio, x102 y80 w90 h30 gSelectDriver vdx9, % "Direct3D 9"
 	Gui %MainGUI%: Add, Radio, x292 y80 w90 h30 gSelectDriver vopengl, % "OpenGL"
@@ -62,6 +62,12 @@ SelectDriver:
 	Gui %MainGUI%: Submit, NoHide ; необходимо для "запуска" переменных
 	driver_dll := dxgi ? "dxgi.dll" : dx9 ? "d3d9.dll" : opengl ? ("opengl" . os_type . ".dll") : ""
 	driver_ini := dxgi ? "dxgi.ini" : dx9 ? "d3d9.ini" : opengl ? ("opengl" . os_type . ".ini") : ""
+	if (driver_dll) {		
+		GuiControl, Enable, SelectGame
+	}
+	else {
+		GuiControl, Disable, SelectGame
+	}
 	return
 }
 
@@ -78,6 +84,9 @@ BrowseOpen:
 		MsgBox % reshade_dir . "`n`n-->`n`n" . SelectedFileDir . "\reshade-shaders"
 		if ErrorLevel {
 			MsgBox The folder could not be copied, perhaps because a folder of that name already exists in "%SelectedFileDir%".
+		}
+		if FileExist(SelectedFileDir . "\reshade-shaders") {
+			FileCreateDir % SelectedFileDir . "\screenshots"
 		}
 	}
 	return

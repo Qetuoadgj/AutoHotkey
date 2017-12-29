@@ -123,12 +123,14 @@ SET_DEFAULTS:
 	Defaults.sound_switch_text_case := "sounds\switch_text_case.wav"
 	Defaults.sound_switch_text_layout := "sounds\switch_text_layout.wav"
 	Defaults.sound_toggle_cursor := "sounds\toggle_cursor.mp3"
+	Defaults.sound_toggle_fullscreen := "sounds\toggle_fullscreen.mp3"
 	
 	; HotKeys
 	Defaults.key_switch_keyboard_layout := "NumPad1" ;"CapsLock"
 	Defaults.key_switch_text_case := "NumPad0" ;"$~!Break"
 	Defaults.key_switch_text_layout := "NumPad2" ;"$~Break"
-	Defaults.key_toggle_cursor := "#c" ;"#c"
+	Defaults.key_toggle_cursor := "RWin" ;"#c"
+	Defaults.key_toggle_fullscreen := "LWin & LButton"
 	
 	; KeyCombos
 	Defaults.combo_switch_layout := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
@@ -143,6 +145,9 @@ SET_DEFAULTS:
 	Defaults.dictionary_russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!`"`"№;:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!`"`"№;:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	
+	
+	global Layouts_List := Layout.Layouts_List
+
 	return
 }
 
@@ -188,12 +193,14 @@ READ_CONFIG_FILE:
 	IniRead sound_switch_text_case, %Config_File%, Sound, sound_switch_text_case, % Defaults.sound_switch_text_case
 	IniRead sound_switch_text_layout, %Config_File%, Sound, sound_switch_text_layout, % Defaults.sound_switch_text_layout
 	IniRead sound_toggle_cursor, %Config_File%, Sound, sound_toggle_cursor, % Defaults.sound_toggle_cursor
+	IniRead sound_toggle_fullscreen, %Config_File%, Sound, sound_toggle_fullscreen, % Defaults.sound_toggle_fullscreen
 	
 	; HotKeys
 	IniRead key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, % Defaults.key_switch_keyboard_layout
 	IniRead key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, % Defaults.key_switch_text_case
 	IniRead key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
 	IniRead key_toggle_cursor, %Config_File%, HotKeys, key_toggle_cursor, % Defaults.key_toggle_cursor
+	IniRead key_toggle_fullscreen, %Config_File%, HotKeys, key_toggle_fullscreen, % Defaults.key_toggle_fullscreen
 	
 	; KeyCombos
 	IniRead combo_switch_layout, %Config_File%, KeyCombos, combo_switch_layout, % Defaults.combo_switch_layout
@@ -289,12 +296,14 @@ SAVE_CONFIG_FILE:
 	IniWrite("sound_switch_text_case", Config_File, "Sound", sound_switch_text_case)
 	IniWrite("sound_switch_text_layout", Config_File, "Sound", sound_switch_text_layout)
 	IniWrite("sound_toggle_cursor", Config_File, "Sound", sound_toggle_cursor)
+	IniWrite("sound_toggle_fullscreen", Config_File, "Sound", sound_toggle_fullscreen)
 	
 	; HotKeys
 	IniWrite("key_switch_keyboard_layout", Config_File, "HotKeys", key_switch_keyboard_layout)
 	IniWrite("key_switch_text_case", Config_File, "HotKeys", key_switch_text_case)
 	IniWrite("key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout)
 	IniWrite("key_toggle_cursor", Config_File, "HotKeys", key_toggle_cursor)
+	IniWrite("key_toggle_fullscreen", Config_File, "HotKeys", key_toggle_fullscreen)
 	
 	; KeyCombos
 	IniWrite("combo_switch_layout", Config_File, "KeyCombos", combo_switch_layout)
@@ -337,6 +346,29 @@ TOGGLE_CURSOR:
 	return
 }
 
+TOGGLE_FULLSCREEN:
+{
+	WinGet, Win_PID, PID, A
+	if (Win_PID != App_PID) {
+		WinGet Style, Style, A
+		if (Style & 0xC40000) {
+			WinSet Style, -0xC40000, A
+			WinMaximize A
+			; if WinActive("ahk_exe chrome.exe") {
+				; WinMove A,, -5, -15, % A_ScreenWidth + 5*2, % A_ScreenHeight + 5 + 15
+			; }
+		}
+		else {
+			WinSet Style, +0xC40000, A
+			WinRestore A
+			; if WinActive("ahk_exe chrome.exe") {
+				; WinMove A,, 0, 0, % A_ScreenWidth / 2, % A_ScreenHeight / 2
+			; }
+		}
+	}
+	return
+}
+
 SWITCH_TEXT_CASE:
 {
 	Clipboard_Tmp := "" ; Null
@@ -367,16 +399,16 @@ SWITCH_TEXT_LAYOUT:
 		}
 		else {
 			Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
-			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
+			Selected_Text_Dictionary := Layouts_List[Text_Layout_Index].Full_Name
 		}
 		if (Text_Layout_Index) {
-			Next_Layout_Index := Text_Layout_Index + 1 > Layout.Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
-			Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
+			Next_Layout_Index := Text_Layout_Index + 1 > Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
+			Next_Layout_Full_Name := Layouts_List[Next_Layout_Index].Full_Name
 			Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name)
 			Edit_Text.Paste(Converted_Text)
-			if (Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL) {
+			if (Next_Layout_HKL := Layouts_List[Next_Layout_Index].HKL) {
 				Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
-				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
+				Next_Layout_Display_Name := Layouts_List[Next_Layout_Index].Display_Name
 				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 			}
 		}
@@ -401,7 +433,7 @@ if (Selected_Text := Edit_Text.Select()) {
 Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
 if (not Selected_Text_Dictionary) {
 Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
-Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
+Selected_Text_Dictionary := Layouts_List[Text_Layout_Index].Full_Name
 }
 if (Selected_Text_Dictionary) {
 Text_Dictionary_Index := Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Selected_Text_Dictionary)
@@ -414,10 +446,10 @@ Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text
 Edit_Text.Paste(Converted_Text)
 
 if (Next_Layout_Index :=  Layout.Get_Index_By_Name(Next_Dictionary_Name)) {
-Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
+Next_Layout_HKL := Layouts_List[Next_Layout_Index].HKL
 Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
-Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
-Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
+Next_Layout_Full_Name := Layouts_List[Next_Layout_Index].Full_Name
+Next_Layout_Display_Name := Layouts_List[Next_Layout_Index].Display_Name
 ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 }
 else {
@@ -928,7 +960,7 @@ Generate_Dictionaries(ByRef Prefix := "")
 	static Layout_Index, Layout_Data
 	static Dictionary_Name, k, v
 	;
-	for Layout_Index, Layout_Data in Layout.Layouts_List {
+	for Layout_Index, Layout_Data in Layouts_List {
 		WinActivate %Win_Title%
 		WinWaitActive %Win_Title%
 		IfWinActive %Win_Title%

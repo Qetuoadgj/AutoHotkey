@@ -44,6 +44,7 @@ Includes\*.ahk
 
 ; Мусор
 Layout_Switcher_v2\*.backup
+Layout_Switcher_v2\backup\
 *tmp
 
 _*.*

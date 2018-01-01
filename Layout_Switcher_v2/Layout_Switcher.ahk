@@ -5,8 +5,10 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 DetectHiddenWindows On
 
-Script_Name := Script.Name()
-Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
+global Class_Script := Script
+
+Script_Name := Class_Script.Name()
+Class_Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -18,7 +20,7 @@ gosub SET_DEFAULTS
 gosub READ_CONFIG_FILE
 
 if (system_start_with_admin_rights) {
-	Script.Run_As_Admin(%0%)
+	Class_Script.Run_As_Admin(%0%)
 }
 
 if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
@@ -775,7 +777,7 @@ Menu_Toggle_Admin_Rights:
 		Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
 	}
 	if (system_start_with_admin_rights) {
-		Script.Run_As_Admin()
+		Class_Script.Run_As_Admin()
 	}
 	else {
 		Reload

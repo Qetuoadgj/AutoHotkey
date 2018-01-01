@@ -3,6 +3,10 @@
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
+; Определение классов (для исключения их прямой перезаписи)
+global Script			:= new c_Script
+;
+
 Script.Force_Single_Instance()
 
 Script_Name := Script.Name()
@@ -56,7 +60,7 @@ READ_CONFIG_FILE:
 }
 
 START_UPDATE:
-{	
+{
 	if (GetUrlStatus(info_updater_ini) == 200) {
 		UrlDownloadToFile %info_updater_ini%, %Config_File%
 	}
@@ -75,37 +79,37 @@ START_UPDATE:
 		;
 		default_text =
 		(LTrim RTrim Join`r`n
-			[x86]
-				; ICONS
-					Icons\English.ico
-					Icons\Russian.ico
-					Icons\Ukrainian.ico
-					;
-					Icons\Menu\Home.ico
-					Icons\Menu\Update.ico
-					;
-					Icons\Menu\Dictionaries.ico
-					Icons\Menu\Restart.ico
-					Icons\Menu\Settings.ico
-					Icons\Menu\Shutdown.ico
-				; IMAGES
-					Images\English.png
-					Images\Russian.png
-					Images\Ukrainian.png
-				; SOUNDS
-					Sounds\switch_keyboard_layout.wav
-					Sounds\switch_text_case.wav
-					Sounds\switch_text_layout.wav
-					Sounds\toggle_cursor.mp3
-				; TRANSLATIONS
-					Translations\Russian.ini
-			[x32]
-				Layout_Switcher_x32.exe
-			[x64]
-				Layout_Switcher_x64.exe
+		[x86]
+		; ICONS
+		Icons\English.ico
+		Icons\Russian.ico
+		Icons\Ukrainian.ico
+		;
+		Icons\Menu\Home.ico
+		Icons\Menu\Update.ico
+		;
+		Icons\Menu\Dictionaries.ico
+		Icons\Menu\Restart.ico
+		Icons\Menu\Settings.ico
+		Icons\Menu\Shutdown.ico
+		; IMAGES
+		Images\English.png
+		Images\Russian.png
+		Images\Ukrainian.png
+		; SOUNDS
+		Sounds\switch_keyboard_layout.wav
+		Sounds\switch_text_case.wav
+		Sounds\switch_text_layout.wav
+		Sounds\toggle_cursor.mp3
+		; TRANSLATIONS
+		Translations\Russian.ini
+		[x32]
+		Layout_Switcher_x32.exe
+		[x64]
+		Layout_Switcher_x64.exe
 		)
 		;
-		FileAppend %default_text%, %Config_File%		
+		FileAppend %default_text%, %Config_File%
 	}
 	
 	IniRead x86_section, %Config_File%, x86

@@ -5,10 +5,17 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 DetectHiddenWindows On
 
-global Class_Script := Script
+; Определение классов (для исключения их прямой перезаписи)
+global Script			:= new c_Script
+global Task_Sheduler	:= new c_Task_Sheduler
+global Windows			:= new c_Windows
+global Window			:= new c_Window
+global Layout			:= new c_Layout
+global Edit_Text		:= new c_Edit_Text
+;
 
-Script_Name := Class_Script.Name()
-Class_Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
+Script_Name := Script.Name()
+Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -20,7 +27,7 @@ gosub SET_DEFAULTS
 gosub READ_CONFIG_FILE
 
 if (system_start_with_admin_rights) {
-	Class_Script.Run_As_Admin(%0%)
+	Script.Run_As_Admin(%0%)
 }
 
 if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
@@ -148,8 +155,7 @@ SET_DEFAULTS:
 	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!`"`"№;:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	
 	
-	global Layouts_List := Layout.Layouts_List
-
+	
 	return
 }
 
@@ -350,25 +356,25 @@ TOGGLE_CURSOR:
 /*
 TOGGLE_FULLSCREEN:
 {
-	WinGet, Win_PID, PID, A
-	if (Win_PID != App_PID) {
-		WinGet Style, Style, A
-		if (Style & 0xC40000) {
-			WinSet Style, -0xC40000, A
-			WinMaximize A
-			; if WinActive("ahk_exe chrome.exe") {
-				; WinMove A,, -5, -15, % A_ScreenWidth + 5*2, % A_ScreenHeight + 5 + 15
-			; }
-		}
-		else {
-			WinSet Style, +0xC40000, A
-			WinRestore A
-			; if WinActive("ahk_exe chrome.exe") {
-				; WinMove A,, 0, 0, % A_ScreenWidth / 2, % A_ScreenHeight / 2
-			; }
-		}
-	}
-	return
+WinGet, Win_PID, PID, A
+if (Win_PID != App_PID) {
+WinGet Style, Style, A
+if (Style & 0xC40000) {
+WinSet Style, -0xC40000, A
+WinMaximize A
+; if WinActive("ahk_exe chrome.exe") {
+; WinMove A,, -5, -15, % A_ScreenWidth + 5*2, % A_ScreenHeight + 5 + 15
+; }
+}
+else {
+WinSet Style, +0xC40000, A
+WinRestore A
+; if WinActive("ahk_exe chrome.exe") {
+; WinMove A,, 0, 0, % A_ScreenWidth / 2, % A_ScreenHeight / 2
+; }
+}
+}
+return
 }
 */
 SWITCH_TEXT_CASE:
@@ -401,16 +407,16 @@ SWITCH_TEXT_LAYOUT:
 		}
 		else {
 			Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
-			Selected_Text_Dictionary := Layouts_List[Text_Layout_Index].Full_Name
+			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
 		}
 		if (Text_Layout_Index) {
-			Next_Layout_Index := Text_Layout_Index + 1 > Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
-			Next_Layout_Full_Name := Layouts_List[Next_Layout_Index].Full_Name
+			Next_Layout_Index := Text_Layout_Index + 1 > Layout.Layouts_List.MaxIndex() ? 1 : Text_Layout_Index + 1
+			Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
 			Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text_Dictionary, Next_Layout_Full_Name)
 			Edit_Text.Paste(Converted_Text)
-			if (Next_Layout_HKL := Layouts_List[Next_Layout_Index].HKL) {
+			if (Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL) {
 				Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
-				Next_Layout_Display_Name := Layouts_List[Next_Layout_Index].Display_Name
+				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
 				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 			}
 		}
@@ -435,7 +441,7 @@ if (Selected_Text := Edit_Text.Select()) {
 Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
 if (not Selected_Text_Dictionary) {
 Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
-Selected_Text_Dictionary := Layouts_List[Text_Layout_Index].Full_Name
+Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
 }
 if (Selected_Text_Dictionary) {
 Text_Dictionary_Index := Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Selected_Text_Dictionary)
@@ -448,10 +454,10 @@ Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text
 Edit_Text.Paste(Converted_Text)
 
 if (Next_Layout_Index :=  Layout.Get_Index_By_Name(Next_Dictionary_Name)) {
-Next_Layout_HKL := Layouts_List[Next_Layout_Index].HKL
+Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
 Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
-Next_Layout_Full_Name := Layouts_List[Next_Layout_Index].Full_Name
-Next_Layout_Display_Name := Layouts_List[Next_Layout_Index].Display_Name
+Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
+Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
 ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 }
 else {
@@ -777,7 +783,7 @@ Menu_Toggle_Admin_Rights:
 		Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
 	}
 	if (system_start_with_admin_rights) {
-		Class_Script.Run_As_Admin()
+		Script.Run_As_Admin()
 	}
 	else {
 		Reload
@@ -962,7 +968,7 @@ Generate_Dictionaries(ByRef Prefix := "")
 	static Layout_Index, Layout_Data
 	static Dictionary_Name, k, v
 	;
-	for Layout_Index, Layout_Data in Layouts_List {
+	for Layout_Index, Layout_Data in Layout.Layouts_List {
 		WinActivate %Win_Title%
 		WinWaitActive %Win_Title%
 		IfWinActive %Win_Title%

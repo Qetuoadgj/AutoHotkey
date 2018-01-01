@@ -1,4 +1,4 @@
-﻿class Script
+﻿class c_Script
 { ; функции управления скриптом
 	
 	Force_Single_Instance(ByRef File_Names := false)

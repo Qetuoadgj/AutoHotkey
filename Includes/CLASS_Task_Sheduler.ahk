@@ -1,7 +1,7 @@
-﻿class Task_Sheduler
+﻿class c_Task_Sheduler
 {
 	static Tasks_Dir := A_WinDir . "\System32\Tasks"
-	static Tasks_Dir_Lenght := StrLen(Task_Sheduler.Tasks_Dir . "\")
+	static Tasks_Dir_Lenght := StrLen(c_Task_Sheduler.Tasks_Dir . "\")
 	;
 	/*
 	Create_Auto_Run_Task(ByRef Task_Name, ByRef Admin_Rights := False)

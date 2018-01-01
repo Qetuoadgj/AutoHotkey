@@ -1,6 +1,6 @@
 ﻿#Include *i CLASS_Windows.ahk
 
-class Window
+class c_Window
 {
 	Is_Full_Screen(ByRef Win_Title := "A")
 	{ ; функция проверки полноэкранного режима

@@ -1,17 +1,17 @@
 ﻿#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn All ; Enable warnings to assist with detecting common errors.
+#Warn All, StdOut ; Enable warnings to assist with detecting common errors.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 DetectHiddenWindows On
 
 ; Определение классов (для исключения их прямой перезаписи)
-global Script			:= new c_Script
-global Task_Sheduler	:= new c_Task_Sheduler
-global Windows			:= new c_Windows
-global Window			:= new c_Window
-global Layout			:= new c_Layout
-global Edit_Text		:= new c_Edit_Text
+new Script			:= c_Script
+new Task_Sheduler	:= c_Task_Sheduler
+new Windows			:= c_Windows
+new Window			:= c_Window
+new Layout			:= c_Layout
+new Edit_Text		:= c_Edit_Text
 ;
 
 Script_Name := Script.Name()

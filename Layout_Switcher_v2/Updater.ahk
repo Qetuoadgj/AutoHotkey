@@ -1,10 +1,10 @@
 ﻿#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn All ; Enable warnings to assist with detecting common errors.
+#Warn All, StdOut ; Enable warnings to assist with detecting common errors.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 ; Определение классов (для исключения их прямой перезаписи)
-global Script			:= new c_Script
+new Script			:= c_Script
 ;
 
 Script.Force_Single_Instance()

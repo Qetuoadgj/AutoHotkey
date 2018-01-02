@@ -4,4 +4,6 @@ SelectIcon(ByRef IconPath := "", ByRef Index := 0)
 	DllCall("shell32\PickIconDlg", "Uint", "null", "str", IconPath, "Uint", 260, "intP", Index)
 	return IconPath . "," . Index
 }
-; MsgBox % SelectIcon()
+; #SelectedIcon := StrSplit(SelectIcon(), ",", "`s")
+; #IconFile := #SelectedIcon[1], #IconIndex := #SelectedIcon[2]
+; MsgBox % #IconFile . ", " . #IconIndex

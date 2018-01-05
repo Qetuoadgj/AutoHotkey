@@ -18,10 +18,11 @@ else { ; скрипт запущен с указанием аргументов
 }
 
 Loop Files, % INI_File, F
-{ ; получаем полный путь к файлус параметрами архивации
+{ ; получаем полный путь к файлу с параметрами архивации
 	INI_File := A_LoopFileLongPath
 }
 SplitPath, INI_File, INI_File_FileName, INI_File_Dir, INI_File_Extension, INI_File_NameNoExt, INI_File_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
+
 WinRAR_Params := ""
 . " -u"								;  люч -U Ч обновить файлы
 . " -as"							;  люч -AS Ч синхронизировать содержимое архива

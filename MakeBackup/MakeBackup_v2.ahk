@@ -39,17 +39,17 @@ Loop Files, % INI_File, F
 SplitPath, INI_File, INI_File_FileName, INI_File_Dir, INI_File_Extension, INI_File_NameNoExt, INI_File_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
 
 WinRAR_Params := ""
-. " -u"								;  люч -U Ч обновить файлы
-. " -as"							;  люч -AS Ч синхронизировать содержимое архива
-. " -s"								;  люч -S Ч создать непрерывный архив
-. " -r0"							;  люч -R0 Ч обрабатывать вложенные папки в соответствии с шаблоном
-. " -m5"							;  люч -M<n> Ч метод сжати€ [0=min...5=max]
-. " -ma5"							;  люч -MA[4|5] Ч верси€ формата архивировани€
-. " -md4m"							;  люч -MD<n>[k,m,g] Ч размер словар€
-. " -mc63:128t+"					; —жатие текста
-. " -mc4a+"							; —жатие аудиоданных, дельта-сжатие
-. " -mcc+"							; —жатие графических данных true color (RGB)
-. " -htb"							;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
+. " -u"				;  люч -U Ч обновить файлы
+. " -as"			;  люч -AS Ч синхронизировать содержимое архива
+. " -s"				;  люч -S Ч создать непрерывный архив
+. " -r0"			;  люч -R0 Ч обрабатывать вложенные папки в соответствии с шаблоном
+. " -m5"			;  люч -M<n> Ч метод сжати€ [0=min...5=max]
+. " -ma5"			;  люч -MA[4|5] Ч верси€ формата архивировани€
+. " -md4m"			;  люч -MD<n>[k,m,g] Ч размер словар€
+. " -mc63:128t+"	; —жатие текста
+. " -mc4a+"			; —жатие аудиоданных, дельта-сжатие
+. " -mcc+"			; —жатие графических данных true color (RGB)
+. " -htb"			;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
 
 IniRead Name, % INI_File, % "Description", % "Name", % INI_File_NameNoExt
 IniRead RootDir, % INI_File, % "Description", % "RootDir", % INI_File_Dir
@@ -111,7 +111,7 @@ if (WriteComment) {
 Message := ""
 . "Name: " . Name . "`n"
 . "ArchiveName: " . ArchiveName . "`n"
-. "Password: " . Password . "`n"
+. (Password ? "Password: " . Password . "`n" : "")
 . "Encrypt: " . Encrypt . "`n"
 . "WinRAR: " . WinRAR . "`n"
 . "RootDir: " . RootDir . "`n"
@@ -120,8 +120,8 @@ Message := ""
 . "WriteComment: " . WriteComment . "`n"
 . "IncludeThisFile: " . IncludeThisFile . "`n"
 . "CreateNewArchives: " . CreateNewArchives . "`n"
-. "NewArchiveNumeration: " . NewArchiveNumeration . "`n"
-. "ArchiveSuffix: " . ArchiveSuffix . "`n"
+. (CreateNewArchives ? "NewArchiveNumeration: " . NewArchiveNumeration . "`n" : "")
+. (AddSuffix ? "ArchiveSuffix: " . ArchiveSuffix . "`n" : "")
 . "Archive: " . Archive . "`n"
 . "WinRAR_Params: " . WinRAR_Params . "`n"
 

@@ -22,6 +22,18 @@ Loop Files, % INI_File, F
 	INI_File := A_LoopFileLongPath
 }
 SplitPath, INI_File, INI_File_FileName, INI_File_Dir, INI_File_Extension, INI_File_NameNoExt, INI_File_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
+WinRAR_Params := ""
+. " -u"								;  люч -U Ч обновить файлы
+. " -as"							;  люч -AS Ч синхронизировать содержимое архива
+. " -s"								;  люч -S Ч создать непрерывный архив
+. " -r0"							;  люч -R0 Ч обрабатывать вложенные папки в соответствии с шаблоном
+. " -m5"							;  люч -M<n> Ч метод сжати€ [0=min...5=max]
+. " -ma5"							;  люч -MA[4|5] Ч верси€ формата архивировани€
+. " -md4m"							;  люч -MD<n>[k,m,g] Ч размер словар€
+. " -mc63:128t+"					; —жатие текста
+. " -mc4a+"							; —жатие аудиоданных, дельта-сжатие
+. " -mcc+"							; —жатие графических данных true color (RGB) 
+. " -htb"							;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
 
 IniRead Name, % INI_File, % "Description", % "Name", % INI_File_NameNoExt
 IniRead RootDir, % INI_File, % "Description", % "RootDir", % INI_File_Dir
@@ -34,6 +46,7 @@ IniRead Encrypt, % INI_File, % "Description", % "Encrypt", % 1
 IniRead AddSuffix, % INI_File, % "Description", % "AddSuffix", % 0
 IniRead CreateNewArchives, % INI_File, % "Description", % "CreateNewArchives", % 0
 IniRead NewArchiveNumeration, % INI_File, % "Description", % "NewArchiveNumeration", % "0.2d"
+IniRead WinRAR_Params, % INI_File, % "Description", % "WinRAR_Params", % WinRAR_Params
 
 RootDir := ExpandEnvironmentVariables(RootDir)
 WinRAR := ExpandEnvironmentVariables(WinRAR)
@@ -94,6 +107,7 @@ Message := ""
 . "NewArchiveNumeration: " . NewArchiveNumeration . "`n"
 . "ArchiveSuffix: " . ArchiveSuffix . "`n"
 . "Archive: " . Archive . "`n"
+. "WinRAR_Params: " . WinRAR_Params . "`n"
 
 MsgBox, 1,, % Message
 
@@ -198,6 +212,7 @@ WinRAR_Compress:
 	WinRAR_Command := (WinRAR_Is_CMD ? ("cd /d " . q(RootDir) . " & ") : "")
 	. q(WinRAR_Binary)					; »сполн€емый файл Rar.exe
 	. " a"								;  оманда A Ч добавить в архив
+	/*
 	. " -u"								;  люч -U Ч обновить файлы
 	. " -as"							;  люч -AS Ч синхронизировать содержимое архива
 	. " -s"								;  люч -S Ч создать непрерывный архив
@@ -211,6 +226,8 @@ WinRAR_Compress:
 	. " -mcc+"							; —жатие графических данных true color (RGB) 
 	; . " -rr3p"							;  люч -RR[n] Ч добавить данные дл€ восстановлени€ [3%]
 	. " -htb"							;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
+	*/
+	. (WinRAR_Params ? WinRAR_Params : "")
 	. " -ilog" . q(WinRAR_Error_Log)	;  люч -ILOG[им€] Ч записывать журнал ошибок в файл
 	; . " -logf=" . q(WinRAR_Backup_Log)	;  люч -LOG[формат][=им€] Ч записать имена в файл с журналом
 	. " -x" . q(Include_List_File)		;  люч -X<файл> Ч не обрабатывать указанный файл или папку

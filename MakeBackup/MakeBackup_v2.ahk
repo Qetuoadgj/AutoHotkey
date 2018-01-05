@@ -15,7 +15,7 @@ if (not ErrorLevel) {
 
 KeyWait Ctrl, D T0.005
 if (not ErrorLevel) {
-	FileSelectFolder, Get_File_List_Folder,, 4
+	FileSelectFolder, Get_File_List_Folder, *%A_WorkingDir%, 4
 	if (Get_File_List_Folder) {
 		gosub Get_Recursive_Files_List
 	}

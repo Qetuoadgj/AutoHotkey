@@ -7,6 +7,21 @@ SendMode Input ; Recommended for new scripts due to its superior speed and relia
 
 ; Your code here...
 
+KeyWait Shift, D T0.005
+if (not ErrorLevel) {
+	gosub Make_Help_File
+	ExitApp
+}
+
+KeyWait Ctrl, D T0.005
+if (not ErrorLevel) {
+	FileSelectFolder, Get_File_List_Folder,, 4
+	if (Get_File_List_Folder) {
+		gosub Get_Recursive_Files_List
+	}
+	ExitApp
+}
+
 if (not A_Args[1] or not FileExist(A_Args[1])) { ; скрипт запущен без аргументов
 	FileSelectFile INI_File,, %A_WorkingDir% ; открываем окно для выбора файла
 	if (not INI_File) { ; файл не выбран
@@ -300,7 +315,106 @@ WinRAR_Compress:
 	return
 }
 
+Make_Help_File:
+{
+	MsgText =
+	( LTrim RTrim Join`r`n
+		[Description]
+		; Name=
+		; Password=
+		; Encrypt=1
+		; WinRAR=`%ProgramFiles`%\WinRAR\Rar.exe
+		; RootDir=`%CD`%
+		; TimeStamp=0
+		; LockArchive=0
+		; WriteComment=1
+		; IncludeThisFile=1
+		; CreateNewArchives=1
+		; NewArchiveNumeration=0.2d
+		; WinRAR_Params=-u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+
+		[IncludeList]
+		; Включаемые файлы (без кавычек)
+
+		[ExcludeList]
+		; Исключаемые файлы (без кавычек)
+		
+		; Свойства папок
+		*Thumbs.db
+		*desktop.ini
+		
+		; Ярлыки
+		*.lnk
+		
+		; Архивы
+		*.rar
+		*.7z
+		
+		; [Comments]
+		; Комментарий
+		
+	)
+	PasteToNotepad(MsgText)
+	return
+}
+
+Get_Recursive_Files_List:
+{
+	FileList := ""
+	; Loop Files, %1%\*, FR
+	Loop Files, %  Get_File_List_Folder . "\*", FR
+	{
+	  FileList .= A_LoopFileLongPath . "|" . A_LoopFileDir "`n"
+	}
+	
+	if (FileList) {
+		MsgBox, 36, Recursive Files List, Sort list?
+		IfMsgBox Yes
+		{
+		  Sort, FileList, \ ;R
+		}
+
+		PreviousDir := ""
+		Output := ""
+		Loop, parse, FileList, `n, `r
+		{
+		  if (A_LoopField == "") { ; Ignore the blank item at the end of the list.
+			Output .= ";"
+			continue
+		  }
+		  FileData := StrSplit(A_LoopField, "|")
+		  File := FileData[1]
+		  FileDir := FileData[2]
+		  if (not FileDir == PreviousDir) {
+			if (A_Index != 1) {
+			  Output .= ";`r`n"
+			}
+			Output .=  "; " . FileDir . "\`r`n"
+		  }
+		  Output .= "`t" . File . "`r`n"
+		  PreviousDir := FileDir
+		}
+		PasteToNotepad(Output)
+	}
+	; else {
+		; MsgBox, Folder is empty.
+	; }
+	
+	return
+}
+
 q(ByRef Str)
 {
 	return """" . Str . """"
+}
+
+PasteToNotepad(ByRef MsgText)
+{
+	Run % "notepad.exe",,, Notepad_PID
+	WinWait ahk_pid %Notepad_PID%,, 3
+	IfWinExist ahk_pid %Notepad_PID%
+	{
+		WinActivate ahk_pid %Notepad_PID%
+		ControlSetText, % "Edit1", % MsgText, ahk_pid %Notepad_PID%
+	}
 }

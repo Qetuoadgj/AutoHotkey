@@ -362,7 +362,7 @@ Get_Recursive_Files_List:
 {
 	FileList := ""
 	
-	TargetPath = %1%
+	TargetPath = %Get_File_List_Folder% ;%1%
 	TargetPath := InStr(FileExist(TargetPath), "D") ? (TargetPath . "\*") : TargetPath
 	
 	Loop Files, % TargetPath, FR ; ; Loop Files, %1%\*, FR

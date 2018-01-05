@@ -48,7 +48,7 @@ WinRAR_Params := ""
 . " -md4m"							;  люч -MD<n>[k,m,g] Ч размер словар€
 . " -mc63:128t+"					; —жатие текста
 . " -mc4a+"							; —жатие аудиоданных, дельта-сжатие
-. " -mcc+"							; —жатие графических данных true color (RGB) 
+. " -mcc+"							; —жатие графических данных true color (RGB)
 . " -htb"							;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
 
 IniRead Name, % INI_File, % "Description", % "Name", % INI_File_NameNoExt
@@ -141,33 +141,33 @@ Exit
 ; /* INCLUDED IN "FUNC_ExpandEnvironmentVariables.ahk"
 ExpandEnvironmentStrings(ByRef String)
 { ; функци€ обработки переменных среды Windows
-  static nSize, Dest, size
-  static NULL := ""
-  ; Find length of dest string:
-  nSize := DllCall("ExpandEnvironmentStrings", "Str", string, "Str", NULL, "UInt", 0, "UInt")
-  ,VarSetCapacity(Dest, size := (nSize * (1 << !!A_IsUnicode)) + !A_IsUnicode) ; allocate dest string
-  ,DllCall("ExpandEnvironmentStrings", "Str", String, "Str", Dest, "UInt", size, "UInt") ; fill dest string
-  return Dest
+	static nSize, Dest, size
+	static NULL := ""
+	; Find length of dest string:
+	nSize := DllCall("ExpandEnvironmentStrings", "Str", string, "Str", NULL, "UInt", 0, "UInt")
+	,VarSetCapacity(Dest, size := (nSize * (1 << !!A_IsUnicode)) + !A_IsUnicode) ; allocate dest string
+	,DllCall("ExpandEnvironmentStrings", "Str", String, "Str", Dest, "UInt", size, "UInt") ; fill dest string
+	return Dest
 }
 
 ExpandEnvironmentStringsAHK(String)
 { ; функци€ обработки переменных среды AHK
-  static Line, Match, Match1, Expanded
-  Loop Parse, String, "\:"
-  {
-    Line := A_LoopField
-    if RegExMatch(Line, "^%(A_\w+)%$", Match)
-    {
-      Expanded := %Match1%
-      String := StrReplace(String, A_LoopField, Expanded)
-    }
-  }
-  return String
+	static Line, Match, Match1, Expanded
+	Loop Parse, String, "\:"
+	{
+		Line := A_LoopField
+		if RegExMatch(Line, "^%(A_\w+)%$", Match)
+		{
+			Expanded := %Match1%
+			String := StrReplace(String, A_LoopField, Expanded)
+		}
+	}
+	return String
 }
 
 ExpandEnvironmentVariables(ByRef String)
 { ; функци€ совместной обработки переменных AHK и Windows
-  return ExpandEnvironmentStringsAHK(ExpandEnvironmentStrings(String))
+	return ExpandEnvironmentStringsAHK(ExpandEnvironmentStrings(String))
 }
 ; */
 
@@ -223,7 +223,7 @@ WinRAR_Compress:
 	WinRAR_Error_Log := A_WorkingDir . "\Backup_Errors.txt"	; файл журнала ошибок
 	WinRAR_Backup_Log := A_WorkingDir . "\Backup_Log.txt"	; файл журнала обработки
 	; удаление предыдущего журнала ошибок
-	FileDelete % WinRAR_Error_Log 
+	FileDelete % WinRAR_Error_Log
 	; —оздание архива WinRAR
 	WinRAR_Command := (WinRAR_Is_CMD ? ("cd /d " . q(RootDir) . " & ") : "")
 	. q(WinRAR_Binary)					; »сполн€емый файл Rar.exe
@@ -239,7 +239,7 @@ WinRAR_Compress:
 	. " -md4m"							;  люч -MD<n>[k,m,g] Ч размер словар€
 	. " -mc63:128t+"					; —жатие текста
 	. " -mc4a+"							; —жатие аудиоданных, дельта-сжатие
-	. " -mcc+"							; —жатие графических данных true color (RGB) 
+	. " -mcc+"							; —жатие графических данных true color (RGB)
 	; . " -rr3p"							;  люч -RR[n] Ч добавить данные дл€ восстановлени€ [3%]
 	. " -htb"							;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
 	*/
@@ -251,15 +251,15 @@ WinRAR_Compress:
 	. " -x" . q(WinRAR_Error_Log)		;  люч -X<файл> Ч не обрабатывать указанный файл или папку
 	. " -x" . q(WinRAR_Backup_Log)		;  люч -X<файл> Ч не обрабатывать указанный файл или папку
 	; ¬ключение в обработку или исключение из обработки самого файла настроек %INI_File%
-	if (not IncludeThisFile) {  
+	if (not IncludeThisFile) {
 		WinRAR_Command .= " -x" . q(INI_File) ;  люч -X<файл> Ч не обрабатывать указанный файл или папку
 	}
 	; ƒобавление парол€
-	if (Password) {  
-		WinRAR_Command .= (Encrypt 
-			? " -hp"	;  люч -HP[пароль] Ч шифровать содержимое файлов и оглавление архива
-			: " -p")	;  люч -P<пароль> Ч указать пароль шифровани€ архива
-		 . Password
+	if (Password) {
+		WinRAR_Command .= (Encrypt
+		? " -hp"	;  люч -HP[пароль] Ч шифровать содержимое файлов и оглавление архива
+		: " -p")	;  люч -P<пароль> Ч указать пароль шифровани€ архива
+		. Password
 	}
 	WinRAR_Command .= " " . q(WinRAR_Archive)	; јрхив
 	. " -x@" . q(Exclude_List_File)		;  люч -X@<файл-список> Ч не обрабатывать файлы, указанные в файле-списке
@@ -319,40 +319,40 @@ Make_Help_File:
 {
 	MsgText =
 	( LTrim RTrim Join`r`n
-		[Description]
-		; Name=
-		; Password=
-		; Encrypt=1
-		; WinRAR=`%ProgramFiles`%\WinRAR\Rar.exe
-		; RootDir=`%CD`%
-		; TimeStamp=0
-		; LockArchive=0
-		; WriteComment=1
-		; IncludeThisFile=1
-		; CreateNewArchives=1
-		; NewArchiveNumeration=0.2d
-		; WinRAR_Params=-u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
-
-		[IncludeList]
-		; ¬ключаемые файлы (без кавычек)
-
-		[ExcludeList]
-		; »сключаемые файлы (без кавычек)
-		
-		; —войства папок
-		*Thumbs.db
-		*desktop.ini
-		
-		; ярлыки
-		*.lnk
-		
-		; јрхивы
-		*.rar
-		*.7z
-		
-		; [Comments]
-		;  омментарий
-		
+	[Description]
+	; Name=
+	; Password=
+	; Encrypt=1
+	; WinRAR=`%ProgramFiles`%\WinRAR\Rar.exe
+	; RootDir=`%CD`%
+	; TimeStamp=0
+	; LockArchive=0
+	; WriteComment=1
+	; IncludeThisFile=1
+	; CreateNewArchives=1
+	; NewArchiveNumeration=0.2d
+	; WinRAR_Params=-u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+	
+	[IncludeList]
+	; ¬ключаемые файлы (без кавычек)
+	
+	[ExcludeList]
+	; »сключаемые файлы (без кавычек)
+	
+	; —войства папок
+	*Thumbs.db
+	*desktop.ini
+	
+	; ярлыки
+	*.lnk
+	
+	; јрхивы
+	*.rar
+	*.7z
+	
+	; [Comments]
+	;  омментарий
+	
 	)
 	PasteToNotepad(MsgText)
 	return
@@ -361,45 +361,54 @@ Make_Help_File:
 Get_Recursive_Files_List:
 {
 	FileList := ""
-	; Loop Files, %1%\*, FR
-	Loop Files, %  Get_File_List_Folder . "\*", FR
+	
+	TargetPath = %1%
+	TargetPath := InStr(FileExist(TargetPath), "D") ? (TargetPath . "\*") : TargetPath
+	
+	Loop Files, % TargetPath, FR ; ; Loop Files, %1%\*, FR
 	{
-	  FileList .= A_LoopFileLongPath . "|" . A_LoopFileDir "`n"
+		File := A_LoopFileLongPath
+		SplitPath, File, FileName, FileDir ;, FileExtension, FileNameNoExt, FileDrive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
+		FileList .= File . "|" . FileDir "`n"
 	}
 	
 	if (FileList) {
 		MsgBox, 36, Recursive Files List, Sort list?
 		IfMsgBox Yes
 		{
-		  Sort, FileList, \ ;R
+			Sort, FileList, \ ;R
 		}
-
+		
 		PreviousDir := ""
 		Output := ""
 		Loop, parse, FileList, `n, `r
 		{
-		  if (A_LoopField == "") { ; Ignore the blank item at the end of the list.
-			Output .= ";"
-			continue
-		  }
-		  FileData := StrSplit(A_LoopField, "|")
-		  File := FileData[1]
-		  FileDir := FileData[2]
-		  if (not FileDir == PreviousDir) {
-			if (A_Index != 1) {
-			  Output .= ";`r`n"
+			if (A_LoopField == "") { ; Ignore the blank item at the end of the list.
+				Output .= ";"
+				continue
 			}
-			Output .=  "; " . FileDir . "\`r`n"
-		  }
-		  Output .= "`t" . File . "`r`n"
-		  PreviousDir := FileDir
+			FileData := StrSplit(A_LoopField, "|")
+			File := FileData[1]
+			FileDir := FileData[2]
+			if (not FileDir == PreviousDir) {
+				if (A_Index != 1) {
+					Output .= ";`r`n"
+				}
+				Output .=  "; " . FileDir . "\`r`n"
+			}
+			Output .= "`t" . File . "`r`n"
+			PreviousDir := FileDir
 		}
+		
+		/*
+		Clipboard := "" ; Empty the clipboard.
+		Clipboard := Output
+		ClipWait ;2.0
+		MsgBox 0,, %Clipboard%, 1.5
+		*/
+		
 		PasteToNotepad(Output)
 	}
-	; else {
-		; MsgBox, Folder is empty.
-	; }
-	
 	return
 }
 

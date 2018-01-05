@@ -39,6 +39,7 @@ Loop Files, % INI_File, F
 SplitPath, INI_File, INI_File_FileName, INI_File_Dir, INI_File_Extension, INI_File_NameNoExt, INI_File_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
 
 WinRAR_Params := ""
+. " A"				;  оманда A Ч добавить в архив
 . " -u"				;  люч -U Ч обновить файлы
 . " -as"			;  люч -AS Ч синхронизировать содержимое архива
 . " -s"				;  люч -S Ч создать непрерывный архив
@@ -51,28 +52,59 @@ WinRAR_Params := ""
 . " -mcc+"			; —жатие графических данных true color (RGB)
 . " -htb"			;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
 
+7Zip_Sync := "p1q0r2x1y2z1w2"
+7Zip_Params := ""
+. " U"					; u (Update) command
+. " -u" . 7Zip_Sync		; -u (Update options) switch
+. " -r0"				; -r (Recurse subdirectories) switch
+. " -spf2"				; -spf (Use fully qualified file paths) switch
+. " -slp"				; -slp (Set Large Pages mode) switch
+. " -mx"				; -m (Set compression Method) switch
+. " -myx"				; Sets level of file analysis.
+. " -ms=on"				; Sets solid mode.
+; . " -mhe=on"			; Enables or disables archive header encryption.
+
+. " -scrcBLAKE2sp"		; -scrc (Set hash function) switch
+
+
+; . " -s"				;  люч -S Ч создать непрерывный архив
+; . " -r0"			;  люч -R0 Ч обрабатывать вложенные папки в соответствии с шаблоном
+; . " -m5"			;  люч -M<n> Ч метод сжати€ [0=min...5=max]
+; . " -ma5"			;  люч -MA[4|5] Ч верси€ формата архивировани€
+; . " -md4m"			;  люч -MD<n>[k,m,g] Ч размер словар€
+; . " -mc63:128t+"	; —жатие текста
+; . " -mc4a+"			; —жатие аудиоданных, дельта-сжатие
+; . " -mcc+"			; —жатие графических данных true color (RGB)
+; . " -htb"			;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
+
 IniRead Name, % INI_File, % "Description", % "Name", % INI_File_NameNoExt
 IniRead RootDir, % INI_File, % "Description", % "RootDir", % INI_File_Dir
 IniRead LockArchive, % INI_File, % "Description", % "LockArchive", 0
 IniRead WriteComment, % INI_File, % "Description", % "WriteComment", 0
 IniRead IncludeThisFile, % INI_File, % "Description", % "IncludeThisFile", 1
 IniRead WinRAR, % INI_File, % "Description", % "WinRAR", % A_ProgramFiles . "\WinRAR\Rar.exe"
-IniRead Password, % INI_File, % "Description", % "Password", % ""
+IniRead Password, % INI_File, % "Description", % "Password", 0
 IniRead Encrypt, % INI_File, % "Description", % "Encrypt", % 1
 IniRead AddSuffix, % INI_File, % "Description", % "AddSuffix", % 0
 IniRead CreateNewArchives, % INI_File, % "Description", % "CreateNewArchives", % 0
 IniRead NewArchiveNumeration, % INI_File, % "Description", % "NewArchiveNumeration", % "0.2d"
 IniRead WinRAR_Params, % INI_File, % "Description", % "WinRAR_Params", % WinRAR_Params
 
+IniRead 7Zip, % INI_File, % "Description", % "7Zip", % A_ProgramFiles . "\7-Zip\7z.exe"
+IniRead 7Zip_Params, % INI_File, % "Description", % "7Zip_Params", % 7Zip_Params
+
 RootDir := ExpandEnvironmentVariables(RootDir)
 WinRAR := ExpandEnvironmentVariables(WinRAR)
+7Zip := ExpandEnvironmentVariables(7Zip)
 
 IniRead TimeStamp, % INI_File, % "Description", % "TimeStamp", % "yyyy.MM.dd"
 FormatTime Date,, % TimeStamp ; ѕолучение текущей даты (2015.11.29)
 Name .= (Date ? " (" . Date . ")" : "")
 ; Name .= ".rar"
 
-ArchiveType := "rar"
+; ArchiveType := "rar"
+IniRead ArchiveType, % INI_File, % "Description", % "ArchiveType", % "rar"
+
 ArchiveName := Name
 Archive := INI_File_Dir . "\" . ArchiveName ; задаем изначальный путь к архиву
 
@@ -100,8 +132,15 @@ Archive := INI_File_Dir . "\" . ArchiveName ; обновл€ем путь к архиву
 Archive .= "." . ArchiveType
 
 Prefix := "DHFWEF90WE89_" ; префикс дл€ имЄн файлов-списков и файла-комментари€
-Include_List_File := TextToFile(SplitINIFile(INI_File, "IncludeList"), A_Temp . "\" . Prefix . "Backup_Include_List_File.txt", "CP1251") ; создаем файл-список включений из секции [IncludeList]
-Exclude_List_File := TextToFile(SplitINIFile(INI_File, "ExcludeList"), A_Temp . "\" . Prefix . "Backup_Exclude_List_File.txt", "CP1251") ; создаем файл-список исключений из секции [ExcludeList]
+; Include_List_File := TextToFile(SplitINIFile(INI_File, "IncludeList"), A_Temp . "\" . Prefix . "Backup_Include_List_File.txt", "CP1251") ; создаем файл-список включений из секции [IncludeList]
+; Exclude_List_File := TextToFile(SplitINIFile(INI_File, "ExcludeList"), A_Temp . "\" . Prefix . "Backup_Exclude_List_File.txt", "CP1251") ; создаем файл-список исключений из секции [ExcludeList]
+
+Include_List_Text := SplitINIFile(INI_File, "IncludeList") ; создаем список включений из секции [IncludeList]
+Exclude_List_Text := SplitINIFile(INI_File, "ExcludeList") ; создаем список исключений из секции [ExcludeList]
+
+Sort, Include_List_Text, U ; удаление дубликатов из списка
+Sort, Exclude_List_Text, U ; удаление дубликатов из списка
+
 if (WriteComment) {
 	Comments_Text := ReadINISection(INI_File, "Comments")										; создаем файл-комментарий из секции [Comments],
 	Comments_Text := Comments_Text ? Comments_Text : ReadINISection(INI_File, "IncludeList")	; если она отсутствует, то из секции [IncludeList]
@@ -110,10 +149,12 @@ if (WriteComment) {
 
 Message := ""
 . "Name: " . Name . "`n"
+. "ArchiveType: " . ArchiveType . "`n"
 . "ArchiveName: " . ArchiveName . "`n"
 . (Password ? "Password: " . Password . "`n" : "")
 . "Encrypt: " . Encrypt . "`n"
-. "WinRAR: " . WinRAR . "`n"
+. (ArchiveType = "rar" ? "WinRAR: " . WinRAR . "`n" : "")
+. (ArchiveType = "7z" ? "7Zip: " . 7Zip . "`n" : "")
 . "RootDir: " . RootDir . "`n"
 . "TimeStamp: " . TimeStamp . "`n"
 . "LockArchive: " . LockArchive . "`n"
@@ -123,13 +164,19 @@ Message := ""
 . (CreateNewArchives ? "NewArchiveNumeration: " . NewArchiveNumeration . "`n" : "")
 . (AddSuffix ? "ArchiveSuffix: " . ArchiveSuffix . "`n" : "")
 . "Archive: " . Archive . "`n"
-. "WinRAR_Params: " . WinRAR_Params . "`n"
+. (ArchiveType = "rar" ? "WinRAR_Params: " . WinRAR_Params . "`n" : "")
+. (ArchiveType = "7z" ? "7Zip_Params: " . 7Zip_Params . "`n" : "")
 
 MsgBox, 1,, % Message
 
 IfMsgBox Ok
 {
-	gosub WinRAR_Compress
+	if (ArchiveType = "rar") {
+		gosub WinRAR_Compress
+	}
+	if (ArchiveType = "7z") {
+		gosub 7Zip_Compress
+	}
 }
 else {
 	ExitApp
@@ -208,9 +255,11 @@ ReadINISection(ByRef File, ByRef Section)
 
 WinRAR_Compress:
 { ; рутина обработки файлов архиватором WinRAR (сжатие файлов в архив и добавление комментари€)
-	WinRAR_Binary := WinRAR
+	Include_List_File := TextToFile(Include_List_Text, A_Temp . "\" . Prefix . "Backup_Include_List_File.txt", "CP1251") ; создаем файл-список включений из секции [IncludeList]
+	Exclude_List_File := TextToFile(Exclude_List_Text, A_Temp . "\" . Prefix . "Backup_Exclude_List_File.txt", "CP1251") ; создаем файл-список исключений из секции [ExcludeList]
 	; WinRAR_Binary := A_ProgramFiles . "\WinRAR\Rar.exe"
 	; WinRAR_Binary := A_ProgramFiles . "\WinRAR\WinRAR.exe"
+	WinRAR_Binary := WinRAR
 	WinRAR_Archive := Archive ; A_WorkingDir . "\" . Name
 	;
 	Loop Files, % WinRAR_Binary, F
@@ -227,23 +276,10 @@ WinRAR_Compress:
 	; —оздание архива WinRAR
 	WinRAR_Command := (WinRAR_Is_CMD ? ("cd /d " . q(RootDir) . " & ") : "")
 	. q(WinRAR_Binary)					; »сполн€емый файл Rar.exe
-	. " a"								;  оманда A Ч добавить в архив
 	/*
-	. " -u"								;  люч -U Ч обновить файлы
-	. " -as"							;  люч -AS Ч синхронизировать содержимое архива
-	. " -s"								;  люч -S Ч создать непрерывный архив
-	; . " -r"								;  люч -R Ч включить в обработку вложенные папки
-	. " -r0"							;  люч -R0 Ч обрабатывать вложенные папки в соответствии с шаблоном
-	. " -m5"							;  люч -M<n> Ч метод сжати€ [0=min...5=max]
-	. " -ma5"							;  люч -MA[4|5] Ч верси€ формата архивировани€
-	. " -md4m"							;  люч -MD<n>[k,m,g] Ч размер словар€
-	. " -mc63:128t+"					; —жатие текста
-	. " -mc4a+"							; —жатие аудиоданных, дельта-сжатие
-	. " -mcc+"							; —жатие графических данных true color (RGB)
-	; . " -rr3p"							;  люч -RR[n] Ч добавить данные дл€ восстановлени€ [3%]
-	. " -htb"							;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
+	; ѕараметры сжати€
 	*/
-	. (WinRAR_Params ? WinRAR_Params : "")
+	. (WinRAR_Params ? " " . Trim(WinRAR_Params) : "")
 	. " -ilog" . q(WinRAR_Error_Log)	;  люч -ILOG[им€] Ч записывать журнал ошибок в файл
 	; . " -logf=" . q(WinRAR_Backup_Log)	;  люч -LOG[формат][=им€] Ч записать имена в файл с журналом
 	. " -x" . q(Include_List_File)		;  люч -X<файл> Ч не обрабатывать указанный файл или папку
@@ -315,6 +351,107 @@ WinRAR_Compress:
 	return
 }
 
+7Zip_Compress:
+{
+	Include_List_File := TextToFile(Include_List_Text, A_Temp . "\" . Prefix . "Backup_Include_List_File.txt", "UTF-8") ; создаем файл-список включений из секции [IncludeList]
+	Exclude_List_File := TextToFile(Exclude_List_Text, A_Temp . "\" . Prefix . "Backup_Exclude_List_File.txt", "UTF-8") ; создаем файл-список исключений из секции [ExcludeList]
+	; 7Zip_Binary := A_ProgramFiles . "\7Zip\7z.exe"
+	; 7Zip_Binary := A_ProgramFiles . "\7Zip\WinRAR.exe"
+	7Zip_Binary := 7Zip
+	7Zip_Archive := Archive ; A_WorkingDir . "\" . Name
+	;
+	Loop Files, % 7Zip_Binary, F
+	{ ; получаем полный путь к файлус параметрами архивации
+		7Zip_Binary := A_LoopFileLongPath
+	}
+	SplitPath, 7Zip_Binary, 7Zip_Binary_FileName, 7Zip_Binary_Dir, 7Zip_Binary_Extension, 7Zip_Binary_NameNoExt, 7Zip_Binary_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
+	7Zip_Is_CMD := 7Zip_Binary_FileName = "7z.exe" ? 1 : 0
+	;
+	7Zip_Error_Log := A_WorkingDir . "\Backup_Errors.txt"	; файл журнала ошибок
+	7Zip_Backup_Log := A_WorkingDir . "\Backup_Log.txt"	; файл журнала обработки
+	; удаление предыдущего журнала ошибок
+	FileDelete % 7Zip_Error_Log
+	; —оздание архива 7Zip
+	7Zip_Command := (7Zip_Is_CMD ? ("cd /d " . q(RootDir) . " & ") : "")
+	. q(7Zip_Binary)					; »сполн€емый файл 7z.exe
+	/*
+	; ѕараметры сжати€
+	*/
+	. (7Zip_Params ? " " . Trim(7Zip_Params) : "")
+	; . " -ilog" . q(7Zip_Error_Log)	;  люч -ILOG[им€] Ч записывать журнал ошибок в файл
+	; . " -logf=" . q(7Zip_Backup_Log)	;  люч -LOG[формат][=им€] Ч записать имена в файл с журналом
+	. " -x!" . q(Include_List_File)		; -x (Exclude filenames) switch
+	. " -x!" . q(Exclude_List_File)		; -x (Exclude filenames) switch
+	. " -x!" . q(7Zip_Error_Log)		; -x (Exclude filenames) switch
+	. " -x!" . q(7Zip_Backup_Log)		; -x (Exclude filenames) switch
+	; ¬ключение в обработку или исключение из обработки самого файла настроек %INI_File%
+	if (not IncludeThisFile) {
+		7Zip_Command .= " -x!" . q(INI_File) ;  люч -X<файл> Ч не обрабатывать указанный файл или папку
+	}
+	; ƒобавление парол€
+	if (Password) {
+		7Zip_Command .= (Encrypt
+		? " -mhe=on -p"	; Enables or disables archive header encryption.
+		: " -p")		; -p (set Password) switch
+		. Password
+	}
+	7Zip_Command .= ""
+	. " " . q(7Zip_Archive)	; јрхив
+	. " -x@" . q(Exclude_List_File)		; -x (Exclude filenames) switch
+	. " -i@" . q(Include_List_File)		; -i (Include filenames) switch
+	if (not 7Zip_Is_CMD) {
+		RunWait %7Zip_Command%
+	}
+	/*
+	;  оманда добавлени€ комментари€ к архиву
+	if WriteComment {
+		7Zip_Command := (7Zip_Is_CMD ? (7Zip_Command . " & ") : "")
+		. q(7Zip_Binary)
+		. " c"									;  оманда C Ч добавить комментарий архива
+		. " -z" . q(Comments_File)				;  люч -Z<файл> Ч прочитать комментарий архива из файла
+		. (Password ? " -p" . Password : "")	;  люч -P<пароль> Ч указать пароль шифровани€ архива
+		. " " . q(7Zip_Archive)				; јрхив
+		if (not 7Zip_Is_CMD) {
+			RunWait %7Zip_Command%
+		}
+	}
+	;  оманда добавлени€ данных дл€ восстановлени€
+	7Zip_Command := (7Zip_Is_CMD ? (7Zip_Command . " & ") : "")
+	. q(7Zip_Binary)
+	. " rr5p"								;  оманда RR[n ] Ч добавить данные дл€ восстановлени€ [5%]
+	. (Password ? " -p" . Password : "")	;  люч -P<пароль> Ч указать пароль шифровани€ архива
+	. " " . q(7Zip_Archive)				; јрхив
+	if (not 7Zip_Is_CMD) {
+		RunWait %7Zip_Command%
+	}
+	;  оманда блокировани€ архива от перезаписи
+	if LockArchive {
+		7Zip_Command := (7Zip_Is_CMD ? (7Zip_Command . " & ") : "")
+		. q(7Zip_Binary)
+		. " k"									;  оманда K Ч заблокировать архив
+		. (Password ? " -p" . Password : "")	;  люч -P<пароль> Ч указать пароль шифровани€ архива
+		. " " . q(7Zip_Archive)				; јрхив
+		if (not 7Zip_Is_CMD) {
+			RunWait %7Zip_Command%
+		}
+	}
+	*/
+	; —оединение всех команд в одну
+	if (7Zip_Is_CMD) {
+		7Zip_Command .= " & pause & exit"
+		MsgBox % 7Zip_Command
+		;
+		; ¬ыполнение команды в коммандной строке Windows
+		RunWait "%ComSpec%" /k %7Zip_Command%
+	}
+	;
+	; ќтображение журнала ошибок
+	if (7Zip_Is_CMD and FileExist(7Zip_Error_Log)) {
+		Run notepad "%7Zip_Error_Log%"
+	}
+	return
+}
+
 Make_Help_File:
 {
 	MsgText =
@@ -324,6 +461,7 @@ Make_Help_File:
 	; Password=
 	; Encrypt=1
 	; WinRAR=`%ProgramFiles`%\WinRAR\Rar.exe
+	; 7Zip=`%ProgramFiles`%\7-Zip\7z.exe
 	; RootDir=`%CD`%
 	; TimeStamp=0
 	; LockArchive=0
@@ -331,7 +469,8 @@ Make_Help_File:
 	; IncludeThisFile=1
 	; CreateNewArchives=1
 	; NewArchiveNumeration=0.2d
-	; WinRAR_Params=-u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+	; WinRAR_Params = A -u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+	; 7Zip_Params = U -up1q0r2x1y2z1w2 -slp -mx -myx -ms=on -scrcBLAKE2sp
 	
 	[IncludeList]
 	; ¬ключаемые файлы (без кавычек)

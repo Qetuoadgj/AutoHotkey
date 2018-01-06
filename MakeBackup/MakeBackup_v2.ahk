@@ -107,12 +107,12 @@ Set_Params:
 	ArchiveName := Name
 	Archive := INI_File_Dir . "\" . ArchiveName ; задаем изначальный путь к архиву
 	
-	If (CreateNewArchives) {
+	if (CreateNewArchives) {
 		ArchiveCount := 0
 		Loop Files, % Archive . "*" . ArchiveType, F
 		{
-			MatchString := "^" . Name . " - (\d+)( .*?)?" . "." . ArchiveType . "$"
-			If RegExMatch(A_LoopFileName, MatchString, Match, 1) {
+			MatchString := "^" . Escape(Name) . " - (\d+)( .*?)?" . "." . Escape(ArchiveType) . "$"
+			if RegExMatch(A_LoopFileName, MatchString, Match, 1) {
 				ArchiveCount := Match1 + 1
 			}
 		}
@@ -134,8 +134,8 @@ Set_Params:
 	Include_List_Text := SplitINIFile(INI_File, "IncludeList") ; создаем список включений из секции [IncludeList]
 	Exclude_List_Text := SplitINIFile(INI_File, "ExcludeList") ; создаем список исключений из секции [ExcludeList]
 	
-	Sort, Include_List_Text, U ; удаление дубликатов из списка
-	Sort, Exclude_List_Text, U ; удаление дубликатов из списка
+	; Sort, Include_List_Text, U ; удаление дубликатов из списка
+	; Sort, Exclude_List_Text, U ; удаление дубликатов из списка
 		
 	if (NoExec) {
 		return
@@ -354,6 +354,9 @@ WinRAR_Compress:
 
 7Zip_Compress:
 {
+	Include_List_Text := ParseList(Include_List_Text, RootDir)
+	Exclude_List_Text := ParseList(Exclude_List_Text, RootDir)
+	;	
 	Include_List_File := TextToFile(Include_List_Text, A_Temp . "\" . Prefix . "Backup_Include_List_File.txt", "UTF-8") ; создаем файл-список включений из секции [IncludeList]
 	Exclude_List_File := TextToFile(Exclude_List_Text, A_Temp . "\" . Prefix . "Backup_Exclude_List_File.txt", "UTF-8") ; создаем файл-список исключений из секции [ExcludeList]
 	; 7Zip_Binary := A_ProgramFiles . "\7Zip\7z.exe"
@@ -409,6 +412,8 @@ WinRAR_Compress:
 		;
 		; Выполнение команды в коммандной строке Windows
 		RunWait "%ComSpec%" /k %7Zip_Command%
+		; Run notepad "%Include_List_File%"
+
 	}
 	;
 	; Отображение журнала ошибок
@@ -416,6 +421,52 @@ WinRAR_Compress:
 		Run notepad "%7Zip_Error_Log%"
 	}
 	return
+}
+
+GetAbsolutePath(Path, RootPath := "")
+{
+	RootPath := RootPath ? RootPath : A_WorkingDir
+	StringReplace, Path, Path, % "..\", % "..\", UseErrorLevel
+	Loop % ErrorLevel
+	{
+		RootPath := RegExReplace(RootPath, "^(.*)\\.*$", "$1",, 1)
+	}
+	Path := RegExReplace(Path, "(\.\.\\)+", RootPath . "\")
+	return Path
+}
+
+ParseList(List, RootPath := "")
+{
+	static Line, Ret
+	Ret := ""
+	Loop Parse, List, `n, `r
+	{
+		Line := ExpandEnvironmentVariables(A_LoopField)
+		if RegExMatch(Line, "\.\.\\") { ; обработка относительных путей типа "..\..\Путь"
+			Line := GetAbsolutePath(Line, A_WorkingDir)
+		}
+		if (not RegExMatch(Line, "^\w+:\\")) {
+			Line := A_WorkingDir . "\" . Line
+		}
+		Ret .= Line . "`n"
+		; MsgBox, 4, , File number %A_Index% is %Line%.`n`nContinue?
+		; IfMsgBox, No, break
+	}
+	if (RootPath) {
+		Ret := StrReplace(Ret, RootPath . "\", "")
+	}
+	Sort, Ret, U ; удаление дубликатов из списка
+	return Ret
+}
+
+Escape(String)
+{ ; функция преобразования String в RegExp
+	static Escape := ["\", ".", "*", "?", "+", "[", "]", "{", "}", "|", "(", ")", "^", "$"]
+	for Index, Char in Escape
+	{
+		String := StrReplace(String, Char, "\" . Char)
+	}
+	return String
 }
 
 Make_Help_File:

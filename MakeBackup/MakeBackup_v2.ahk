@@ -1,3 +1,5 @@
+; site: https://github.com/Qetuoadgj/AutoHotkey/tree/master/MakeBackup
+
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn All ; Enable warnings to assist with detecting common errors.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
@@ -47,6 +49,7 @@ Set_Params:
 	else {
 		INI_File := ""
 	}
+	
 	SplitPath, INI_File, INI_File_FileName, INI_File_Dir, INI_File_Extension, INI_File_NameNoExt, INI_File_Drive ; получаем путь к папке, в которой находится файл с параметрами архивации
 	
 	WinRAR_Params := ""
@@ -75,9 +78,9 @@ Set_Params:
 	. " -ms=on"			; Sets solid mode.
 	. " -scrcBLAKE2sp"	; -scrc (Set hash function) switch
 	
-	
 	IniRead Name, % INI_File, % "Description", % "Name", % INI_File_NameNoExt
 	IniRead RootDir, % INI_File, % "Description", % "RootDir", % INI_File_Dir
+	IniRead WorkingDir, % INI_File, % "Description", % "WorkingDir", 0
 	IniRead WinRAR_LockArchive, % INI_File, % "Description", % "WinRAR_LockArchive", 0
 	IniRead WinRAR_WriteComment, % INI_File, % "Description", % "WinRAR_WriteComment", 0
 	IniRead IncludeThisFile, % INI_File, % "Description", % "IncludeThisFile", 1
@@ -93,6 +96,7 @@ Set_Params:
 	IniRead 7Zip_Params, % INI_File, % "Description", % "7Zip_Params", % 7Zip_Params
 	
 	RootDir := ExpandEnvironmentVariables(RootDir)
+	WorkingDir := ExpandEnvironmentVariables(WorkingDir)
 	WinRAR := ExpandEnvironmentVariables(WinRAR)
 	7Zip := ExpandEnvironmentVariables(7Zip)
 	
@@ -152,7 +156,10 @@ if (WinRAR_WriteComment) {
 
 Message := ""
 . "Name = " . Name . "`n"
+
 . "RootDir = " . RootDir . "`n"
+. "WorkingDir = " . WorkingDir . "`n"
+
 . "ArchiveType = " . ArchiveType . "`n"
 
 . (Password ? ""
@@ -196,6 +203,9 @@ MsgBox, 1,, % Message
 IfMsgBox Ok
 {
 	WinRAR_Command := "", 7Zip_Command := "" ; определение переменных для избежания лишних "if" в будущем
+	if (WorkingDir && InStr(FileExist(WorkingDir), "D")) {
+		SetWorkingDir % WorkingDir
+	}
 	if (ArchiveType = "rar") {
 		gosub WinRAR_Compress
 	}
@@ -298,8 +308,8 @@ WinRAR_Compress:
 	SplitPath, WinRAR_Binary, WinRAR_Binary_FileName, WinRAR_Binary_Dir, WinRAR_Binary_Extension, WinRAR_Binary_NameNoExt, WinRAR_Binary_Drive ; получаем путь к папке, в которой находится файл с параметрами архивации
 	WinRAR_Is_CMD := WinRAR_Binary_FileName = "Rar.exe" ? 1 : 0
 	;
-	WinRAR_Error_Log := A_WorkingDir . "\Backup_Errors.txt"	; файл журнала ошибок
-	WinRAR_Backup_Log := A_WorkingDir . "\Backup_Log.txt"	; файл журнала обработки
+	WinRAR_Error_Log := INI_File_Dir . "\Backup_Errors.txt"	; файл журнала ошибок
+	WinRAR_Backup_Log := INI_File_Dir . "\Backup_Log.txt"	; файл журнала обработки
 	; удаление предыдущего журнала ошибок
 	FileDelete % WinRAR_Error_Log
 	; Создание архива WinRAR
@@ -406,8 +416,8 @@ WinRAR_Compress:
 	SplitPath, 7Zip_Binary, 7Zip_Binary_FileName, 7Zip_Binary_Dir, 7Zip_Binary_Extension, 7Zip_Binary_NameNoExt, 7Zip_Binary_Drive ; получаем путь к папке, в которой находится файл с параметрами архивации
 	7Zip_Is_CMD := 7Zip_Binary_FileName = "7z.exe" ? 1 : 0
 	;
-	7Zip_Error_Log := A_WorkingDir . "\Backup_Errors.txt"	; файл журнала ошибок
-	7Zip_Backup_Log := A_WorkingDir . "\Backup_Log.txt"	; файл журнала обработки
+	7Zip_Error_Log := INI_File_Dir . "\Backup_Errors.txt"	; файл журнала ошибок
+	7Zip_Backup_Log := INI_File_Dir . "\Backup_Log.txt"	; файл журнала обработки
 	; удаление предыдущего журнала ошибок
 	FileDelete % 7Zip_Error_Log
 	; Создание архива 7Zip
@@ -469,7 +479,7 @@ Include_INI_File:
 {
 	if (IncludeThisFile) {
 		INI_Needs_To_Be_Copied := 0, Made_INI_Safe_Copy := 0
-		if (RootDir != A_WorkingDir) {
+		if (RootDir != INI_File_Dir) { ; if (RootDir != A_WorkingDir) {
 			INI_Needs_To_Be_Copied := 1
 			Target_INI_File := RootDir . "\" . INI_File_FileName
 			Temp_INI_File := RootDir . "\" . Prefix . INI_File_FileName
@@ -578,6 +588,7 @@ Make_Help_File:
 	[Description]
 	# Name = __0003
 	# RootDir = %A_WorkingDir%
+	# WorkingDir = %A_WorkingDir%
 	ArchiveType = 7z
 	# ArchiveType = rar
 	# Password = 567576

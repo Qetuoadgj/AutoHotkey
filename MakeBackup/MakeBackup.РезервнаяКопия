@@ -1,29 +1,28 @@
 ; ÄËß ÏĞÀÂÈËÜÍÎÃÎ ×ÒÅÍÈß ÑÈÌÂÎËÎÂ ÊÎÄÈĞÎÂÊÀ İÒÎÃÎ ÔÀÉËÀ ÎÁßÇÀÒÅËÜÍÎ ÄÎËÆÍÀ ÁÛÒÜ: WIN-1251 | CP1251
 
 [Description]
-; Name = Far Cry [Configured+IronSights]
-; Password = 567576
-RootDir = D:\Google Äèñê\AutoHotkey\
-; SevenZip = %ProgramFiles%\7-Zip\7z.exe
-; WinRAR = %ProgramFiles%\WinRAR\Rar.exe
+# Name = __0003
+RootDir = D:\Google Äèñê\AutoHotkey
+WorkingDir = D:\Google Äèñê\AutoHotkey
 ArchiveType = 7z
-; TimeStamp = false
-; TimeStamp = yyyy.MM.dd
-; CreateNewArchives = true
-; NewArchiveNumeration = 0.3d
-; LockArchive = true
-; IncludeThisFile = false
-
-[Zip_Options]
-; Method = Deflate ; Copy,Deflate,Deflate64,BZip2,LZMA,PPMd
-; Compression = 5  ; 0 | 1 | 3 | 5 | 7 | 9
-
-[7z_Options]
-; Method = LZMA2:27 ; LZMA,LZMA2,PPMd,BZip2,Deflate,Delta,BCJ,BCJ2,Copy
-; Compression = 9 ; 0 | 1 | 3 | 5 | 7 | 9
-
-[Rar_Options]
-; Compression = 5 ; 0 | 1 | 3 | 5
+# ArchiveType = rar
+# Password = 567576
+# Encrypt = 0
+TimeStamp = yyyy.MM.dd
+# IncludeThisFile = 0
+# CreateNewArchives = 1
+NewArchiveNumeration = 0.2d
+# AddSuffix = 1
+# ;
+# 7Zip = %ProgramFiles%\7-Zip\7z.exe
+# 7Zip_Params = U -up1q0r2x1y2z1w2 -r0 -spf2 -slp -mx -myx -ms=on -scrcBLAKE2sp
+# ;
+# WinRAR = %ProgramFiles%\WinRAR\Rar.exe
+# WinRAR_Params = A -u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+# WinRAR_LockArchive = 1
+# WinRAR_WriteComment = 1
+#
+# Debug = 1
 
 [IncludeList]
 ; Âñå ôàéëû
@@ -43,7 +42,7 @@ MakeBackup\*.url
 *.zip
 
 ; Ìóñîğ
-MakeBackup\*.backup
+*.backup
 *tmp
 
 _*.*

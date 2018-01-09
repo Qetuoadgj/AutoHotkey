@@ -1007,8 +1007,10 @@ App_Close:
 #Include ..\Includes\FUNC_MenuIcon.ahk
 #Include ..\Includes\FUNC_SystemCursor.ahk
 
+#Include ..\Includes\FUNC_hexToDecimal.ahk ; необходим для CLASS_Task_Sheduler.ahk
+
 #Include ..\Includes\CLASS_Script.ahk
-#Include ..\Includes\CLASS_Task_Sheduler.ahk
+#Include ..\Includes\CLASS_Task_Sheduler.ahk ; требует FUNC_hexToDecimal.ahk
 #Include ..\Includes\CLASS_Windows.ahk
 #Include ..\Includes\CLASS_Window.ahk
 #Include ..\Includes\CLASS_Layout.ahk

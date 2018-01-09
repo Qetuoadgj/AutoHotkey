@@ -10,7 +10,7 @@
 		;
 		Command = "%A_WinDir%\System32\schtasks.exe" /create /TN "%Task_Name%" /TR """"%A_ScriptFullPath%"""" /SC ONLOGON
 		Command .= Admin_Rights ? " /RL HIGHEST /F" : " /F"
-		RunWait *RunAs %Command%
+		RunWait *RunAs %Command%,, Hide
 	}
 
 	Delete_Auto_Run_Task(ByRef Task_Name)
@@ -18,7 +18,7 @@
 		static Command
 		;
 		Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
-		RunWait *RunAs %Command%
+		RunWait *RunAs %Command%,, Hide
 	}
 	*/
 	
@@ -42,8 +42,8 @@
 		static Command
 		;
 		Command = schtasks.exe /Create /XML "%Task_XML%" /tn "%Task_Name%"
-		; RunWait, %ComSpec% /k %Command% & pause & exit
-		RunWait *RunAs %Command%
+		; RunWait, %ComSpec% /k %Command% & pause & exit,, Hide
+		RunWait *RunAs %Command%,, Hide
 		Sleep 1
 	}
 
@@ -52,7 +52,7 @@
 		static Command
 		;
 		Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
-		RunWait *RunAs %Command%
+		RunWait *RunAs %Command%,, Hide
 		Sleep 1
 	}
 	

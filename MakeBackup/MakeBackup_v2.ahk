@@ -136,13 +136,13 @@ Set_Params:
 	Archive := INI_File_Dir . "\" . ArchiveName ; обновляем путь к архиву
 	Archive .= "." . ArchiveType
 	
-	Prefix := "DHFWEF90WE89_" ; префикс для имён файлов-списков и файла-комментария	
+	Prefix := "DHFWEF90WE89_" ; префикс для имён файлов-списков и файла-комментария
 	Include_List_Text := SplitINIFile(INI_File, "IncludeList") ; создаем список включений из секции [IncludeList]
 	Exclude_List_Text := SplitINIFile(INI_File, "ExcludeList") ; создаем список исключений из секции [ExcludeList]
 	
 	; Sort, Include_List_Text, U ; удаление дубликатов из списка
 	; Sort, Exclude_List_Text, U ; удаление дубликатов из списка
-		
+	
 	if (NoExec) {
 		return
 	}
@@ -292,7 +292,7 @@ WinRAR_Compress:
 { ; рутина обработки файлов архиватором WinRAR (сжатие файлов в архив и добавление комментария)
 	Include_List_Text := ParseList(Include_List_Text, RootDir)
 	Exclude_List_Text := ParseList(Exclude_List_Text, RootDir)
-	;	
+	;
 	Include_List_File := TextToFile(Include_List_Text, A_Temp . "\" . Prefix . "Backup_Include_List_File.txt", "CP1251") ; создаем файл-список включений из секции [IncludeList]
 	Exclude_List_File := TextToFile(Exclude_List_Text, A_Temp . "\" . Prefix . "Backup_Exclude_List_File.txt", "CP1251") ; создаем файл-список исключений из секции [ExcludeList]
 	;
@@ -401,7 +401,7 @@ WinRAR_Compress:
 {
 	Include_List_Text := ParseList(Include_List_Text, RootDir)
 	Exclude_List_Text := ParseList(Exclude_List_Text, RootDir)
-	;	
+	;
 	Include_List_File := TextToFile(Include_List_Text, A_Temp . "\" . Prefix . "Backup_Include_List_File.txt", "UTF-8") ; создаем файл-список включений из секции [IncludeList]
 	Exclude_List_File := TextToFile(Exclude_List_Text, A_Temp . "\" . Prefix . "Backup_Exclude_List_File.txt", "UTF-8") ; создаем файл-список исключений из секции [ExcludeList]
 	;
@@ -586,48 +586,49 @@ Make_Help_File:
 	MsgText =
 	( LTrim RTrim Join`r`n
 	[Description]
-	# Name = __0003
-	# RootDir = %A_WorkingDir%
-	# WorkingDir = %A_WorkingDir%
+	; Name = __0003
+	; RootDir = %A_WorkingDir%
+	; WorkingDir = %A_WorkingDir%
 	ArchiveType = 7z
-	# ArchiveType = rar
-	# Password = 567576
-	# Encrypt = 0
-	# TimeStamp = yyyy.MM.dd
-	# IncludeThisFile = 0
-	# CreateNewArchives = 1
-	# NewArchiveNumeration = 0.2d
-	# AddSuffix = 1
-	# ;
-	# 7Zip = `%ProgramFiles`%\7-Zip\7z.exe
-	# 7Zip_Params =%7Zip_Params%
-	# ;
-	# WinRAR = `%ProgramFiles`%\WinRAR\Rar.exe
-	# WinRAR_Params =%WinRAR_Params%
-	# WinRAR_LockArchive = 1
-	# WinRAR_WriteComment = 1
-	#
-	# Debug = 1
+	; ArchiveType = rar
+	; Password = 567576
+	; Encrypt = 0
+	; TimeStamp = yyyy.MM.dd
+	; IncludeThisFile = 0
+	; CreateNewArchives = 1
+	; NewArchiveNumeration = 0.2d
+	; AddSuffix = 1
+	;
+	; 7Zip = `%ProgramFiles`%\7-Zip\7z.exe
+	; 7Zip_Params =%7Zip_Params%
+	;
+	; WinRAR = `%ProgramFiles`%\WinRAR\Rar.exe
+	; WinRAR_Params =%WinRAR_Params%
+	; WinRAR_LockArchive = 1
+	; WinRAR_WriteComment = 1
+	;
+	; Debug = 1
 	
 	[IncludeList]
-	# Маски файлов для архивирования
+	; Маски файлов для архивирования
 	
 	[ExcludeList]
-	# Маски файлов, исключаемых из обработки файлы
+	; Маски файлов, исключаемых из обработки файлы
 	
-	# Свойства папок
+	; Свойства папок
 	*Thumbs.db
 	*desktop.ini
 	
-	# Ярлыки
+	; Ярлыки
 	*.lnk
 	
-	# Архивы
+	; Архивы
 	*.rar
 	*.7z
+	*.zip
 	
-	# [Comments]
-	# Комментарий, который будет добавлен в свойства архива (только для WinRAR)
+	; [Comments]
+	; Комментарий, который будет добавлен в свойства архива (только для WinRAR)
 	
 	)
 	PasteToNotepad(MsgText)

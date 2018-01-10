@@ -6,33 +6,16 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #SingleInstance Force
 
 ; Your code here...
-/*
-if (not A_Args[1] or not FileExist(A_Args[1])) { ; скрипт запущен без аргументов
-	FileSelectFile TargetFile,, % A_WorkingDir,, % "*.url" ; открываем окно для выбора файла
-	if (not TargetFile) { ; файл не выбран
-		ExitApp
-	}
-}
-else { ; скрипт запущен с указанием аргументов
-	TargetFile := A_Args[1] ; 1й аргумент - файл с параметрами архивации
-}
+SplitPath A_ScriptFullPath,,,, A_SciptName
+ConfigFile := A_ScriptDir . "\" A_SciptName . ".ini"
 
-Loop Files, % TargetFile, F
-{ ; получаем полный путь к файлу с параметрами архивации
-	TargetFile := A_LoopFileLongPath
-}
-*/
+IniRead DeleteConvertedFiles, % ConfigFile, % "Settings", % "DeleteConvertedFiles", 0
+IniWrite("DeleteConvertedFiles", ConfigFile, "Settings", DeleteConvertedFiles)
 
 FileSelectFile, TargetFile, M32,,, *.url
 if (not TargetFile) { ; файл не выбран
 	ExitApp
 }
-/*
-Loop Files, % TargetFile, F
-{ ; получаем полный путь к файлу с параметрами архивации
-	TargetFile := A_LoopFileLongPath
-}
-*/
 
 Loop Parse, % TargetFile, `n
 {
@@ -47,7 +30,7 @@ Loop Parse, % TargetFile, `n
 		Loop Files, % FileDir . "\" . A_LoopField, F
 		{ ; получаем полный путь к файлу
 			TargetFile := A_LoopFileLongPath
-			Convert(TargetFile)
+			Convert(TargetFile, DeleteConvertedFiles)
 		}
 	}
 }
@@ -69,7 +52,7 @@ SelectIcon(ByRef IconPath := "", ByRef Index := 0)
 	}
 }
 
-Convert(ByRef File)
+Convert(ByRef File, ByRef DeleteConvertedFiles := 0)
 {
 	static FileName, FileDir, FileExtension, FileNameNoExt, FileDrive
 	static OutTarget, OutDir, OutArgs, OutDesc, OutIcon, OutIconNum, OutRunState
@@ -87,7 +70,7 @@ Convert(ByRef File)
 			CoordMode, ToolTip
 			ToolTip % FileNameNoExt, 50, 45
 			SelectedIcon := StrSplit(SelectIcon(), ",", "`s")
-			if (SelectedIcon[1] && SelectedIcon[2]) {
+			; if (SelectedIcon[1] && SelectedIcon[2]) {
 				;
 				Target := q("%WinDir%\explorer.exe")
 				LinkFile := FileDir . "\" . FileNameNoExt . ".lnk"
@@ -102,10 +85,26 @@ Convert(ByRef File)
 				FileCreateShortcut, % Target, % LinkFile, % WorkingDir, % Args, % Description, % IconFile, % ShortcutKey, % IconNumber, % RunState
 				if (not ErrorLevel) {
 					; MsgBox, % FileDir . "\" . FileNameNoExt . ".lnk" . "`n" "OK!"
-					; FileDelete % File
+					if (DeleteConvertedFiles) {
+						FileDelete % File
+					}
 					MsgBox, 262144, , OK!, 1
 				}
-			}
+			; }
 		}
+	}
+}
+
+IniWrite(ByRef Key, ByRef File, ByRef Section, ByRef Value)
+{ ; замена стандартного IniWrite (записывает только измененные параметры)
+	static Test_Value
+	;
+	if (not File) {
+		return
+	}
+	Value := Value = "ERROR" ? "" : Value
+	IniRead Test_Value, %File%, %Section%, %Key%
+	if (not Test_Value = Value) {
+		IniWrite %Value%, %File%, %Section%, %Key%
 	}
 }

@@ -1,31 +1,37 @@
 ﻿#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn All, StdOut ; Enable warnings to assist with detecting common errors.
+#Warn All, MsgBox ; Enable warnings to assist with detecting common errors.
 SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
+#Warn ClassOverwrite, Off
+
 DetectHiddenWindows On
 
-; https://autohotkey.com/boards/viewtopic.php?f=6&t=6413#
-#NoEnv
-#MaxHotkeysPerInterval 99000000
-#HotkeyInterval 99000000
-#KeyHistory 0
-ListLines Off
-; Process Priority,, A
-SetBatchLines -1
-SetKeyDelay -1, -1
-SetMouseDelay -1
-SetDefaultMouseSpeed 0
-SetWinDelay -1
+; /*
+; Generic optimizations 			; https://autohotkey.com/boards/viewtopic.php?f=6&t=6413
+#NoEnv								; #NoEnv is recommended for all scripts, it disables environment variables.
+#MaxHotkeysPerInterval 99000000		; The default #MaxHotkeysPerInterval along with #HotkeyInterval will stop your script by showing message boxes if you have some kind of rapid autofire loop in it.
+#HotkeyInterval 99000000			; Just put some insane unreachable high number to ignore this limit.
+#KeyHistory 0						; ListLines and #KeyHistory are functions used to "log your keys".
+ListLines Off						; Disable them as they're only useful for debugging purposes.
+; Process Priority,, A				; Setting an higher priority to a Windows program is supposed to improve its performance. Use AboveNormal/A. If you feel like it's making things worse, comment or remove this line.
+SetBatchLines -1					; The default SetBatchLines value makes your script sleep 10 milliseconds every line. Make it -1 to not sleep (but remember to include at least one Sleep in your loops, if any!)
+SetKeyDelay -1, -1					; Even though SendInput ignores SetKeyDelay, SetMouseDelay and SetDefaultMouseSpeed,
+SetMouseDelay -1					; having these delays at -1 improves SendEvent's speed just in case SendInput is not available and falls back to SendEvent.
+SetDefaultMouseSpeed 0				;
+SetWinDelay -1						; SetWinDelay and SetControlDelay may affect performance depending on the script.
+SetControlDelay -1					;
+SendMode Input						; SendInput is the fastest send method. SendEvent (the default one) is 2nd place, SendPlay a far 3rd place (it's the most compatible one though). SendInput does not obey to SetKeyDelay, SetMouseDelay, SetDefaultMouseSpeed; there is no delay between keystrokes in that mode.
 ;
+; */
 
 ; Определение классов (для исключения их прямой перезаписи)
-new Script			:= c_Script
-new Task_Sheduler	:= c_Task_Sheduler
-new Windows			:= c_Windows
-new Window			:= c_Window
-new Layout			:= c_Layout
-new Edit_Text		:= c_Edit_Text
+; new Script		:= c_Script
+; new Task_Sheduler	:= c_Task_Sheduler
+; new Windows		:= c_Windows
+; new Window		:= c_Window
+; new Layout		:= c_Layout
+; new Edit_Text		:= c_Edit_Text
 ;
 
 Script_Name := Script.Name()
@@ -51,8 +57,6 @@ if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(
 App_PID := DllCall("GetCurrentProcessId")
 if (system_run_with_high_priority) {
 	Process Priority, %App_PID%, High
-	; Thread NoTimers, true
-	; Thread Priority, 2147483647
 }
 else {
 	Process Priority, %App_PID%, Normal

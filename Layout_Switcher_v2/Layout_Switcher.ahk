@@ -5,6 +5,20 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 DetectHiddenWindows On
 
+; https://autohotkey.com/boards/viewtopic.php?f=6&t=6413#
+#NoEnv
+#MaxHotkeysPerInterval 99000000
+#HotkeyInterval 99000000
+#KeyHistory 0
+ListLines Off
+; Process Priority,, A
+SetBatchLines -1
+SetKeyDelay -1, -1
+SetMouseDelay -1
+SetDefaultMouseSpeed 0
+SetWinDelay -1
+;
+
 ; Определение классов (для исключения их прямой перезаписи)
 new Script			:= c_Script
 new Task_Sheduler	:= c_Task_Sheduler
@@ -37,6 +51,8 @@ if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(
 App_PID := DllCall("GetCurrentProcessId")
 if (system_run_with_high_priority) {
 	Process Priority, %App_PID%, High
+	; Thread NoTimers, true
+	; Thread Priority, 2147483647
 }
 else {
 	Process Priority, %App_PID%, Normal

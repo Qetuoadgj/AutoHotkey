@@ -1,4 +1,4 @@
-﻿class c_Edit_Text
+﻿class Edit_Text
 { ; функции получения / обработки текста
 	; static Ctrl_C := "^{vk43}" . "{Ctrl Up}"
 	; static Ctrl_V := "^{vk56}" . "{Ctrl Up}"

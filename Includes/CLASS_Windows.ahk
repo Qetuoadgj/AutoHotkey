@@ -1,7 +1,7 @@
-﻿class c_Windows
+﻿class Windows
 { ; получение информации о Windows
-	static Tray_ID := c_Windows.Get_Tray_ID() ; ID системного трея Windows
-	static Desktop_ID := c_Windows.Get_Desktop_ID() ; ID рабочего стола Windows
+	static Tray_ID := Windows.Get_Tray_ID() ; ID системного трея Windows
+	static Desktop_ID := Windows.Get_Desktop_ID() ; ID рабочего стола Windows
 	;
 	Get_Tray_ID()
 	{ ; функция получения ID системного трея Windows

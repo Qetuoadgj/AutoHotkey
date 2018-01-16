@@ -1,6 +1,6 @@
 ﻿#Include *i FUNC_hexToDecimal.ahk
 
-class c_Layout
+class Layout
 { ; функции управления раскладками клавиатуры
 	static SISO639LANGNAME := 0x0059 ; ISO abbreviated language name, eg "en"
 	static LOCALE_SENGLANGUAGE := 0x1001 ; Full language name, eg "English"
@@ -8,7 +8,7 @@ class c_Layout
 	static INPUTLANGCHANGE_FORWARD := 0x0002
 	static INPUTLANGCHANGE_BACKWARD := 0x0004
 	;
-	static Layouts_List := c_Layout.Get_Layouts_List()
+	static Layouts_List := Layout.Get_Layouts_List()
 	;
 	static Switch_Layout_Combo := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
 	;

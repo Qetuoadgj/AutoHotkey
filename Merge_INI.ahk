@@ -213,35 +213,119 @@ WindowGetRect(windowTitle*)
     }
 }
 
-IniCountKeys(ByRef file)
+FileReadSection(ByRef SourceFile, ByRef StartString, ByRef EndString = "", ByRef SkipComments := 1, ByRef CommentPattern := "^(\s+)?;", ByRef SkipEmptyLines := 1)
 {
-	static count, sections, section_name, line_, line_1, line_2
+	static SectionContains, StartLine, EndLine, CurrentLine
 	;
-	count := 0
-	IniRead, sections, % file
-	Loop Parse, sections, `n, `r
+	StartLine := 0, EndLine := 0, CurrentLine := 0
+	SectionContains := ""
+	Loop, Read, %SourceFile%
 	{
-		section_name := A_LoopField
-		IniRead section, % file, % section_name
-		Loop Parse, section, `n, `r
+		if RegExMatch(A_LoopReadLine, StartString) {
+			StartLine := A_Index
+		}
+	}
+	Loop, Read, %SourceFile%
+	{
+		if RegExMatch(A_LoopReadLine, EndString) && (not EndString = "") && (A_Index > StartLine)
 		{
-			StringSplit line_, A_LoopField, =
-			key := Trim(line_1)
-			if (key) {
-				count++
+			EndLine := A_Index
+			break
+		}
+		else {
+			EndLine := A_Index + 1
+		}
+	}
+	Loop, Read, %SourceFile%
+	{
+		If (SkipEmptyLines) {
+			if (Trim(A_LoopReadLine) = "") { ; if looped line is empty
+				continue ; skip the current Loop instance
+			}
+		}
+		If (SkipComments) {
+			If RegExMatch(A_LoopReadLine, CommentPattern) { ; if looped line is commented
+				continue ; skip the current Loop instance
+			}
+		}
+		CurrentLine := A_Index
+		If (CurrentLine > StartLine) && (CurrentLine < EndLine) {
+			SectionContains .= A_LoopReadLine . "`n"
+		}
+	}
+	SectionContains := RegExReplace(SectionContains, "\s+$", "") ; удаляем последние пустые строки (на всякий случай)
+	return SectionContains
+}
+
+IniRead(ByRef Filename, ByRef Section := "", ByRef Key := "", ByRef Default := "ERROR")
+{ ; замена стандартного IniRead
+	static Match, Match1, Match2
+	static SectionContains, LineText, KeyName, KeyValue, SectionsList, SectionName
+	if (Section) { ; секция указана
+		SectionContains := FileReadSection(Filename, "\[" . Section . "\]", "^\[.*?\]", 1, "^(\s+)?[;#]", 1) ; получение содержимого указанной секции
+		if (Key) { ; указан ключ
+			Loop, Parse, SectionContains, `n, `r
+			{ ; поиск нужного ключа в указанной секции
+				LineText := Trim(A_LoopField)
+				if RegExMatch(LineText, "^(.*?)[ \t]?+=[ \t]?+(.*)$", Match) { ; найден какой-то ключ со значением
+					KeyName := Match1 ; сам ключ
+					KeyValue := StrLen(Match2) > 0 ? Match2 : Default ; устанавливаем значение ключа
+					if (KeyName = Key) { ; найден ключ, который мы искали
+						; return KeyValue ? KeyValue : KeyName ; возвращаем значение ключа, если оно есть, если значения нет - возвращаем сам ключ
+						return KeyValue ; возвращаем значение ключа
+					}
+				}
+				if (LineText = Key) { ; найден ключ без знака равенства (обычный текст), сопадающий с искомым ключем
+					LineText := "{#-#-#-MERGE_AS_TEXT-#-#-#}" . LineText . "{#-#-#-MERGE_AS_TEXT-#-#-#}"
+					return LineText ; возвращаем ключ в виде текста (без знака равенства и значения)
+				}
+			}
+			return ; не найден искомый ключ - возвращаем "пустое" значение
+		}
+		return SectionContains ; ключ не был указан, возвращаем содержимое всей секции
+	}
+	else { ; секция не была указана
+		SectionsList := "" ; задаем "пустое" значения для будущего списка секций
+		Loop, Read, %Filename%
+		{ ; ищем в файле "секции", используя шаблон RegEx
+			if RegExMatch(Trim(A_LoopReadLine), "^\[(.*?)\]$", Match) { ; по шаблону найдена секция
+				SectionName := Match1 ; получаем имя секции
+				SectionsList .= SectionName . "`n" ; добавляем имя в список секций
+			}
+		}
+		SectionsList := RegExReplace(SectionsList, "\s+$", "") ; удаляем последние пустые строки (на всякий случай)
+		return SectionsList ; возвращаеи список секций
+	}
+}
+
+IniCountKeys(ByRef INI)
+{
+	static KeysCount, SectionsList, SectionName, SectionKeys
+	;
+	KeysCount := 0
+	SectionsList := IniRead(INI)
+	Loop, Parse, SectionsList, `n, `r
+	{
+		SectionName := A_LoopField
+		SectionKeys := IniRead(INI, SectionName)
+		if (SectionKeys) {
+			Loop, Parse, SectionKeys, `n, `r
+			{
+				KeysCount++
 			}
 		}
 	}
-	return count
+	return KeysCount
 }
 
-MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByRef method := 1, ByRef progress := "")
+MergeINI(ByRef ini_merge_to, ByRef ini_merge_from, ByRef ini_result := "_merge_ini_file3.ini", ByRef method := 1, ByRef progress := "")
 {
 	; Keep Structure = 1
 	; Only Settings = 2
 	; Only Difference = 3
 	; Only Difference (Invert) = 4
 	;
+	; /*
 	static file1, file2, file3, ret
 	static sections, section_name, section, line_, line_1, line_2, key, value, value_1, value_2
 	static count, pos, pct
@@ -273,11 +357,13 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 				count := IniCountKeys(file1) + IniCountKeys(file2)
 				progress := count ? progress : "" 
 			}
-			IniRead, sections, % file1
+			; IniRead, sections, % file1
+			sections := IniRead(file1)
 			Loop Parse, sections, `n, `r
 			{
 				section_name := A_LoopField
-				IniRead section, % file1, % section_name
+				; IniRead section, % file1, % section_name
+				section := IniRead(file1, section_name)
 				Loop Parse, section, `n, `r
 				{
 					StringSplit line_, A_LoopField, =
@@ -289,11 +375,21 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 							; ToolTip % pos . " : " . count . " : " . pct
 							GuiControl,, % progress, % pct
 						}
-						IniRead value, % file1, % section_name, % key
+						; IniRead value, % file1, % section_name, % key
+						value := IniRead(file1, section_name, key, "")
 						if (method > 2) {
-							IniRead value_2, % file2, % section_name, % key
+							; IniRead value_2, % file2, % section_name, % key
+							value_2 := IniRead(file2, section_name, key, "")
 							if (value_2 == value) {
 								continue
+							}
+						}
+						if (method = 1) {
+							if RegExMatch(value, "i)" . "{#-#-#-MERGE_AS_TEXT-#-#-#}" . "(.*?)" . "{#-#-#-MERGE_AS_TEXT-#-#-#}", Match) {
+								if tv := IniRead(file1, section_name, key, "") {
+									; MsgBox % tv
+									continue
+								}
 							}
 						}
 						IniWrite % value, % file3, % section_name, % key
@@ -307,11 +403,13 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 				progress := count ? progress : "" 
 			}
 		}
-		IniRead, sections, % file2
+		; IniRead, sections, % file2
+		sections := IniRead(file2)
 		Loop Parse, sections, `n, `r
 		{
 			section_name := A_LoopField
-			IniRead section, % file2, % section_name
+			; IniRead section, % file2, % section_name
+			section := IniRead(file2, section_name)
 			Loop Parse, section, `n, `r
 			{
 				StringSplit line_, A_LoopField, =
@@ -323,10 +421,18 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 						; ToolTip % pos . " : " . count . " : " . pct
 						GuiControl,, % progress, % pct
 					}
-					IniRead value, % file2, % section_name, % key
+					; IniRead value, % file2, % section_name, % key
+					value := IniRead(file2, section_name, key, "")
 					if (method > 2) {
-						IniRead value_1, % file1, % section_name, % key
+						; IniRead value_1, % file1, % section_name, % key
+						value_1 := IniRead(file1, section_name, key, "")
 						if (value_1 == value) {
+							continue
+						}
+					}
+					if RegExMatch(value, "i)" . "{#-#-#-MERGE_AS_TEXT-#-#-#}" . "(.*?)" . "{#-#-#-MERGE_AS_TEXT-#-#-#}", Match) {
+						if tv := IniRead(file1, section_name, key, "") {
+							; MsgBox % tv
 							continue
 						}
 					}
@@ -335,8 +441,27 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 			}
 		}
 		FileRead ret, % file3
+		; /*
+		static result
+		result := ""
+		Loop, Parse, ret, `n, `r
+		{
+			LineText := A_LoopField
+			if RegExMatch(LineText, "i)" . "^(.*?)={#-#-#-MERGE_AS_TEXT-#-#-#}" . ".*?" . "{#-#-#-MERGE_AS_TEXT-#-#-#}", Match) {
+				LineText := RegExReplace(LineText, "i)" . "^(.*?)={#-#-#-MERGE_AS_TEXT-#-#-#}" . ".*?" . "{#-#-#-MERGE_AS_TEXT-#-#-#}", "$1")
+				IniDelete, Filename, Section [, Key]
+			}
+			result .= LineText . "`n"
+		}
+		if (file3 != file1 and file3 != file2) {
+			FileDelete, % file3
+			FileAppend, % result, % file3
+		}
+		FileRead ret, % file3
+		; */
 	}
 	return ret
+	; */
 }
 
 Merge:

@@ -99,6 +99,8 @@ Create_GUI:
 	Gui Add, Edit, Multi ReadOnly x5 y150 w0 h0 vini_file_1_text, % A_Space
 	Gui Add, Edit, Multi ReadOnly x5 y150 w0 h0 vini_file_2_text, % A_Space
 	Gui Add, Edit, Multi ReadOnly x5 y150 w0 h0 vini_file_3_text, % A_Space
+	;
+	Gui Add, Progress, x550 y5 w0 h0 vMsgBox1_Progress +Smooth ;cBlue
 	return
 }
 
@@ -189,6 +191,11 @@ GuiSize:
 			GuiControl, Move, ini_file_1_text, % "*x" 5*1+W*0 "*y" 145 "*w" W "*h" H
 			GuiControl, Move, ini_file_2_text, % "*x" 5*2+W*1 "*y" 145 "*w" W "*h" H
 			GuiControl, Move, ini_file_3_text, % "*x" 5*3+W*2 "*y" 145 "*w" W "*h" H
+			;
+			W := rect.width-550-5*2, H := (145-5*2)/5
+			X := 550, Y := (145-H)/2
+			GuiControl, Move, MsgBox1_Progress, % "*x" 550 "*y" Y "*w" W "* h" H
+			; GuiControl,, MsgBox1_Progress, 50
 		}
 	}
 	return
@@ -206,7 +213,29 @@ WindowGetRect(windowTitle*)
     }
 }
 
-MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByRef method := 1)
+IniCountKeys(ByRef file)
+{
+	static count, sections, section_name, line_, line_1, line_2
+	;
+	count := 0
+	IniRead, sections, % file
+	Loop Parse, sections, `n, `r
+	{
+		section_name := A_LoopField
+		IniRead section, % file, % section_name
+		Loop Parse, section, `n, `r
+		{
+			StringSplit line_, A_LoopField, =
+			key := Trim(line_1)
+			if (key) {
+				count++
+			}
+		}
+	}
+	return count
+}
+
+MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByRef method := 1, ByRef progress := "")
 {
 	; Keep Structure = 1
 	; Only Settings = 2
@@ -214,21 +243,36 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 	; Only Difference (Invert) = 4
 	;
 	static file1, file2, file3, ret
+	static sections, section_name, section, line_, line_1, line_2, key, value, value_1, value_2
+	static count, pos, pct
 	;
 	file1 := ini_merge_to, file2 := ini_merge_from, file3 := ini_result, ret = ""
 	;
+	count := 0, pos := 0
 	if FileExist(file2)
 	{
 		if (method = 1) {
 			FileCopy % file1, % file3, 1
+			if InStr(FileExist(file3), "R") { ; перед обработкой снять аттрибут "только чтение"
+				FileSetAttrib, -R, % file3
+			}
 		}
 		else {
-			FileDelete % file3
+			if InStr(FileExist(file3), "R") { ; перед обработкой снять аттрибут "только чтение"
+				FileSetAttrib, -R, % file3
+			}
+			if (file3 != file1 and file3 != file2) {
+				FileDelete % file3
+			}
 			if (method = 4) {
 				file1 := ini_merge_from, file2 := ini_merge_to
 			}
 		}
 		if (method < 3) {
+			if (progress) {
+				count := IniCountKeys(file1) + IniCountKeys(file2)
+				progress := count ? progress : "" 
+			}
 			IniRead, sections, % file1
 			Loop Parse, sections, `n, `r
 			{
@@ -239,6 +283,12 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 					StringSplit line_, A_LoopField, =
 					key := Trim(line_1)
 					if (key) {
+						if (progress) {
+							pos++
+							pct := pos/count*100
+							; ToolTip % pos . " : " . count . " : " . pct
+							GuiControl,, % progress, % pct
+						}
 						IniRead value, % file1, % section_name, % key
 						if (method > 2) {
 							IniRead value_2, % file2, % section_name, % key
@@ -251,6 +301,12 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 				}
 			}
 		}
+		else {
+			if (progress) {
+				count := IniCountKeys(file2)
+				progress := count ? progress : "" 
+			}
+		}
 		IniRead, sections, % file2
 		Loop Parse, sections, `n, `r
 		{
@@ -261,6 +317,12 @@ MergeINI(ini_merge_to, ini_merge_from, ini_result := "_merge_ini_file3.ini", ByR
 				StringSplit line_, A_LoopField, =
 				key := Trim(line_1)
 				if (key) {
+					if (progress) {
+						pos++
+						pct := pos/count*100
+						; ToolTip % pos . " : " . count . " : " . pct
+						GuiControl,, % progress, % pct
+					}
 					IniRead value, % file2, % section_name, % key
 					if (method > 2) {
 						IniRead value_1, % file1, % section_name, % key
@@ -283,11 +345,13 @@ Merge:
 	Gui Submit, NoHide
 	method_id := Method
 	GuiControl -AltSubmit, Method ; возвращает выбранный в списке текст
-	;
+	/*
 	if (OverwriteOutputFile and (ini_file_3 != ini_file_1 and ini_file_1 != ini_file_2)) {
 		FileDelete % ini_file_3
 	}
-	result := MergeINI(ini_file_1, ini_file_2, ini_file_3, method_id)
+	*/
+	GuiControl,, % "ini_file_3_text", % A_Space
+	result := MergeINI(ini_file_1, ini_file_2, ini_file_3, method_id, "MsgBox1_Progress")
 	GuiControl,, % "ini_file_3_text", % result
 	return
 }

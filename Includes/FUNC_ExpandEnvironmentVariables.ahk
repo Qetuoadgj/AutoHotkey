@@ -1,4 +1,4 @@
-﻿ExpandEnvironmentStrings(ByRef String)
+﻿ExpandEnvironmentStrings(String)
 { ; функция обработки переменных среды Windows
   static nSize, Dest, size
   static NULL := ""
@@ -24,7 +24,7 @@ ExpandEnvironmentStringsAHK(String)
   return String
 }
 
-ExpandEnvironmentVariables(ByRef String)
+ExpandEnvironmentVariables(String)
 { ; функция совместной обработки переменных AHK и Windows
   return ExpandEnvironmentStringsAHK(ExpandEnvironmentStrings(String))
 }

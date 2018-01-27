@@ -1,4 +1,4 @@
-﻿IniRead(ByRef Filename, ByRef Section := "", ByRef Key := "", ByRef Default := "")
+﻿IniRead(Filename, Section := "", Key := "", Default := "")
 { ; замена стандартного IniRead (имеет возможность читать параметры, для которых не существует [Section])
 	static OutputVar := ""
 	;

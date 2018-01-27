@@ -110,7 +110,7 @@
 		return Selected_Text
 	}
 	
-	Convert_Case(ByRef Selected_Text, ByRef Force_Case_ID := 0)
+	Convert_Case(Selected_Text, Force_Case_ID := 0)
 	{ ; функция смены регистра текста
 		static Converted_Text
 		; -----------------------------------------------------------------------------------
@@ -155,7 +155,7 @@
 		return Converted_Text
 	}
 	
-	Dictionary(ByRef Selected_Text)
+	Dictionary(Selected_Text)
 	{ ; функция сравнения текста со словарями (определение словаря, соответствующего тексту)
 		static Language
 		static Dictionary
@@ -182,7 +182,7 @@
 		; -----------------------------------------------------------------------------------
 	}
 	
-	Replace_By_Dictionaries(ByRef Selected_Text, ByRef Current_Dictionary, ByRef Next_Dictionary)
+	Replace_By_Dictionaries(Selected_Text, Current_Dictionary, Next_Dictionary)
 	{ ; функция замены символов одного словаря соответствующими (по порядку) символами другого (смена раскладки текста)
 		static Converted_Text
 		; -----------------------------------------------------------------------------------
@@ -205,7 +205,7 @@
 		return Converted_Text
 	}
 	
-	Paste(ByRef Converted_Text)
+	Paste(Converted_Text)
 	{ ; функция отправки буфер текста обмена / вывода текста
 		; -----------------------------------------------------------------------------------
 		; Отправление "Converted_Text" в буфер обмена и отправка команды "Control + V"
@@ -226,7 +226,7 @@
 	}
 	
 	/*
-	Get_Index_By_Name(ByRef Name)
+	Get_Index_By_Name(Name)
 	{ ; функция получения порядкового номера словаря по полному имени ("English")
 		static Index, Dictionary
 		;

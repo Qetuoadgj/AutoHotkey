@@ -1,7 +1,7 @@
 ﻿class Script
 { ; функции управления скриптом
 	
-	Force_Single_Instance(ByRef File_Names := false)
+	Force_Single_Instance(File_Names := false)
 	{ ; функция автоматического завершения всех копий текущего скрипта (одновременно для .exe и .ahk)
 		static Detect_Hidden_Windows_Tmp
 		static File_Types, Index, File_Type
@@ -19,7 +19,7 @@
 		DetectHiddenWindows % Detect_Hidden_Windows_Tmp
 	}
 
-	Close_Other_Instances(ByRef App_Full_Path)
+	Close_Other_Instances(App_Full_Path)
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
 		static Current_ID, Process_List, Process_Count, Process_ID, Process_PID
 		;
@@ -38,7 +38,7 @@
 		}
 	}
 
-	Run_As_Admin(ByRef Params := "")
+	Run_As_Admin(Params := "")
 	{ ; функция запуска скрипта с правами администратора
 		if (not A_IsAdmin) {
 			Try {

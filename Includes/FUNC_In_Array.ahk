@@ -1,4 +1,4 @@
-﻿In_Array(ByRef Array, ByRef Value)
+﻿In_Array(Array, Value)
 { ; функция проверки наличия значения во множестве
 	static k, v
 	;

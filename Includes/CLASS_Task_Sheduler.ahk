@@ -4,7 +4,7 @@
 	static Tasks_Dir_Lenght := StrLen(Task_Sheduler.Tasks_Dir . "\")
 	;
 	/*
-	Create_Auto_Run_Task(ByRef Task_Name, ByRef Admin_Rights := False)
+	Create_Auto_Run_Task(Task_Name, Admin_Rights := False)
 	{ ; функция создания автозагрузки программы в планировщике Windows
 		static Command
 		;
@@ -13,7 +13,7 @@
 		RunWait *RunAs %Command%,, Hide
 	}
 
-	Delete_Auto_Run_Task(ByRef Task_Name)
+	Delete_Auto_Run_Task(Task_Name)
 	{ ; функция удаления автозагрузки программы из планировщика Windows
 		static Command
 		;
@@ -22,7 +22,7 @@
 	}
 	*/
 	
-	Create_Auto_Run_Task(ByRef Task_Name, ByRef Admin_Rights := False, ByRef Delete_Task_XML := 0)
+	Create_Auto_Run_Task(Task_Name, Admin_Rights := False, Delete_Task_XML := 0)
 	{ ; функция создания автозагрузки программы в планировщике Windows
 		static Task_XML
 		;
@@ -37,7 +37,7 @@
 		}
 	}
 	
-	Create_Task_From_XML(ByRef Task_Name, ByRef Task_XML)
+	Create_Task_From_XML(Task_Name, Task_XML)
 	{ ; функция создания задания в планировщике Windows (из XML файла)
 		static Command
 		;
@@ -47,7 +47,7 @@
 		Sleep 1
 	}
 
-	Delete_Task(ByRef Task_Name)
+	Delete_Task(Task_Name)
 	{ ; функция удаления задания из планировщика Windows
 		static Command
 		;
@@ -56,7 +56,7 @@
 		Sleep 1
 	}
 	
-	Create_Auto_Start_XML(ByRef Command, ByRef Admin_Rights := false, ByRef Task_XML := "my_task.xml", ByRef Delay := "")
+	Create_Auto_Start_XML(Command, Admin_Rights := false, Task_XML := "my_task.xml", Delay := "")
 	{ ; функция создания XML файла задания для планировщика Windows
 		static XML_Text
 		static Registration_Time
@@ -126,7 +126,7 @@
 		FileAppend %XML_Text%, %Task_XML%
 	}
 	
-	Task_Exists(ByRef Task_Name, ByRef Command := 0)
+	Task_Exists(Task_Name, Command := 0)
 	{ ; функция проверки наличия задания в планировщике
 		static Task_File
 		static Task_Command

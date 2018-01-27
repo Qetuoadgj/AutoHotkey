@@ -2,7 +2,7 @@
 
 class Window
 {
-	Is_Full_Screen(ByRef Win_Title := "A")
+	Is_Full_Screen(Win_Title := "A")
 	{ ; функция проверки полноэкранного режима
 		static Win_ID
 		static Win_Style

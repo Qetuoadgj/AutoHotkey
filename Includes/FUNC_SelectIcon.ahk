@@ -1,4 +1,4 @@
-SelectIcon(ByRef IconPath := "", ByRef Index := 0)
+SelectIcon(IconPath := "", Index := 0)
 { ; функция вызова диалога выбора файла иконки и самой иконки из него
 	static Call
 	IconPath := IconPath ? IconPath : A_WinDir . "\system32\shell32.dll"

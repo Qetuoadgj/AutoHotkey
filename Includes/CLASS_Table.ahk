@@ -1,6 +1,6 @@
 ﻿class Table
 {
-	Get_Key_Index(ByRef Table, ByRef Key_Name)
+	Get_Key_Index(Table, Key_Name)
 	{ ; функция получения порядкового номера ключа по его имени
 		static Key, Index
 		;
@@ -19,7 +19,7 @@
 		}
 	}
 	
-	Get_Key_Name(ByRef Table, ByRef Index)
+	Get_Key_Name(Table, Index)
 	{ ; функция получения имени ключа словаря по порядковому номеру
 		static Key
 		;
@@ -33,7 +33,7 @@
 		}
 	}
 	
-	Max_Index(ByRef Table)
+	Max_Index(Table)
 	{
 		static Key, Index
 		;

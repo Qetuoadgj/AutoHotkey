@@ -1,4 +1,4 @@
-hexToDecimal(ByRef str)
+hexToDecimal(str)
 {
 	static _0 := 0
 	static _1 := 1

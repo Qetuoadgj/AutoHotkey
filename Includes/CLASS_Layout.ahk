@@ -35,7 +35,7 @@ class Layout
 		return Layouts_List
 	}
 	
-	Language_Name(ByRef HKL, ByRef Full_Name := false)
+	Language_Name(HKL, Full_Name := false)
 	{ ; функция получения наименования (сокращенного "en" или полного "English") раскладки по ее "HKL" 
 		static LocID, LCType, Size
 		;
@@ -47,7 +47,7 @@ class Layout
 		return localeSig
 	}
 	
-	Display_Name(ByRef HKL)
+	Display_Name(HKL)
 	{ ; функция получения названия ("Английская") раскладки по ее "HKL" 
 		static KLID, Display_Name, outBufSize
 		;
@@ -63,7 +63,7 @@ class Layout
 		return Display_Name
 	}
 	
-	Get_HKL(ByRef Window := "A")
+	Get_HKL(Window := "A")
 	{ ; функция получения названия "HKL" текущей раскладки
 		static Window_ID, Window_Class, Console_PID, HKL
 		;
@@ -84,7 +84,7 @@ class Layout
 		return HKL
 	}
 	
-	Get_KLID(ByRef HKL)
+	Get_KLID(HKL)
 	{ ; функция получения названия "KLID" раскладки по ее "HKL" 
 		static Prior_HKL, KLID
 		;
@@ -96,7 +96,7 @@ class Layout
 		return StrGet(&KLID)
 	}
 	
-	Next(ByRef Window := "A", ByRef BySend := false)
+	Next(Window := "A", BySend := false)
 	{ ; функция смены раскладки (вперед)
 		if BySend { ; с помощью команды Send
 			SendInput % This.Switch_Layout_Combo
@@ -111,7 +111,7 @@ class Layout
 		Sleep 1
 	}
 	
-	Change(ByRef HKL, ByRef Window := "A", ByRef BySend := false)
+	Change(HKL, Window := "A", BySend := false)
 	{ ; функция смены раскладки по "HKL"
 		static Window_ID
 		;
@@ -139,7 +139,7 @@ class Layout
 		Sleep 1
 	}
 
-	Get_Index(ByRef HKL)
+	Get_Index(HKL)
 	{ ; функция получения порядкового номера раскладки по "HKL"
 		static Index, Layout
 		;
@@ -150,7 +150,7 @@ class Layout
 		}
 	}
 	
-	Get_Index_By_Name(ByRef Full_Name)
+	Get_Index_By_Name(Full_Name)
 	{ ; функция получения порядкового номера раскладки по полному имени ("English")
 		static Index, Layout
 		;

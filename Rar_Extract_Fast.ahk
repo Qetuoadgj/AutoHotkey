@@ -1,7 +1,7 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn,All ; Enable warnings to assist with detecting common errors.
-SendMode,Input ; Recommended for new scripts due to its superior speed and reliability.
-; SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
+#Warn, All ; Enable warnings to assist with detecting common errors.
+SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
+; SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 Script.Force_Single_Instance()
 
@@ -13,41 +13,45 @@ If FileExist("Extracted\") {
 	FileRemoveDir, Extracted, 1
 }
 
-File_List := []
-Loop, Read, % "List_File.txt"
-{
-	Loop, Parse, A_LoopReadLine, `n, `r
+INI_File := A_WorkingDir "\" "List_File" ".ini"
+IniRead, list_section, %INI_File%, List
+
+If ( List_Section = "ERROR") {
+	MsgBox, 0, Test, % "There is no section: " "List" " in`n" INI_File
+} Else {
+	TXT_File := A_WorkingDir "\" "List_File" ".txt"
+	FileDelete, %TXT_File%
+	Loop, Parse, List_Section, `n, `r
 	{
-		Read_Line := Trim(A_LoopReadLine)
-		If RegExMatch( Read_Line, "^;" ) {
+		Line := Trim( A_LoopField )
+		Line := RegExReplace( Line, " `;.*", "" )
+		If ( Line == "" ) { ; пропуск пустых строк
 			Continue
 		}
-		File_List.Push( Read_Line )
+		File := StrReplace( Line, "/", "\" )
+		FileAppend, %File%`n, %TXT_File%, CP1251
 	}
-}
-
-Archive_List := []
-Loop, Files, % "*.pak", RF
-{
-	Archive_List.Push( A_LoopFileFullPath )
-}
-
-For File_Index, File in File_List {
+	
+	IniRead, archive_pattern, %INI_File%, Settings, archive_pattern, %A_Space%
+	Archive_List := []
+	Loop, Files, %archive_pattern%, RF
+	{
+		; MsgBox, % A_LoopFileFullPath
+		Archive_List.Push( A_LoopFileFullPath )
+	}
+	
+	IncludeList := TXT_File
 	For Archive_Index, Archive in Archive_List {
-		Parsed := File_Index/File_List.MaxIndex() + (Archive_Index/Archive_List.MaxIndex() - 1)/100
-		Pct := Round( Parsed * 100, 2 ) . "%"
-		Tip := "File:   " File " (" File_Index " of " File_List.MaxIndex() ")" . "`n" . "In:     " Archive " (" Archive_Index " of " Archive_List.MaxIndex() ")" . "`n" . "Total: " Pct
-		Extract_CMD = %WinRAR% x -INUL -o+ "%Archive%" "%File%" "%Output_Dir%"
+		Extract_CMD = %WinRAR% x -INUL -o+ "%Archive%" @"%IncludeList%" "%Output_Dir%"
 		RunWait, %Extract_CMD%
-		ToolTip( Tip )
 	}
-}
 
-MsgBox, F I N I S H E D
+	MsgBox, F I N I S H E D
 
-IfExist, %Output_Dir%
-{
-	Run, %Output_Dir%
+	IfExist, %Output_Dir%
+	{
+		Run, %Output_Dir%
+	}
 }
 
 ExitApp
@@ -73,6 +77,7 @@ class Script
 		static Detect_Hidden_Windows_Tmp
 		static File_Types, Index, File_Type
 		static Script_Name, Script_Full_Path
+		;
 		Detect_Hidden_Windows_Tmp := A_DetectHiddenWindows
 		#SingleInstance, Off
 		DetectHiddenWindows, On
@@ -87,7 +92,8 @@ class Script
 
 	Close_Other_Instances( Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
-		static Process_ID
+		static Current_ID, Process_List, Process_Count, Process_ID, Process_PID
+		;
 		Script_Full_Path := Script_Full_Path ? Script_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Current_ID, ID, % A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Process_List, List, % Script_Full_Path . " ahk_class AutoHotkey"
@@ -115,6 +121,8 @@ class Script
 	
 	Name()
 	{ ; функция получения имени текущего скрипта
+		static Name
+		;
 		SplitPath, A_ScriptFullPath,,,, Name
 		Return, Name
 	}

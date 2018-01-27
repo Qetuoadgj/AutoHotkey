@@ -138,7 +138,7 @@ COPY_PRESET_SHADERS:
 	return
 }
 
-EmptyDir(ByRef Dir) {
+EmptyDir(Dir) {
 	FileRemoveDir % Dir, 1
 	FileCreateDir % Dir
 	return ErrorLevel

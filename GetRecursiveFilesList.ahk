@@ -66,7 +66,7 @@ if (FileList) {
 
 Exit
 
-PasteToNotepad(ByRef Text)
+PasteToNotepad(Text)
 {
 	Run % "notepad.exe",,, Notepad_PID
 	WinWait ahk_pid %Notepad_PID%,, 3

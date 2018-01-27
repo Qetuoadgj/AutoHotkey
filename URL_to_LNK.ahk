@@ -37,12 +37,12 @@ Loop Parse, % TargetFile, `n
 
 Exit
 
-q(ByRef Str)
+q(Str)
 {
 	return """" . Str . """"
 }
 
-SelectIcon(ByRef IconPath := "", ByRef Index := 0)
+SelectIcon(IconPath := "", Index := 0)
 { ; функция вызова диалога выбора файла иконки и самой иконки из него
 	static Call
 	IconPath := IconPath ? IconPath : A_WinDir . "\system32\shell32.dll"
@@ -52,7 +52,7 @@ SelectIcon(ByRef IconPath := "", ByRef Index := 0)
 	}
 }
 
-Convert(ByRef File, ByRef DeleteConvertedFiles := 0)
+Convert(File, DeleteConvertedFiles := 0)
 {
 	static FileName, FileDir, FileExtension, FileNameNoExt, FileDrive
 	static OutTarget, OutDir, OutArgs, OutDesc, OutIcon, OutIconNum, OutRunState
@@ -95,7 +95,7 @@ Convert(ByRef File, ByRef DeleteConvertedFiles := 0)
 	}
 }
 
-IniWrite(ByRef Key, ByRef File, ByRef Section, ByRef Value)
+IniWrite(Key, File, Section, Value)
 { ; замена стандартного IniWrite (записывает только измененные параметры)
 	static Test_Value
 	;

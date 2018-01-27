@@ -484,7 +484,7 @@ GetValue(SourceFile,SearchPattern)
 ; ===================================================================================
 ;                 ‘”Õ ÷»ﬂ –¿«ƒ≈À≈Õ»ﬂ ‘¿…À¿-»—“Œ◊Õ» ¿ Õ¿ ‘¿…À€-—œ»— »
 ; ===================================================================================
-SplitTextFile( ByRef SourceFile, ByRef OutputFile, ByRef StartString, ByRef EndString := "", ByRef Encoding := "", ByRef SkipComments := true, ByRef TrimLines := true )
+SplitTextFile( SourceFile, OutputFile, StartString, EndString := "", Encoding := "", SkipComments := true, TrimLines := true )
 {
 	If (Encoding == "") { ; if no Encoding defined
 		Encoding := A_FileEncoding

@@ -221,7 +221,7 @@ Exit
 
 ; #Include %A_ScriptDir%\..\Includes\FUNC_ExpandEnvironmentVariables.ahk ; содержит функцию обработки переменных среды
 ; /* INCLUDED IN "FUNC_ExpandEnvironmentVariables.ahk"
-ExpandEnvironmentStrings(ByRef String)
+ExpandEnvironmentStrings(String)
 { ; функция обработки переменных среды Windows
 	static nSize, Dest, size
 	static NULL := ""
@@ -247,13 +247,13 @@ ExpandEnvironmentStringsAHK(String)
 	return String
 }
 
-ExpandEnvironmentVariables(ByRef String)
+ExpandEnvironmentVariables(String)
 { ; функция совместной обработки переменных AHK и Windows
 	return ExpandEnvironmentStringsAHK(ExpandEnvironmentStrings(String))
 }
 ; */
 
-TextToFile(ByRef Text, ByRef File, ByRef Encoding := "")
+TextToFile(Text, File, Encoding := "")
 { ; функция записи текста в файл
 	If FileExist(File) {
 		FileDelete, % File
@@ -262,14 +262,14 @@ TextToFile(ByRef Text, ByRef File, ByRef Encoding := "")
 	return ErrorLevel ? "" : File
 }
 
-SplitINIFile(ByRef File, ByRef Section)
+SplitINIFile(File, Section)
 { ; функция чтения секций из файла с параметрами архивации, возвращает файл-список
 	static Ret
 	IniRead Ret, % File, % Section
 	return Ret
 }
 
-ReadINISection(ByRef File, ByRef Section)
+ReadINISection(File, Section)
 { ; функция чтения секций из файла с параметрами архивации, возвращает содержимое секции
 	static Start, End, Ret
 	Start := 0, Ret := ""
@@ -513,7 +513,7 @@ Clean_UP:
 	return
 }
 
-SafeCopy(ByRef FileToCopyPath, ByRef TargetFilePath, ByRef TmpFilePath)
+SafeCopy(FileToCopyPath, TargetFilePath, TmpFilePath)
 {
 	static MadeSafeCopy, RenamedOldFile, CopiedNewFile
 	MadeSafeCopy := 0, RenamedOldFile = 0, CopiedNewFile = 0
@@ -689,12 +689,12 @@ Get_Recursive_Files_List:
 	return
 }
 
-q(ByRef Str)
+q(Str)
 {
 	return """" . Str . """"
 }
 
-PasteToNotepad(ByRef MsgText)
+PasteToNotepad(MsgText)
 {
 	Run % "notepad.exe",,, Notepad_PID
 	WinWait ahk_pid %Notepad_PID%,, 3

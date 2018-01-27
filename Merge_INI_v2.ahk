@@ -79,8 +79,8 @@ Create_GUI:
 	Gui, Add, Button, x380 y65 w70 h20 gBrowseSave v3, % "Browse"
 	;
 	Gui, Add, GroupBox, x460 y0 w80 h90, % "Encoding"
-	Gui, Add, DropDownList, x465 y15 w70 h90 vInputEncoding gWrite_Config_File
-	Gui, Add, DropDownList, x465 y64 w70 h90 vOutputEncoding	gWrite_Config_File
+	Gui, Add, DropDownList, x465 y15 w70 h90 vInputEncoding gWrite_Config_File Disabled
+	Gui, Add, DropDownList, x465 y64 w70 h90 vOutputEncoding gWrite_Config_File Disabled
 	;
 	Gui, Add, GroupBox, x5 y90 w370 h50, % "Output Settings"
 	Gui, Add, Text, x10 y115 w40 h20, % "Method"

@@ -376,11 +376,11 @@ INI_MERGE(Ini_File_1, Ini_File_2, Ini_File_3, Method_ID)
 		Ini_File_3 := INI_READ_TO_FILE(Ini_File_2, Ini_File_3)
 	}
 	if (Method_ID = 3) {
-		G_KEYS_TO_PROCESS := Ini_File_1_Keys_Count, G_KEYS_PROCESSED := 0
+		G_KEYS_TO_PROCESS := Ini_File_2_Keys_Count, G_KEYS_PROCESSED := 0
 		Ini_File_3 := INI_READ_DIFFS_TO_FILE(Ini_File_1, Ini_File_2, Ini_File_3)
 	}
 	if (Method_ID = 4) {
-		G_KEYS_TO_PROCESS := Ini_File_2_Keys_Count, G_KEYS_PROCESSED := 0
+		G_KEYS_TO_PROCESS := Ini_File_1_Keys_Count, G_KEYS_PROCESSED := 0
 		Ini_File_3 := INI_READ_DIFFS_TO_FILE(Ini_File_2, Ini_File_1, Ini_File_3)
 	}
 	;

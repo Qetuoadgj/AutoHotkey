@@ -150,12 +150,12 @@ RUN_APP:
 	return
 }
 
-Normalize(ByRef VarName, ByRef Value := 0)
+Normalize(VarName, Value := 0)
 {
 	%VarName% := %VarName% ? %VarName% : Value
 }
 
-GetUrlStatus(ByRef URL, ByRef Timeout = -1)
+GetUrlStatus(URL, Timeout = -1)
 { ; проверка статуса URL
 	ComObjError(0)
 	static WinHttpReq := ComObjCreate("WinHttp.WinHttpRequest.5.1")
@@ -167,7 +167,7 @@ GetUrlStatus(ByRef URL, ByRef Timeout = -1)
 	return WinHttpReq.Status()
 }
 
-DownloadFromList(ByRef DownloadFrom, ByRef List, ByRef DestDir := False)
+DownloadFromList(DownloadFrom, List, DestDir := False)
 {
 	static Line, Location, Download
 	DestDir := DestDir ? DestDir : A_ScriptDir

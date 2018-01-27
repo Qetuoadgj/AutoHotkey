@@ -497,7 +497,7 @@ return
 }
 */
 
-Get_Dictionaries(ByRef Config_File, ByRef Section, ByRef Prefix := "", ByRef Skip_Unused := False)
+Get_Dictionaries(Config_File, Section, Prefix := "", Skip_Unused := False)
 { ; функция получения словарей из файла настроек
 	static Dictionaries_List
 	static Match
@@ -540,7 +540,7 @@ Edit_Text.Dictionaries_Order.Delete(Table.Get_Key_Index(Edit_Text.Dictionaries_O
 }
 */
 
-Get_Binds(ByRef Config_File, ByRef Section, ByRef Prefix := "")
+Get_Binds(Config_File, Section, Prefix := "")
 { ; функция получения назначений клавиш из файла настроек
 	static Binds_List
 	static Match
@@ -960,7 +960,7 @@ Menu_Exit_App:
 	return
 }
 
-Generate_Dictionaries(ByRef Prefix := "")
+Generate_Dictionaries(Prefix := "")
 { ; функция создания словарей для текущих раскладок
 	static Notepad_PID, Notepad_ID, Win_Title, Keys
 	global system_switch_layouts_by_send

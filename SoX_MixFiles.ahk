@@ -263,7 +263,7 @@ If FileExist( Output_Dir "\" )
 
 ExitApp
 
-ToolTip( ByRef text, ByRef time := 800 )
+ToolTip( text, time := 800 )
 { ; функция вывода высплывающей подсказки с последующим ( убирается по таймеру )
 	Tooltip, %text%
 	SetTimer, Clear_ToolTips, %time%
@@ -296,7 +296,7 @@ class Script
 		DetectHiddenWindows, % Detect_Hidden_Windows_Tmp
 	}
 
-	Close_Other_Instances( ByRef Script_Full_Path )
+	Close_Other_Instances( Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
 		static Process_ID
 		Script_Full_Path := Script_Full_Path ? Script_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
@@ -314,7 +314,7 @@ class Script
 		}
 	}
 
-	Run_As_Admin( ByRef Params := "" )
+	Run_As_Admin( Params := "" )
 	{ ; функция запуска скрипта с правами адиминистратора
 		If ( not A_IsAdmin ) {
 			Try {

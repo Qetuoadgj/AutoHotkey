@@ -17,10 +17,11 @@ Script_Win_Title := A_ScriptName
 ConfigFile := A_ScriptDir . "\" . A_ScriptNameNoExt . ".ini"
 
 global G_KEYS_TO_PROCESS := 0, G_KEYS_PROCESSED := 0, G_PROGRESS_BAR := "Progress_Bar_1", G_PROGRESS_TEXT := "Progress_Text_1"
+Gui_Hwnd := 0
 
-gosub Read_Config_File
-gosub Create_GUI
-gosub Set_GUI_Settings
+gosub, Read_Config_File
+gosub, Create_GUI
+gosub, Set_GUI_Settings
 
 Exit
 
@@ -144,19 +145,19 @@ Set_GUI_Settings:
 
 BrowseOpen:
 {
-	FileSelectFile SelectedFilePath, 3,, % "Select file", % "*.ini"
+	FileSelectFile, SelectedFilePath, 3,, % "Select file", % "*.ini"
 	if (SelectedFilePath) {
 		GuiControl,, % "Ini_File_" . A_GuiControl, %SelectedFilePath%
 		FileRead, SelectedFileContents, %SelectedFilePath%
 		GuiControl,, % "Ini_File_" . A_GuiControl "_Text", %SelectedFileContents%
 	}
-	gosub Write_Config_File
+	gosub, Write_Config_File
 	return
 }
 
 BrowseSave:
 {
-	FileSelectFile SelectedFilePath, S 26,, % "Select file", % "*.ini"
+	FileSelectFile, SelectedFilePath, S 26,, % "Select file", % "*.ini"
 	if (SelectedFilePath) {
 		SplitPath, SelectedFilePath, SelectedFileFileName, SelectedFileDir, SelectedFileExtension, SelectedFileNameNoExt, SelectedFileDrive
 		if (not SelectedFileExtension = "ini") {
@@ -164,27 +165,27 @@ BrowseSave:
 		}
 		GuiControl,, % "Ini_File_" . A_GuiControl, % SelectedFilePath
 	}
-	gosub Write_Config_File
+	gosub, Write_Config_File
 	return
 }
 
 GuiClose:
 {
-	gosub Write_Config_File
-	gosub On_Exit
+	gosub, Write_Config_File
+	gosub, On_Exit
 	; ExitApp
 }
 
 ButtonExit:
 {
-	gosub Write_Config_File
-	gosub On_Exit
+	gosub, Write_Config_File
+	gosub, On_Exit
 	; ExitApp
 }
 
 GuiSize:
 {
-	GuiState := ErrorLevel == 0 ? "Resized / Restored" : ErrorLevel == 1 ? "Minimized" : ErrorLevel == 2 ? "Maximized" : "N/A"	
+	GuiState := ErrorLevel == 0 ? "Resized / Restored" : ErrorLevel == 1 ? "Minimized" : ErrorLevel == 2 ? "Maximized" : "N/A"
 	if (Gui_Hwnd) {
 		Rect := WindowGetRect("ahk_id " . Gui_Hwnd)
 		if (GuiState = "Maximized") {
@@ -209,7 +210,7 @@ WindowGetRect(WindowTitle)
         VarSetCapacity(Rect, 16, 0)
         DllCall("GetClientRect", "Ptr",Hwnd, "Ptr",&Rect)
         return {width: NumGet(Rect, 8, "Int"), height: NumGet(Rect, 12, "Int")}
-    }
+	}
 }
 
 INI_PREPARE(Ini_File_Path, Tmp_Ini_File_Name)
@@ -278,7 +279,7 @@ GUI_UPDATE_PROGRESS_TEXT(GUI_Progress_Text, Max_Value, Current_Value)
 INI_READ_TO_FILE(Input_Ini_File_Path, Output_Ini_File_Path)
 {
 	global G_KEYS_TO_PROCESS, G_KEYS_PROCESSED ; GUI_UPDATE_PROGRESS_BAR
-	; 
+	;
 	IniRead, Ini_File_Sections, %Input_Ini_File_Path%
 	Loop, Parse, Ini_File_Sections, `n, `r
 	{
@@ -286,12 +287,12 @@ INI_READ_TO_FILE(Input_Ini_File_Path, Output_Ini_File_Path)
 			IniRead, Section_Contents, %Input_Ini_File_Path%, %Section_Name%
 			if (Trim(Section_Contents) = "") {
 				IniWrite, %Section_Contents%, %Output_Ini_File_Path%, %Section_Name%
-			} 
+			}
 			else {
 				Loop, Parse, Section_Contents, `n, `r
 				{
 					if (Section_Line := A_LoopField) {
-						if RegExMatch(Section_Line, "^(.*?)=(.*)$", Key_Data_) {				
+						if RegExMatch(Section_Line, "^(.*?)=(.*)$", Key_Data_) {
 							if (Key_Name := Trim(Key_Data_1)) {
 								Key_Value := Trim(Key_Data_2)
 								IniWrite, %Key_Value%, %Output_Ini_File_Path%, %Section_Name%, %Key_Name%
@@ -314,7 +315,7 @@ INI_READ_TO_FILE(Input_Ini_File_Path, Output_Ini_File_Path)
 INI_READ_DIFFS_TO_FILE(Ini_File_1_Path, Ini_File_2_Path, Output_Ini_File)
 {
 	global G_KEYS_TO_PROCESS, G_KEYS_PROCESSED ; GUI_UPDATE_PROGRESS_BAR
-	; 
+	;
 	IniRead, Ini_File_2_Sections, %Ini_File_2_Path%
 	Loop, Parse, Ini_File_2_Sections, `n, `r
 	{

@@ -27,79 +27,79 @@
 		; Выделение текста / получение уже выделенного, назначение переменной "Selected_Text"
 		; -----------------------------------------------------------------------------------
 		Clipboard := "" ; Null
-		SendInput % "{Ctrl Down}"
+		SendInput, % "{Ctrl Down}"
 		; Sleep 1
-		SendInput % "{vk43}"
-		Sleep 1
-		SendInput % "{Ctrl Up}"
-		ClipWait 0.05
+		SendInput, % "{vk43}"
+		Sleep, 1
+		SendInput, % "{Ctrl Up}"
+		ClipWait, 0.05
 		Selected_Text := Clipboard
 		if (StrLen(Selected_Text) = 0) {
-			Loop 100 {
+			Loop, 100 {
 				Clipboard := "" ; Null
-				SendInput % "{Ctrl Down}{Shift Down}"
+				SendInput, % "{Ctrl Down}{Shift Down}"
 				; Sleep 1
-				SendInput % "{Left}"
+				SendInput, % "{Left}"
 				; Sleep 1
-				SendInput % "{Shift Up}"
-				Sleep 1
-				SendInput % "{vk43}"
-				Sleep 1
-				SendInput % "{Ctrl Up}"
-				ClipWait 0.5
+				SendInput, % "{Shift Up}"
+				Sleep, 1
+				SendInput, % "{vk43}"
+				Sleep, 1
+				SendInput, % "{Ctrl Up}"
+				ClipWait, 0.5
 				if (StrLen(Clipboard) = 0) { ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					return
 				}
 				if (StrLen(Clipboard) = StrLen(Selected_Text)) { ; достигнуто начало строки
-					Break
+					break
 				}
 				if RegExMatch(Clipboard, "^\s+$") { ; строка состоит из пробелов
-					SendInput % "{Right}"
-					Break
+					SendInput, % "{Right}"
+					break
 				}
 				if RegExMatch(Clipboard, "\s+$") { ; курсор стоял перед пробелом, его нужно "перескочить"
 					Clipboard := "" ; Null
-					SendInput % "{Left}"
+					SendInput, % "{Left}"
 					; Sleep 1
-					SendInput % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
-					SendInput % "{Right}"
+					SendInput, % "{Right}"
 					; Sleep 1
-					SendInput % "{Shift Up}"
-					Sleep 1
-					SendInput % "{vk43}"
-					Sleep 1
-					SendInput % "{Ctrl Up}"
-					ClipWait 0.5
-					Break
+					SendInput, % "{Shift Up}"
+					Sleep, 1
+					SendInput, % "{vk43}"
+					Sleep, 1
+					SendInput, % "{Ctrl Up}"
+					ClipWait, 0.5
+					break
 				}
 				if RegExMatch(Clipboard, "^[^\s]+\s+[^\s]+") { ; в выделение попал пробел или перенос на новую строку
 					Clipboard := "" ; Null
-					SendInput % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
-					SendInput % "{Right 2}{Left}"
+					SendInput, % "{Right 2}{Left}"
 					; Sleep 1
-					SendInput % "{Shift Up}"
-					Sleep 1
-					SendInput % "{vk43}"
-					Sleep 1
-					SendInput % "{Ctrl Up}"
-					ClipWait 0.5
-					Break
+					SendInput, % "{Shift Up}"
+					Sleep, 1
+					SendInput, % "{vk43}"
+					Sleep, 1
+					SendInput, % "{Ctrl Up}"
+					ClipWait, 0.5
+					break
 				}
 				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел, который находится в самом начале области редактирования
 					Clipboard := "" ; Null
-					SendInput % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
-					SendInput % "{Right}{Left}"
+					SendInput, % "{Right}{Left}"
 					; Sleep 1
-					SendInput % "{Shift Up}"
-					Sleep 1
-					SendInput % "{vk43}"
-					Sleep 1
-					SendInput % "{Ctrl Up}"
-					ClipWait 0.5
-					Break
+					SendInput, % "{Shift Up}"
+					Sleep, 1
+					SendInput, % "{vk43}"
+					Sleep, 1
+					SendInput, % "{Ctrl Up}"
+					ClipWait, 0.5
+					break
 				}
 				Selected_Text := Clipboard ; необходимо для сравнения текущего результата с предыдущим
 			}
@@ -121,13 +121,13 @@
 		}
 		This.Next_Case_ID := Force_Case_ID ? Force_Case_ID : This.Next_Case_ID
 		if (This.Next_Case_ID = "U") {
-			StringUpper Converted_Text, Selected_Text
+			StringUpper, Converted_Text, Selected_Text
 			if (not Force_Case_ID and Converted_Text == Selected_Text) {
 				This.Next_Case_ID := "T"
 			}
 		}
 		if (This.Next_Case_ID = "T") {
-			StringLower Converted_Text, Selected_Text, T
+			StringLower, Converted_Text, Selected_Text, T
 			Converted_Text := RegExReplace(Converted_Text, This.Title_Case_Symbols . This.Title_Case_Match, "$1$U2")
 			Converted_Text := RegExReplace(Converted_Text, "i)" . This.Title_Case_Symbols . This.Upper_Case_Words, "$1$U2")
 			if (not Force_Case_ID and Converted_Text == Selected_Text) {
@@ -135,7 +135,7 @@
 			}
 		}
 		if (This.Next_Case_ID = "L") {
-			StringLower Converted_Text, Selected_Text
+			StringLower, Converted_Text, Selected_Text
 			if (not Force_Case_ID and Converted_Text == Selected_Text) {
 				This.Next_Case_ID := "U"
 			}
@@ -168,11 +168,11 @@
 		}
 		for Language, Dictionary in This.Dictionaries {
 			; MsgBox, % Language " = " Dictionary
-			Loop Parse, Selected_Text
+			Loop, Parse, Selected_Text
 			{
 				Same_Dictionary := InStr(Dictionary, A_LoopField, 1) or RegExMatch(A_LoopField, "\s")
 				if (not Same_Dictionary) {
-					Break
+					break
 				}
 			} ; until not Same_Dictionary
 			if (Same_Dictionary) {
@@ -192,7 +192,7 @@
 			return
 		}
 		Converted_Text := "" ; Null
-		Loop Parse, Selected_Text
+		Loop, Parse, Selected_Text
 		{
 			if (Current_Dictionary_Match := InStr(This.Dictionaries[Current_Dictionary], A_LoopField, 1)) {
 				Converted_Text .= SubStr(This.Dictionaries[Next_Dictionary], Current_Dictionary_Match, 1)
@@ -215,12 +215,12 @@
 		}
 		Clipboard := "" ; Null
 		Clipboard := Converted_Text
-		ClipWait 1.0
-		SendInput % "{Ctrl Down}"
-		Sleep 1
-		SendInput % "{vk56}" 
-		Sleep 1
-		SendInput % "{Ctrl Up}"
+		ClipWait, 1.0
+		SendInput, % "{Ctrl Down}"
+		Sleep, 1
+		SendInput, % "{vk56}" 
+		Sleep, 1
+		SendInput, % "{Ctrl Up}"
 		; -----------------------------------------------------------------------------------
 		return Clipboard
 	}

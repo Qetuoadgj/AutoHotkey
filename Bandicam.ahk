@@ -4,101 +4,74 @@ SendMode,Input ; Recommended for new scripts due to its superior speed and relia
 ; SetWorkingDir,%A_ScriptDir% ; Ensures a consistent starting directory.
 
 Script.Force_Single_Instance()
+Script.Run_As_Admin()
+/*
+if not ( Win_Width or Win_Height ) {
+	MsgBox, Не найдено окно:`n%Win_Title%
+	ExitApp
+}
+*/
 
-SetWorkingDir, % "D:\Downloads\Sounds\sox-14.4.2\converted"
+Win_Title := "ahk_class TARGETRECT ahk_exe bdcam.exe"
 
-SoX := "D:\Downloads\Sounds\sox-14.4.2\sox.exe"
-Output_Dir := A_WorkingDir "\SoX_Output"
-
-Command = ; null
-
-inFilePath := "flyby_004.wav"
-inFileExt := RegExReplace( inFilePath, ".*\.(.*)", "$1" )
-inFileName := RegExReplace(  RegExReplace( inFilePath, ".*\\(.*)", "$1" ), "(.*)\..*", "$1" )
-
-rpm = 400
-shots = 5
-step := 60/rpm
-pitch := 200
-
-pitch_min := -(pitch/2)
-pitch_max := +(pitch/2)
-
-outFilesArray := []
-outFilesList := ""
-
-cleanUpArray := []
-
-Count := 0
-
-Loop, % shots - 1
+#IfWinExist, ahk_class TARGETRECT ahk_exe bdcam.exe
 {
-	Count := A_Index
-	Random, pitchValue, % pitch_min, % pitch_max
-	outFileName := Format( "{1:s}.{2:s}", inFileName " - " count, inFileExt )
-	outFilePath := outFileName
-	Command = "%SoX%" "%inFilePath%" "%outFilePath%"
-	Command .= " pitch " pitchValue
-	RunWait, %Command%
-	if FileExist( outFilePath )
+	^f::
 	{
-		outFilesArray.Push( outFilePath )
-		; outFilesList .= """" outFilePath """"
-		; outFilesList .= " "
-		cleanUpArray.Push( outFilePath )
+		ControlSend,,^f,%Win_Title%
+		ToolTip(1111)
+		return
 	}
 }
-
-for outFileIndex, outFilePath1 in outFilesArray
-{
-	Count := outFileIndex
-	Random, stepError, 0.95, 1.05
-	outFileName := Format( "{1:s}.{2:s}", inFileName " - cut_" count, inFileExt )
-	outFilePath := outFileName
-	Command = "%SoX%" "%outFilePath1%" "%outFilePath%"
-	Command .= " trim 0 " (step * stepError)
-	RunWait, %Command%
-	if FileExist( outFilePath )
-	{
-		; outFilesArray.Push( outFilePath )
-		outFilesList .= """" outFilePath """"
-		outFilesList .= " "
-		cleanUpArray.Push( outFilePath )
-	}
-}
-
-outFileName := Format( "{1:s}.{2:s}", inFileName " - cut_" count+1, inFileExt )
-outFilePath := outFileName
-FileCopy, %inFilePath%, %outFilePath%, 1
-if FileExist( outFilePath )
-{
-	outFilesArray.Push( outFilePath )
-	outFilesList .= """" outFilePath """"
-	outFilesList .= " "
-	cleanUpArray.Push( outFilePath )
-}
-
-outFilesList := Trim( outFilesList )
-
-outFileName := Format( "{1:s}.{2:s}", inFileName " - Burst " shots, inFileExt )
-outFilePath := outFileName
-
-Command = "%SoX%" %outFilesList% "%outFilePath%"
-if ( StrLen( Command ) > 0 )
-{
-	MsgBox, %Command%
-	RunWait, %Command%
-}
-
-Msg :=  ""
-for cleanUpFileIndex, cleanUpFilePath in cleanUpArray
-{
-	FileDelete, %cleanUpFilePath%
-	Msg .= cleanUpFilePath "`n"
-}
-MsgBox, %Msg%
 
 ExitApp
+
+GetStartDimensions:
+{
+	Win_Width = 683
+	Win_Height = 475
+	if not ( Win_Width or Win_Height ) {
+		WinGetPos,,, Win_Width, Win_Height, %Win_Title%
+	}
+	return
+}
+
+Get_Min( Win_ID := False )
+{
+	Win_ID := Win_ID ? Win_ID : WinExist("A")
+	SendMessage, 0x0401, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETRANGEMIN
+	return, ErrorLevel
+}
+
+Get_Max( Win_ID := False )
+{
+	Win_ID := Win_ID ? Win_ID : WinExist("A")
+	SendMessage, 0x0402, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETRANGEMAX
+	return, ErrorLevel
+}
+Get_Pos( Win_ID := False )
+{
+	Win_ID := Win_ID ? Win_ID : WinExist("A")
+	static Min, Max, Pos
+	SendMessage, 0x0401, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETRANGEMIN
+	Min := ErrorLevel
+	SendMessage, 0x0402, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETRANGEMAX
+	Max := ErrorLevel
+	SendMessage, 0x0400, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETPOS
+	Pos := ErrorLevel
+	Pos := Pos > Max ? Pos - Min - Max : Pos
+	return, Pos
+}
+
+To_Percent( Cur, Max, Rnd := 0)
+{
+	return, Round( Cur / Max * 100, Rnd )
+}
+
+To_Pos( Pct, Max, Rnd := 0 )
+{
+	return, Round( Max * ( Pct / 100 ), Rnd )
+}
 
 ToolTip( text, time := 800 )
 { ; функция вывода высплывающей подсказки с последующим ( убирается по таймеру )
@@ -167,4 +140,3 @@ class Script
 		return, Name
 	}
 }
-

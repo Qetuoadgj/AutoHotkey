@@ -24,11 +24,11 @@ Loop, Files, % "D:\Downloads\Sounds\Bullet_Cracks\308\Stereo\Bullet_Crack_*.wav"
 	File_List2.Push( A_LoopFileLongPath )
 }
 
-If ( File_List1.MaxIndex() < 1 or File_List2.MaxIndex() < 1 ) {
+if ( File_List1.MaxIndex() < 1 or File_List2.MaxIndex() < 1 ) {
 	ExitApp
 }
 /*
-If FileExist( Output_Dir "\" ) {
+if FileExist( Output_Dir "\" ) {
 	FileRemoveDir, %Output_Dir%, 1
 }
 */
@@ -62,44 +62,44 @@ Channels3 := 1
 
 Header = 
 ( LTrim RTrim Join`r`n
-	%Separator%
-	%Comment% %Time_Stamp%
-	%Separator%
-	
-	%Comment% SoX params:
-	%Comment% `tVolume: %Volume%
-	%Comment% `tFactor1: %Str_Factor1%
-	%Comment% `tFactor2: %Str_Factor2%
-	%Comment% `tChannels1: %Channels1%
-	%Comment% `tChannels2: %Channels2%
-	%Comment% `tChannels3: %Channels3%
-	
-	cls
-	@echo off		
-	cd /d "`%~dp0"
+%Separator%
+%Comment% %Time_Stamp%
+%Separator%
 
-	set "SOX=%SoX%"
-	
-	set OUTPUT_FORMAT=%Output_Format%
-	set "OUTPUT_DIR=%Output_Dir%"
-	
-	set INPUT_1_CHANNELS=%Channels1%
-	set INPUT_2_CHANNELS=%Channels2%
-	set OUTPUT_CHANNELS=%Channels3%
-	
-	rd "`%OUTPUT_DIR`%" /q /s
-	md "`%OUTPUT_DIR`%"
+%Comment% SoX params:
+%Comment% `tVolume: %Volume%
+%Comment% `tFactor1: %Str_Factor1%
+%Comment% `tFactor2: %Str_Factor2%
+%Comment% `tChannels1: %Channels1%
+%Comment% `tChannels2: %Channels2%
+%Comment% `tChannels3: %Channels3%
+
+cls
+@echo off		
+cd /d "`%~dp0"
+
+Set "SOX=%SoX%"
+
+Set OUTPUT_FORMAT=%Output_Format%
+Set "OUTPUT_DIR=%Output_Dir%"
+
+Set INPUT_1_CHANNELS=%Channels1%
+Set INPUT_2_CHANNELS=%Channels2%
+Set OUTPUT_CHANNELS=%Channels3%
+
+rd "`%OUTPUT_DIR`%" /q /s
+md "`%OUTPUT_DIR`%"
 )
 
 Output_Data .= Header "`r`n"
 Output_Data .= "`r`n"
 
-If FileExist( Output_Dir "\" )
+if FileExist( Output_Dir "\" )
 {
 	FileRemoveDir, %Output_Dir%, 1
 }
 
-For File2_Index, File2_Path in File_List2 {
+for File2_Index, File2_Path in File_List2 {
 	Random, File1_Index, 1, % File_List1.MaxIndex()
 	File1_Path := File_List1[File1_Index]
 	Random, volume1, % 1.00 * Factor1[1], % 1.00 * Factor1[2]
@@ -107,7 +107,7 @@ For File2_Index, File2_Path in File_List2 {
 	volume1 := volume1 * Volume
 	volume2 := volume2 * Volume
 	; If (File1_Path != File2_Path) {
-		If not FileExist( Output_Dir "\" )
+		if not FileExist( Output_Dir "\" )
 		{
 			FileCreateDir, %Output_Dir%
 		}
@@ -141,14 +141,14 @@ Output_Data .= "`r`n" Separator "`r`n"
 Copy_Command = copy "`%0" "`%OUTPUT_DIR`%\`%~nx0"
 Output_Data .=  "`r`n" Copy_Command "`r`n"
 
-If ( StrLen( Command ) > 0 )
+if ( StrLen( Command ) > 0 )
 {
-	If FileExist( Mix_Table )
+	if FileExist( Mix_Table )
 	{
 		FileDelete, %Mix_Table%
 	}
 	FileAppend, %Output_Data%, %Mix_Table%
-	If FileExist( Mix_Table )
+	if FileExist( Mix_Table )
 	{
 		Run, notepad.exe %Mix_Table%
 	}
@@ -158,7 +158,7 @@ ExitApp
 
 ToolTip( text, time := 800 )
 { ; функция вывода высплывающей подсказки с последующим ( убирается по таймеру )
-	Tooltip, %text%
+	ToolTip, %text%
 	SetTimer, Clear_ToolTips, %time%
 }
 
@@ -166,7 +166,7 @@ Clear_ToolTips:
 { ; рутина очистки подсказок и отключения связанных с ней таймеров
 	ToolTip
 	SetTimer, %A_ThisLabel%, Off
-	Return
+	return
 }
 
 class Script
@@ -181,14 +181,14 @@ class Script
 		#SingleInstance, Off
 		DetectHiddenWindows, On
 		File_Types := [ ".exe", ".ahk" ]
-		For Index, File_Type in File_Types {
+		for Index, File_Type in File_Types {
 			Script_Name := RegExReplace( A_ScriptName, "^(.*)\.(.*)$", "$1" ) . File_Type
 			Script_Full_Path := A_ScriptDir . "\" . Script_Name
 			This.Close_Other_Instances( Script_Full_Path . "ahk_class AutoHotkey" )
 		}
 		DetectHiddenWindows, % Detect_Hidden_Windows_Tmp
 	}
-
+	
 	Close_Other_Instances( Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
 		static Process_ID
@@ -199,18 +199,18 @@ class Script
 		Loop, %Process_List%
 		{
 			Process_ID := Process_List%Process_Count%
-			If ( not Process_ID = Current_ID ) {
+			if ( not Process_ID = Current_ID ) {
 				WinGet, Process_PID, PID, % Script_Full_Path . " ahk_id " . Process_ID
 				Process, Close, %Process_PID%
 			}
 			Process_Count += 1
 		}
 	}
-
+	
 	Run_As_Admin( Params := "" )
 	{ ; функция запуска скрипта с правами адиминистратора
-		If ( not A_IsAdmin ) {
-			Try {
+		if ( not A_IsAdmin ) {
+			try {
 				Run, *RunAs "%A_ScriptFullPath%" %Params%
 			}
 			ExitApp
@@ -220,7 +220,7 @@ class Script
 	Name()
 	{ ; функция получения имени текущего скрипта
 		SplitPath, A_ScriptFullPath,,,, Name
-		Return, Name
+		return, Name
 	}
 }
 

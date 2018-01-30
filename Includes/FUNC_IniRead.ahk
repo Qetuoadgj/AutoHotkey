@@ -8,7 +8,7 @@
 		static FileContents := "", Line_ := "", Line_1 := "", Line_2 := ""
 		;
 		FileRead, FileContents, %Filename%
-		Loop Parse, FileContents, `n, `r
+		Loop, Parse, FileContents, `n, `r
 		{
 			StringSplit, Line_, A_LoopField, =
 			if (Line_1) {

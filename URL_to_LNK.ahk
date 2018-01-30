@@ -1,15 +1,15 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn All ; Enable warnings to assist with detecting common errors.
-SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
+#Warn, All ; Enable warnings to assist with detecting common errors.
+SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance Force
 
 ; Your code here...
-SplitPath A_ScriptFullPath,,,, A_SciptName
+SplitPath, A_ScriptFullPath,,,, A_SciptName
 ConfigFile := A_ScriptDir . "\" A_SciptName . ".ini"
 
-IniRead DeleteConvertedFiles, % ConfigFile, % "Settings", % "DeleteConvertedFiles", 0
+IniRead, DeleteConvertedFiles, % ConfigFile, % "Settings", % "DeleteConvertedFiles", 0
 IniWrite("DeleteConvertedFiles", ConfigFile, "Settings", DeleteConvertedFiles)
 
 FileSelectFile, TargetFile, M32,,, *.url
@@ -17,7 +17,7 @@ if (not TargetFile) { ; файл не выбран
 	ExitApp
 }
 
-Loop Parse, % TargetFile, `n
+Loop, Parse, % TargetFile, `n
 {
 	if (not A_LoopField) {
 		break
@@ -27,7 +27,7 @@ Loop Parse, % TargetFile, `n
 		FileDir := A_LoopField
 	}
 	else {
-		Loop Files, % FileDir . "\" . A_LoopField, F
+		Loop, Files, % FileDir . "\" . A_LoopField, F
 		{ ; получаем полный путь к файлу
 			TargetFile := A_LoopFileLongPath
 			Convert(TargetFile, DeleteConvertedFiles)
@@ -65,10 +65,10 @@ Convert(File, DeleteConvertedFiles := 0)
 		return
 	}
 	else {
-		IniRead URL, % File, InternetShortcut, URL, 0
+		IniRead, URL, % File, InternetShortcut, URL, 0
 		if (URL) {
 			CoordMode, ToolTip
-			ToolTip % FileNameNoExt, 50, 45
+			ToolTip, % FileNameNoExt, 50, 45
 			SelectedIcon := StrSplit(SelectIcon(), ",", "`s")
 			; if (SelectedIcon[1] && SelectedIcon[2]) {
 				;
@@ -86,7 +86,7 @@ Convert(File, DeleteConvertedFiles := 0)
 				if (not ErrorLevel) {
 					; MsgBox, % FileDir . "\" . FileNameNoExt . ".lnk" . "`n" "OK!"
 					if (DeleteConvertedFiles) {
-						FileDelete % File
+						FileDelete, % File
 					}
 					MsgBox, 262144, , OK!, 1
 				}
@@ -103,8 +103,8 @@ IniWrite(Key, File, Section, Value)
 		return
 	}
 	Value := Value = "ERROR" ? "" : Value
-	IniRead Test_Value, %File%, %Section%, %Key%
+	IniRead, Test_Value, %File%, %Section%, %Key%
 	if (not Test_Value = Value) {
-		IniWrite %Value%, %File%, %Section%, %Key%
+		IniWrite, %Value%, %File%, %Section%, %Key%
 	}
 }

@@ -6,8 +6,8 @@
 		return
 	}
 	Value := Value = "ERROR" ? "" : Value
-	IniRead Test_Value, %File%, %Section%, %Key%
+	IniRead, Test_Value, %File%, %Section%, %Key%
 	if (not Test_Value = Value) {
-		IniWrite %Value%, %File%, %Section%, %Key%
+		IniWrite, %Value%, %File%, %Section%, %Key%
 	}
 }

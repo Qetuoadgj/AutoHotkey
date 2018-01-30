@@ -20,7 +20,7 @@ hexToDecimal(str)
 	str := LTrim(str, "0x `t`n`r")
 	len := StrLen(str)
 	ret := 0
-	Loop Parse, str
+	Loop, Parse, str
 	{
 		ret += _%A_LoopField% * (16 ** (len - A_Index))	
 	}

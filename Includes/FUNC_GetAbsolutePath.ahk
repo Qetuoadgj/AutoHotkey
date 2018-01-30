@@ -2,7 +2,7 @@ GetAbsolutePath(Path, RootPath := "")
 { ; получение полного пути из относительного
 	RootPath := RootPath ? RootPath : A_WorkingDir
 	StringReplace, Path, Path, % "..\", % "..\", UseErrorLevel
-	Loop % ErrorLevel
+	Loop, % ErrorLevel
 	{
 		RootPath := RegExReplace(RootPath, "^(.*)\\.*$", "$1",, 1)
 	}
@@ -14,7 +14,7 @@ ParseList(List, RootPath := "")
 { ; обработка относительных путей в списке
 	static Line, Ret
 	Ret := ""
-	Loop Parse, List, `n, `r
+	Loop, Parse, List, `n, `r
 	{
 		Line := ExpandEnvironmentVariables(A_LoopField)
 		if RegExMatch(Line, "\.\.\\") { ; обработка относительных путей типа "..\..\Путь"

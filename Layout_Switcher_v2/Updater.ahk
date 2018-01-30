@@ -1,10 +1,10 @@
 ﻿#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn All, StdOut ; Enable warnings to assist with detecting common errors.
-SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
+#Warn, All, StdOut ; Enable warnings to assist with detecting common errors.
+SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 ; Определение классов (для исключения их прямой перезаписи)
-new Script			:= c_Script
+; New Script			:= c_Script
 ;
 
 Script.Force_Single_Instance()
@@ -15,22 +15,22 @@ Config_File := A_ScriptDir "\" "Updater" ".ini"
 NumberOfParameters = %0%
 
 if (NumberOfParameters) {
-	Loop %NumberOfParameters%
+	Loop, %NumberOfParameters%
 	{
 		; IfEqual, A_Index, 1, Continue
 		Parameter := %A_Index%
 		if RegExMatch(Parameter, "-app_pid=(.*)", Match) {
 			Process_PID := Match1
-			Process Close, %Process_PID%
-			WinWaitClose ahk_pid %Process_PID%,,5
+			Process, Close, %Process_PID%
+			WinWaitClose, ahk_pid %Process_PID%,,5
 		}
 	}
 }
 
-gosub SET_DEFAULTS
-gosub READ_CONFIG_FILE
-gosub START_UPDATE
-gosub RUN_APP
+gosub, SET_DEFAULTS
+gosub, READ_CONFIG_FILE
+gosub, START_UPDATE
+gosub, RUN_APP
 
 Exit
 
@@ -47,13 +47,13 @@ SET_DEFAULTS:
 READ_CONFIG_FILE:
 {
 	; Info
-	IniRead info_download_from, %Config_File%, Info, info_download_from, % Defaults.info_download_from
+	IniRead, info_download_from, %Config_File%, Info, info_download_from, % Defaults.info_download_from
 	Normalize("info_download_from", Defaults.info_download_from)
 	info_updater_ini := Defaults.info_download_from . "Updater.ini"
 	
-	IniRead info_run_x32, %Config_File%, Info, info_run_x32, % Defaults.info_run_x32
+	IniRead, info_run_x32, %Config_File%, Info, info_run_x32, % Defaults.info_run_x32
 	Normalize("info_run_x32", Defaults.info_run_x32)
-	IniRead info_run_x64, %Config_File%, Info, info_run_x64, % Defaults.info_run_x64
+	IniRead, info_run_x64, %Config_File%, Info, info_run_x64, % Defaults.info_run_x64
 	Normalize("info_run_x64", Defaults.info_run_x64)
 	
 	return
@@ -62,20 +62,20 @@ READ_CONFIG_FILE:
 START_UPDATE:
 {
 	if (GetUrlStatus(info_updater_ini) == 200) {
-		UrlDownloadToFile %info_updater_ini%, %Config_File%
+		URLDownloadToFile, %info_updater_ini%, %Config_File%
 	}
 	;
-	IniRead info_download_from, %Config_File%, Info, info_download_from
+	IniRead, info_download_from, %Config_File%, Info, info_download_from
 	if (info_download_from == "ERROR") {
 		info_download_from := Defaults.info_download_from
 		info_run_x32 := Defaults.info_run_x32
 		info_run_x64 := Defaults.info_run_x64
 		;
-		FileDelete % Config_File
+		FileDelete, % Config_File
 		;
-		IniWrite % info_download_from, %Config_File%, Info, info_download_from
-		IniWrite % info_run_x32, %Config_File%, Info, info_run_x32
-		IniWrite % info_run_x64, %Config_File%, Info, info_run_x64
+		IniWrite, % info_download_from, %Config_File%, Info, info_download_from
+		IniWrite, % info_run_x32, %Config_File%, Info, info_run_x32
+		IniWrite, % info_run_x64, %Config_File%, Info, info_run_x64
 		;
 		default_text =
 		(LTrim RTrim Join`r`n
@@ -109,12 +109,12 @@ START_UPDATE:
 		Layout_Switcher_x64.exe
 		)
 		;
-		FileAppend %default_text%, %Config_File%
+		FileAppend, %default_text%, %Config_File%
 	}
 	
-	IniRead x86_section, %Config_File%, x86
-	IniRead x32_section, %Config_File%, x32
-	IniRead x64_section, %Config_File%, x64
+	IniRead, x86_section, %Config_File%, x86
+	IniRead, x32_section, %Config_File%, x32
+	IniRead, x64_section, %Config_File%, x64
 	
 	DownloadFromList(info_download_from, x86_section)
 	if (A_Is64bitOS) {
@@ -131,19 +131,19 @@ START_UPDATE:
 RUN_APP:
 {
 	if (A_Is64bitOS) {
-		IniRead info_run_x64, %Config_File%, Info, info_run_x64, % Defaults.info_run_x64
+		IniRead, info_run_x64, %Config_File%, Info, info_run_x64, % Defaults.info_run_x64
 		Normalize("info_run_x64", Defaults.info_run_x64)
 		IniWrite("info_run_x64", Config_File, "Info", info_run_x64)
 		if FileExist(info_run_x64) {
-			Run %info_run_x64%
+			Run, %info_run_x64%
 		}
 	}
 	else {
-		IniRead info_run_x32, %Config_File%, Info, info_run_x32, % Defaults.info_run_x32
+		IniRead, info_run_x32, %Config_File%, Info, info_run_x32, % Defaults.info_run_x32
 		Normalize("info_run_x32", Defaults.info_run_x32)
 		IniWrite("info_run_x32", Config_File, "Info", info_run_x32)
 		if FileExist(info_run_x32) {
-			Run %info_run_x32%
+			Run, %info_run_x32%
 		}
 	}
 	
@@ -171,20 +171,20 @@ DownloadFromList(DownloadFrom, List, DestDir := False)
 {
 	static Line, Location, Download
 	DestDir := DestDir ? DestDir : A_ScriptDir
-	Loop Parse, List, `n, `r
+	Loop, Parse, List, `n, `r
 	{
 		Line := Trim(A_LoopField)
 		Line := RegExReplace(Line, " `;.*", "")
 		if (Line == "") { ; пропуск пустых строк
-			Continue
+			continue
 		}
 		File := StrReplace(Line, "/", "\")
 		Download := DownloadFrom . StrReplace(File, "\", "/")
 		if (GetUrlStatus(Download) == 200) {
 			if RegExMatch(File, "(.*\\)", Dir) {
-				FileCreateDir % DestDir . "\" . Dir
+				FileCreateDir, % DestDir . "\" . Dir
 			}
-			UrlDownloadToFile %Download%, % DestDir "\" . StrReplace(File, "/", "\")
+			URLDownloadToFile, %Download%, % DestDir "\" . StrReplace(File, "/", "\")
 		}
 	}
 }

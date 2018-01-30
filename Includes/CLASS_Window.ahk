@@ -4,10 +4,8 @@ class Window
 {
 	Is_Full_Screen(Win_Title := "A")
 	{ ; функция проверки полноэкранного режима
-		static Win_ID
-		static Win_Style
-		static Win_W
-		static Win_H
+		static Win_ID, Win_Style, Win_W, Win_H
+		Win_ID := "", Win_Style := "", Win_W := "", Win_H := ""
 		;		
 		Win_ID := WinExist(Win_Title)
 		if (not Win_ID) {

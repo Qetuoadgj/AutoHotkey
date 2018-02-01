@@ -3,7 +3,9 @@
 SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
-#SingleInstance, Force
+; #SingleInstance, Force
+$_script_name := Script.Name()
+Script.Force_Single_Instance([RegExReplace($_script_name, "_x(32|64)", "") . "*"])
 
 ; Your code here...
 
@@ -69,7 +71,7 @@ __get_case_dictionary($_api_file := "")
 	}
 }
 
-__escape($_string)
+__regex_escape($_string)
 {
 	local
 	$_escape := ["\", ".", "*", "?", "+", "[", "]", "{", "}", "|", "(", ")", "^", "$"]
@@ -103,15 +105,24 @@ __paste_text($_string)
 	}
 }
 
-__fix_case($_text_line, $_case_dictionary)
+__fix_case($_text_line, $_case_dictionary, $_ignore_commented := 1)
 {
 	local
 	Loop, Parse, $_case_dictionary, `n, `r
 	{
+		if ($_ignore_commented && RegExMatch($_text_line, "^(?:[\t ]+)?;")) {
+			break
+		}
 		$_key_word := A_LoopField
-		$_has_symbols := RegExMatch($_key_word, "^([^\w]+)", $_symbols_)
-		$_pattern := "i)" . ($_has_symbols ? __escape($_symbols_1) . "\b" . __escape($_key_word) . "\b" : "\b" . __escape($_key_word) . "\b")
-		$_text_line := RegExReplace($_text_line, $_pattern, __escape($_key_word))
+		$_has_symbols := RegExMatch($_key_word, "^([^\w]+)(.*)", $_split_)
+		$_pattern := "i)" . ($_has_symbols ? __regex_escape($_split_1) . "\b" . __regex_escape($_split_2) . "\b" : "\b" . __regex_escape($_key_word) . "\b")
+		if ($_ignore_commented && RegExMatch($_text_line, "^(.*?)([\t ]+);(.*)$", $_comments_split_)) {
+			$_text_line := RegExReplace($_comments_split_1, $_pattern, __regex_escape($_key_word))
+			$_text_line .= $_comments_split_2 . ";" . $_comments_split_3
+		}
+		else {
+			$_text_line := RegExReplace($_text_line, $_pattern, __regex_escape($_key_word))
+		}
 	}
 	return $_text_line
 }
@@ -169,16 +180,16 @@ __fix_commas($_code_text, $_comma_key_words_dictionary)
 		$_text_line := A_LoopField
 		if RegExMatch($_text_line, "^([;~]?(?:[\t ]+)?)(([^\w]+)?\b\w+\b)([\t ]{1,})([^\s])", $_match_) {
 			$_key_word := $_match_2
-			$_has_symbols := RegExMatch($_key_word, "^([^\w]+)", $_symbols_)
-			$_pattern := "i)" . ($_has_symbols ? __escape($_symbols_1) . "\b" . __escape($_key_word) . "\b" : "\b" . __escape($_key_word) . "\b")
+			$_has_symbols := RegExMatch($_key_word, "^([^\w]+)(.*)", $_split_)
+			$_pattern := "i)" . ($_has_symbols ? __regex_escape($_split_1) . "\b" . __regex_escape($_split_2) . "\b" : "\b" . __regex_escape($_key_word) . "\b")
 			;
 			if RegExMatch($_comma_key_words_dictionary, $_pattern, $_match_) {
-				if RegExMatch($_text_line, "i)" . "^([;~]?(?:[\t ]+)?)" . __escape($_key_word) . "\b" . "([\t ]{1,})([^\s]+)", $_match_) {
+				if RegExMatch($_text_line, "i)" . "^([;~]?(?:[\t ]+)?)" . __regex_escape($_key_word) . "\b" . "([\t ]{1,})([^\s]+)", $_match_) {
 					$_params_or_something := $_match_3
 					$_math_symbols_regex := "\+\+|\-\-|\-\=|\+\=|\*\=|\/\=|\:\=|\.="
 					if !RegExMatch($_params_or_something, $_math_symbols_regex) {
-						$_text_line := RegExReplace($_text_line, "i)" . "^([;~]?(?:[\t ]+)?)" . __escape($_key_word) . "\b" . "([\t ]{1,})([^\s])", "$_1" . __escape($_key_word) . ",$_2$_3", 1)
-						$_text_line := RegExReplace($_text_line, "i)" . __escape($_key_word) . "\b" . ",([\t ]+;)", __escape($_key_word) . "$_1", 1)
+						$_text_line := RegExReplace($_text_line, "i)" . "^([;~]?(?:[\t ]+)?)" . __regex_escape($_key_word) . "\b" . "([\t ]{1,})([^\s])", "$_1" . __regex_escape($_key_word) . ",$_2$_3", 1)
+						$_text_line := RegExReplace($_text_line, "i)" . __regex_escape($_key_word) . "\b" . ",([\t ]+;)", __regex_escape($_key_word) . "$_1", 1)
 					}
 				}
 			}
@@ -194,3 +205,5 @@ __fix_commas($_code_text, $_comma_key_words_dictionary)
 	}
 	return $_new_code_text
 }
+
+#Include .\Includes\CLASS_Script.ahk

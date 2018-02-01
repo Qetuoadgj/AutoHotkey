@@ -6,7 +6,7 @@ SendMode,Input ; Recommended for new scripts due to its superior speed and relia
 Script.Force_Single_Instance()
 Script.Run_As_Admin()
 /*
-if not ( Win_Width or Win_Height ) {
+If not ( Win_Width or Win_Height ) {
 	MsgBox, Не найдено окно:`n%Win_Title%
 	ExitApp
 }
@@ -20,7 +20,7 @@ Win_Title := "ahk_class TARGETRECT ahk_exe bdcam.exe"
 	{
 		ControlSend,,^f,%Win_Title%
 		ToolTip(1111)
-		return
+		Return
 	}
 }
 
@@ -30,26 +30,26 @@ GetStartDimensions:
 {
 	Win_Width = 683
 	Win_Height = 475
-	if not ( Win_Width or Win_Height ) {
+	If not ( Win_Width or Win_Height ) {
 		WinGetPos,,, Win_Width, Win_Height, %Win_Title%
 	}
-	return
+	Return
 }
 
-Get_Min( Win_ID := False )
+Get_Min( ByRef Win_ID := False )
 {
 	Win_ID := Win_ID ? Win_ID : WinExist("A")
 	SendMessage, 0x0401, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETRANGEMIN
-	return, ErrorLevel
+	Return, ErrorLevel
 }
 
-Get_Max( Win_ID := False )
+Get_Max( ByRef Win_ID := False )
 {
 	Win_ID := Win_ID ? Win_ID : WinExist("A")
 	SendMessage, 0x0402, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETRANGEMAX
-	return, ErrorLevel
+	Return, ErrorLevel
 }
-Get_Pos( Win_ID := False )
+Get_Pos( ByRef Win_ID := False )
 {
 	Win_ID := Win_ID ? Win_ID : WinExist("A")
 	static Min, Max, Pos
@@ -60,22 +60,22 @@ Get_Pos( Win_ID := False )
 	SendMessage, 0x0400, 0, 0, msctls_trackbar321, ahk_id %Win_ID% ; TBM_GETPOS
 	Pos := ErrorLevel
 	Pos := Pos > Max ? Pos - Min - Max : Pos
-	return, Pos
+	Return, Pos
 }
 
-To_Percent( Cur, Max, Rnd := 0)
+To_Percent( ByRef Cur, ByRef Max, ByRef Rnd := 0)
 {
-	return, Round( Cur / Max * 100, Rnd )
+	Return, Round( Cur / Max * 100, Rnd )
 }
 
-To_Pos( Pct, Max, Rnd := 0 )
+To_Pos( ByRef Pct, ByRef Max, ByRef Rnd := 0 )
 {
-	return, Round( Max * ( Pct / 100 ), Rnd )
+	Return, Round( Max * ( Pct / 100 ), Rnd )
 }
 
-ToolTip( text, time := 800 )
+ToolTip( ByRef text, ByRef time := 800 )
 { ; функция вывода высплывающей подсказки с последующим ( убирается по таймеру )
-	ToolTip, %text%
+	Tooltip, %text%
 	SetTimer, Clear_ToolTips, %time%
 }
 
@@ -83,7 +83,7 @@ Clear_ToolTips:
 { ; рутина очистки подсказок и отключения связанных с ней таймеров
 	ToolTip
 	SetTimer, %A_ThisLabel%, Off
-	return
+	Return
 }
 
 class Script
@@ -98,15 +98,15 @@ class Script
 		#SingleInstance, Off
 		DetectHiddenWindows, On
 		File_Types := [ ".exe", ".ahk" ]
-		for Index, File_Type in File_Types {
+		For Index, File_Type in File_Types {
 			Script_Name := RegExReplace( A_ScriptName, "^(.*)\.(.*)$", "$1" ) . File_Type
 			Script_Full_Path := A_ScriptDir . "\" . Script_Name
 			This.Close_Other_Instances( Script_Full_Path . "ahk_class AutoHotkey" )
 		}
 		DetectHiddenWindows, % Detect_Hidden_Windows_Tmp
 	}
-	
-	Close_Other_Instances( Script_Full_Path )
+
+	Close_Other_Instances( ByRef Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
 		static Process_ID
 		Script_Full_Path := Script_Full_Path ? Script_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
@@ -116,18 +116,18 @@ class Script
 		Loop, %Process_List%
 		{
 			Process_ID := Process_List%Process_Count%
-			if ( not Process_ID = Current_ID ) {
+			If ( not Process_ID = Current_ID ) {
 				WinGet, Process_PID, PID, % Script_Full_Path . " ahk_id " . Process_ID
 				Process, Close, %Process_PID%
 			}
 			Process_Count += 1
 		}
 	}
-	
-	Run_As_Admin( Params := "" )
+
+	Run_As_Admin( ByRef Params := "" )
 	{ ; функция запуска скрипта с правами адиминистратора
-		if ( not A_IsAdmin ) {
-			try {
+		If ( not A_IsAdmin ) {
+			Try {
 				Run, *RunAs "%A_ScriptFullPath%" %Params%
 			}
 			ExitApp
@@ -137,6 +137,6 @@ class Script
 	Name()
 	{ ; функция получения имени текущего скрипта
 		SplitPath, A_ScriptFullPath,,,, Name
-		return, Name
+		Return, Name
 	}
 }

@@ -29,18 +29,18 @@ outFilesList := ""
 
 cleanUpArray := []
 
-Count := 0
+count := 0
 
 Loop, % shots - 1
 {
-	Count := A_Index
+	count := A_Index
 	Random, pitchValue, % pitch_min, % pitch_max
 	outFileName := Format( "{1:s}.{2:s}", inFileName " - " count, inFileExt )
 	outFilePath := outFileName
 	Command = "%SoX%" "%inFilePath%" "%outFilePath%"
 	Command .= " pitch " pitchValue
 	RunWait, %Command%
-	if FileExist( outFilePath )
+	If FileExist( outFilePath )
 	{
 		outFilesArray.Push( outFilePath )
 		; outFilesList .= """" outFilePath """"
@@ -49,16 +49,16 @@ Loop, % shots - 1
 	}
 }
 
-for outFileIndex, outFilePath1 in outFilesArray
+For outFileIndex, outFilePath1 in outFilesArray
 {
-	Count := outFileIndex
+	count := outFileIndex
 	Random, stepError, 0.95, 1.05
 	outFileName := Format( "{1:s}.{2:s}", inFileName " - cut_" count, inFileExt )
 	outFilePath := outFileName
 	Command = "%SoX%" "%outFilePath1%" "%outFilePath%"
 	Command .= " trim 0 " (step * stepError)
 	RunWait, %Command%
-	if FileExist( outFilePath )
+	If FileExist( outFilePath )
 	{
 		; outFilesArray.Push( outFilePath )
 		outFilesList .= """" outFilePath """"
@@ -70,7 +70,7 @@ for outFileIndex, outFilePath1 in outFilesArray
 outFileName := Format( "{1:s}.{2:s}", inFileName " - cut_" count+1, inFileExt )
 outFilePath := outFileName
 FileCopy, %inFilePath%, %outFilePath%, 1
-if FileExist( outFilePath )
+If FileExist( outFilePath )
 {
 	outFilesArray.Push( outFilePath )
 	outFilesList .= """" outFilePath """"
@@ -84,14 +84,14 @@ outFileName := Format( "{1:s}.{2:s}", inFileName " - Burst " shots, inFileExt )
 outFilePath := outFileName
 
 Command = "%SoX%" %outFilesList% "%outFilePath%"
-if ( StrLen( Command ) > 0 )
+If ( StrLen( Command ) > 0 )
 {
 	MsgBox, %Command%
 	RunWait, %Command%
 }
 
 Msg :=  ""
-for cleanUpFileIndex, cleanUpFilePath in cleanUpArray
+For cleanUpFileIndex, cleanUpFilePath in cleanUpArray
 {
 	FileDelete, %cleanUpFilePath%
 	Msg .= cleanUpFilePath "`n"
@@ -100,9 +100,9 @@ MsgBox, %Msg%
 
 ExitApp
 
-ToolTip( text, time := 800 )
+ToolTip( ByRef text, ByRef time := 800 )
 { ; функция вывода высплывающей подсказки с последующим ( убирается по таймеру )
-	ToolTip, %text%
+	Tooltip, %text%
 	SetTimer, Clear_ToolTips, %time%
 }
 
@@ -110,7 +110,7 @@ Clear_ToolTips:
 { ; рутина очистки подсказок и отключения связанных с ней таймеров
 	ToolTip
 	SetTimer, %A_ThisLabel%, Off
-	return
+	Return
 }
 
 class Script
@@ -125,15 +125,15 @@ class Script
 		#SingleInstance, Off
 		DetectHiddenWindows, On
 		File_Types := [ ".exe", ".ahk" ]
-		for Index, File_Type in File_Types {
+		For Index, File_Type in File_Types {
 			Script_Name := RegExReplace( A_ScriptName, "^(.*)\.(.*)$", "$1" ) . File_Type
 			Script_Full_Path := A_ScriptDir . "\" . Script_Name
 			This.Close_Other_Instances( Script_Full_Path . "ahk_class AutoHotkey" )
 		}
 		DetectHiddenWindows, % Detect_Hidden_Windows_Tmp
 	}
-	
-	Close_Other_Instances( Script_Full_Path )
+
+	Close_Other_Instances( ByRef Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
 		static Process_ID
 		Script_Full_Path := Script_Full_Path ? Script_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
@@ -143,18 +143,18 @@ class Script
 		Loop, %Process_List%
 		{
 			Process_ID := Process_List%Process_Count%
-			if ( not Process_ID = Current_ID ) {
+			If ( not Process_ID = Current_ID ) {
 				WinGet, Process_PID, PID, % Script_Full_Path . " ahk_id " . Process_ID
 				Process, Close, %Process_PID%
 			}
 			Process_Count += 1
 		}
 	}
-	
-	Run_As_Admin( Params := "" )
+
+	Run_As_Admin( ByRef Params := "" )
 	{ ; функция запуска скрипта с правами адиминистратора
-		if ( not A_IsAdmin ) {
-			try {
+		If ( not A_IsAdmin ) {
+			Try {
 				Run, *RunAs "%A_ScriptFullPath%" %Params%
 			}
 			ExitApp
@@ -164,7 +164,7 @@ class Script
 	Name()
 	{ ; функция получения имени текущего скрипта
 		SplitPath, A_ScriptFullPath,,,, Name
-		return, Name
+		Return, Name
 	}
 }
 

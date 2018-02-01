@@ -103,7 +103,7 @@ File_List1 := []
 Loop, Parse, L1, `n, `r ; Recommended approach in most cases.
 {
 	Line := Trim( RegExReplace( A_LoopField, "[ \t]+;.*$", "" ) )
-	if StrLen( Line > 0 ) {
+	If StrLen( Line > 0 ) {
 		File_List1.Push( Line )
 	}
 }
@@ -113,18 +113,18 @@ File_List2 := []
 Loop, Parse, L2, `n, `r ; Recommended approach in most cases.
 {
 	Line := Trim( RegExReplace( A_LoopField, "[ \t]+;.*$", "" ) )
-	if StrLen( Line > 0 ) {
+	If StrLen( Line > 0 ) {
 		File_List2.Push( Line )
 	}
 }
 Line = ; Null
 
-if ( File_List1.MaxIndex() < 1 or File_List2.MaxIndex() < 1 ) {
+If ( File_List1.MaxIndex() < 1 or File_List2.MaxIndex() < 1 ) {
 	ExitApp
 }
 
 /*
-if FileExist( Output_Dir "\" ) {
+If FileExist( Output_Dir "\" ) {
 	FileRemoveDir, %Output_Dir%, 1
 }
 */
@@ -158,50 +158,50 @@ Channels3 := Output_Channels ;1
 
 Header = 
 ( LTrim RTrim Join`r`n
-%Separator%
-%Comment% %Time_Stamp%
-%Separator%
+	%Separator%
+	%Comment% %Time_Stamp%
+	%Separator%
+	
+	%Comment% SoX params:
+	%Comment% `tVolume: %Volume%
+	%Comment% `tFactor1: %Str_Factor1%
+	%Comment% `tFactor2: %Str_Factor2%
+	%Comment% `tChannels1: %Channels1%
+	%Comment% `tChannels2: %Channels2%
+	%Comment% `tChannels3: %Channels3%
+	
+	cls
+	@echo off		
+	cd /d "`%~dp0"
 
-%Comment% SoX params:
-%Comment% `tVolume: %Volume%
-%Comment% `tFactor1: %Str_Factor1%
-%Comment% `tFactor2: %Str_Factor2%
-%Comment% `tChannels1: %Channels1%
-%Comment% `tChannels2: %Channels2%
-%Comment% `tChannels3: %Channels3%
-
-cls
-@echo off		
-cd /d "`%~dp0"
-
-Set "SOX=%SoX%"
-
-Set OUTPUT_FORMAT=%Output_Format%
-Set "OUTPUT_DIR=%Output_Dir%"
-
-Set INPUT_1_CHANNELS=%Channels1%
-Set INPUT_2_CHANNELS=%Channels2%
-Set OUTPUT_CHANNELS=%Channels3%
-
-rd "`%OUTPUT_DIR`%" /q /s
-md "`%OUTPUT_DIR`%"
+	set "SOX=%SoX%"
+	
+	set OUTPUT_FORMAT=%Output_Format%
+	set "OUTPUT_DIR=%Output_Dir%"
+	
+	set INPUT_1_CHANNELS=%Channels1%
+	set INPUT_2_CHANNELS=%Channels2%
+	set OUTPUT_CHANNELS=%Channels3%
+	
+	rd "`%OUTPUT_DIR`%" /q /s
+	md "`%OUTPUT_DIR`%"
 )
 
 Output_Data .= Header "`r`n"
 Output_Data .= "`r`n"
 
-if ( not FileExist( SoX ) )
+If ( not FileExist( SoX ) )
 {
 	MsgBox,ОШИБКА:`nОтсутствует файл: %SoX%
 	ExitApp
 }
 
-if FileExist( Output_Dir "\" )
+If FileExist( Output_Dir "\" )
 {
 	FileRemoveDir, %Output_Dir%, 1
 }
 
-for File2_Index, File2_Path in File_List2 {
+For File2_Index, File2_Path in File_List2 {
 	Random, File1_Index, 1, % File_List1.MaxIndex()
 	File1_Path := File_List1[File1_Index]
 	Random, volume1, % 1.00 * Factor1[1], % 1.00 * Factor1[2]
@@ -209,7 +209,7 @@ for File2_Index, File2_Path in File_List2 {
 	volume1 := volume1 * Volume
 	volume2 := volume2 * Volume
 	; If (File1_Path != File2_Path) {
-		if not FileExist( Output_Dir "\" )
+		If not FileExist( Output_Dir "\" )
 		{
 			FileCreateDir, %Output_Dir%
 		}
@@ -243,29 +243,29 @@ Output_Data .= "`r`n" Separator "`r`n"
 Copy_Command = copy "`%0" "`%OUTPUT_DIR`%\`%~nx0"
 Output_Data .=  "`r`n" Copy_Command "`r`n"
 
-if ( StrLen( Command ) > 0 )
+If ( StrLen( Command ) > 0 )
 {
-	if FileExist( Mix_Table )
+	If FileExist( Mix_Table )
 	{
 		FileDelete, %Mix_Table%
 	}
 	FileAppend, %Output_Data%, %Mix_Table%
-	if FileExist( Mix_Table )
+	If FileExist( Mix_Table )
 	{
 		Run, notepad.exe %Mix_Table%
 	}
 }
 
-if FileExist( Output_Dir "\" )
+If FileExist( Output_Dir "\" )
 {
 	Run, %Output_Dir%
 }
 
 ExitApp
 
-ToolTip( text, time := 800 )
+ToolTip( ByRef text, ByRef time := 800 )
 { ; функция вывода высплывающей подсказки с последующим ( убирается по таймеру )
-	ToolTip, %text%
+	Tooltip, %text%
 	SetTimer, Clear_ToolTips, %time%
 }
 
@@ -273,7 +273,7 @@ Clear_ToolTips:
 { ; рутина очистки подсказок и отключения связанных с ней таймеров
 	ToolTip
 	SetTimer, %A_ThisLabel%, Off
-	return
+	Return
 }
 
 class Script
@@ -288,15 +288,15 @@ class Script
 		#SingleInstance, Off
 		DetectHiddenWindows, On
 		File_Types := [ ".exe", ".ahk" ]
-		for Index, File_Type in File_Types {
+		For Index, File_Type in File_Types {
 			Script_Name := RegExReplace( A_ScriptName, "^(.*)\.(.*)$", "$1" ) . File_Type
 			Script_Full_Path := A_ScriptDir . "\" . Script_Name
 			This.Close_Other_Instances( Script_Full_Path . "ahk_class AutoHotkey" )
 		}
 		DetectHiddenWindows, % Detect_Hidden_Windows_Tmp
 	}
-	
-	Close_Other_Instances( Script_Full_Path )
+
+	Close_Other_Instances( ByRef Script_Full_Path )
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
 		static Process_ID
 		Script_Full_Path := Script_Full_Path ? Script_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
@@ -306,18 +306,18 @@ class Script
 		Loop, %Process_List%
 		{
 			Process_ID := Process_List%Process_Count%
-			if ( not Process_ID = Current_ID ) {
+			If ( not Process_ID = Current_ID ) {
 				WinGet, Process_PID, PID, % Script_Full_Path . " ahk_id " . Process_ID
 				Process, Close, %Process_PID%
 			}
 			Process_Count += 1
 		}
 	}
-	
-	Run_As_Admin( Params := "" )
+
+	Run_As_Admin( ByRef Params := "" )
 	{ ; функция запуска скрипта с правами адиминистратора
-		if ( not A_IsAdmin ) {
-			try {
+		If ( not A_IsAdmin ) {
+			Try {
 				Run, *RunAs "%A_ScriptFullPath%" %Params%
 			}
 			ExitApp
@@ -327,7 +327,7 @@ class Script
 	Name()
 	{ ; функция получения имени текущего скрипта
 		SplitPath, A_ScriptFullPath,,,, Name
-		return, Name
+		Return, Name
 	}
 }
 

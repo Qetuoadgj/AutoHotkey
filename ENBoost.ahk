@@ -1,7 +1,7 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-; #Warn, All ; Enable warnings to assist with detecting common errors.
-SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
+; #Warn All ; Enable warnings to assist with detecting common errors.
+SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance Force
 
@@ -9,9 +9,9 @@ SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 Start:
 {
 	; gosub Create_Vars
-	gosub, Set_Values
+	gosub Set_Values
 	; gosub Get_Config_Framework
-	gosub, Get_Config
+	gosub Get_Config
 }
 
 Exit
@@ -26,20 +26,20 @@ Create_Vars:
 {
 	enblocal_ini := "D:\Games\Oblivion\enblocal.ini"
 	; output := "ini := {}" . "`n"
-	IniRead, ini_sections, % enblocal_ini
-	Loop, Parse, % ini_sections, `n, `r
+	IniRead ini_sections, % enblocal_ini
+	Loop Parse, % ini_sections, `n, `r
 	{
 		section_name := A_LoopField
 		; output .= ";`n" . "ini." . section_name . " := {}" . "`n"
-		IniRead, section_keys, % enblocal_ini, % section_name
-		Loop, Parse, % section_keys, `n, `r
+		IniRead section_keys, % enblocal_ini, % section_name
+		Loop Parse, % section_keys, `n, `r
 		{
 			key := Trim(RegExReplace(A_LoopField, "=.*", ""))
-			IniRead, value, % enblocal_ini, % section_name, % key
+			IniRead value, % enblocal_ini, % section_name, % key
 			output .= "ini_" . section_name . "_" . key . " := " . q(value) . "`n"
 		}
 	}
-	MsgBox, % output
+	MsgBox % output
 	return
 }
 
@@ -48,19 +48,19 @@ Get_Video_Memory:
 	OSWindowsVersion := SubStr(A_OSVersion, 5)
 	VideoMemorySize := Round(GetVideoMemorySize() / 1024**2)
 	InstalledSystemMemory := Round(GetPhysicallyInstalledSystemMemory() / 1024)
-	MsgBox, 68,, % "Video Adapter Memory = " . VideoMemorySize . " MB" . "`n"
+	MsgBox 68,, % "Video Adapter Memory = " . VideoMemorySize . " MB" . "`n"
 	. "Installed Memory (RAM) = " . InstalledSystemMemory . " MB" . "`n"
-	IfMsgBox, No
+	IfMsgBox No
 	{
-		InputBox, VideoMemorySizeCustom,,,,, 100
-		if (StrLen(Trim(VideoMemorySize)) > 0) {
+		InputBox VideoMemorySizeCustom,,,,, 100
+		If (StrLen(Trim(VideoMemorySize)) > 0) {
 			VideoMemorySize := VideoMemorySizeCustom
 		}
-		MsgBox, 68,, % "Video Adapter Memory = " . VideoMemorySize . " MB" . "`n"
+		MsgBox 68,, % "Video Adapter Memory = " . VideoMemorySize . " MB" . "`n"
 		. "Installed Memory (RAM) = " . InstalledSystemMemory . " MB" . "`n"
-		IfMsgBox, No
+		IfMsgBox No
 		{
-			gosub, %A_ThisLabel%
+			gosub %A_ThisLabel%
 		}
 	}
 	
@@ -69,7 +69,7 @@ Get_Video_Memory:
 	? Round(VideoMemorySize + InstalledSystemMemory - 2048)
 	: VideoMemorySize - (OSWindowsVersion >= 8 ? 350 : 170) ; https://www.youtube.com/watch?v=zYgFihHMD4w
 	
-	MsgBox, % ""
+	MsgBox % ""
 	. "OSWindowsVersion = " . OSWindowsVersion . "`n"
 	. "ENB_ReservedMemorySizeMb = " . ENB_ReservedMemorySizeMb . "`n"
 	. "ENB_VideoMemorySizeMb = " . ENB_VideoMemorySizeMb . "`n"
@@ -78,7 +78,7 @@ Get_Video_Memory:
 
 Set_Values:
 {
-	gosub, Get_Video_Memory
+	gosub Get_Video_Memory
 	;
 	ini_PROXY_EnableProxyLibrary := "false"
 	ini_PROXY_InitProxyFunctions := "true"
@@ -118,20 +118,20 @@ Set_Values:
 Get_Config_Framework:
 {
 	output := "", enblocal_ini := "D:\Games\Oblivion\enblocal.ini"
-	IniRead, ini_sections, % enblocal_ini
-	Loop, Parse, % ini_sections, `n, `r
+	IniRead ini_sections, % enblocal_ini
+	Loop Parse, % ini_sections, `n, `r
 	{
 		section_name := A_LoopField
 		output .= "`n" . "[" . section_name . "]" . "`n"
-		IniRead, section_keys, % enblocal_ini, % section_name
-		Loop, Parse, % section_keys, `n, `r
+		IniRead section_keys, % enblocal_ini, % section_name
+		Loop Parse, % section_keys, `n, `r
 		{
 			key := Trim(RegExReplace(A_LoopField, "=.*", ""))
 			; IniRead value, % enblocal_ini, % section_name, % key
 			output .= key . "=" . "%ini_" . section_name . "_" . key . "%" . "`n"
 		}
 	}
-	MsgBox, % output
+	MsgBox % output
 	return
 }
 
@@ -180,16 +180,16 @@ Get_Config:
 	
 	)
 	MsgBox, 4,, % out ;, 1
-	IfMsgBox, Yes
+	IfMsgBox Yes
 	{
 		Clipboard := ""
-		Sleep, 1
+		Sleep 1
 		Clipboard := out
-		ClipWait, 1
+		ClipWait 1
 		ExitApp
 	}
 	else {
-		gosub, Start
+		gosub Start
 	}
 	return
 }
@@ -208,16 +208,16 @@ GetVideoMemorySize()
 {
 	static info_file, video_adapter_info, Match, Match1
 	info_file := A_Temp "\Win32_videocontroller_info.txt"
-	RunWait, %ComSpec% /k wmic PATH Win32_videocontroller GET adapterram>"%info_file%" & exit,, Hide
+	RunWait %ComSpec% /k wmic PATH Win32_videocontroller GET adapterram>"%info_file%" & exit,, Hide
 	if FileExist(info_file) {
 		FileRead, video_adapter_info, % info_file
-		Loop, Parse, % video_adapter_info, `n, `r
+		Loop Parse, % video_adapter_info, `n, `r
 		{
 			if RegExMatch(Trim(A_LoopField), "^(\d{4,})$", Match) {
 				return (Match1+0)
 			}
 		}
-		FileDelete, % info_file
+		FileDelete % info_file
 	}
 	return
 }

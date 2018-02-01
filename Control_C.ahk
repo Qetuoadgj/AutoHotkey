@@ -3,8 +3,8 @@
 
 #NoEnv ; Recommended For performance and compatibility with future AutoHotkey releases.
 ; #Warn, All ; Enable warnings to assist with detecting common errors.
-SendMode, Input ; Recommended For New scripts due to its superior speed and reliability.
-SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
+SendMode Input ; Recommended For New scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 Script.Force_Single_Instance()
 
@@ -38,26 +38,26 @@ CreateLogo:
 SetTrayIcon:
 {
 	IcoFile := A_ScriptDir . "\Images\" . SCRIPT_NAME . ".ico"
-	if FileExist(IcoFile)
+	If FileExist(IcoFile)
 	{
-		Menu, Tray, Icon, %IcoFile%
+		Menu Tray, Icon, %IcoFile%
 	}
 }
 
 CreateGUI:
 {
 	MainGUI := SCRIPT_NAME . "_"
-	Gui, %MainGUI%:+AlwaysOnTop
-	Gui, %MainGUI%:Add, Button, x5 y5 w90 h40 gResetArray, Reset Array
-	Gui, %MainGUI%:Add, Text, x105 y7 w55 h20, New Lines
-	Gui, %MainGUI%:Add, ComboBox, x160 y5 w45 h300 vNewLines, -2|-1|0||1|2|3|4|5|6|7|8|9|10
-	Gui, %MainGUI%:Add, Text, x105 y30 w55 h20, Use Enter
-	Gui, %MainGUI%:Add, ComboBox, x160 y27 w45 h300 vUseEnter, Yes||No|
-	Gui, %MainGUI%:Add, Text, x215 y7 w80 h20, Close Window
-	Gui, %MainGUI%:Add, ComboBox, x290 y5 w45 h300 vCloseWindow, Yes|No||
-	Gui, %MainGUI%:Add, Text, x215 y30 w80 h20, Insert Counter
-	Gui, %MainGUI%:Add, ComboBox, x290 y27 w45 h300 vInsertCounter, Yes|No||
-	Gui, %MainGUI%:Submit, Hide
+	Gui %MainGUI%:+AlwaysOnTop
+	Gui %MainGUI%:Add, Button, x5 y5 w90 h40 gResetArray, Reset Array
+	Gui %MainGUI%:Add, Text, x105 y7 w55 h20, New Lines
+	Gui %MainGUI%:Add, ComboBox, x160 y5 w45 h300 vNewLines, -2|-1|0||1|2|3|4|5|6|7|8|9|10
+	Gui %MainGUI%:Add, Text, x105 y30 w55 h20, Use Enter
+	Gui %MainGUI%:Add, ComboBox, x160 y27 w45 h300 vUseEnter, Yes||No|
+	Gui %MainGUI%:Add, Text, x215 y7 w80 h20, Close Window
+	Gui %MainGUI%:Add, ComboBox, x290 y5 w45 h300 vCloseWindow, Yes|No||
+	Gui %MainGUI%:Add, Text, x215 y30 w80 h20, Insert Counter
+	Gui %MainGUI%:Add, ComboBox, x290 y27 w45 h300 vInsertCounter, Yes|No||
+	Gui %MainGUI%:Submit, Hide
 }
 
 DefineGlobals:
@@ -73,89 +73,89 @@ DefineGlobals:
 SetDocumentWindow:
 {
 	DOCUMENT_PATH := %0% ? %0% : "D:\Google Диск\HTML\html\2.0.4.html"
-	KeyWait, Shift, D T0.005
+	KeyWait Shift, D T0.005
 	if (not ErrorLevel) {
-		FileSelectFile, NEW_DOCUMENT_PATH,, %A_WorkingDir% ; открываем окно для выбора файла
+		FileSelectFile NEW_DOCUMENT_PATH,, %A_WorkingDir% ; открываем окно для выбора файла
 		DOCUMENT_PATH := NEW_DOCUMENT_PATH ? NEW_DOCUMENT_PATH : DOCUMENT_PATH
 	}
 	; DOCUMENT_PATH := %0% ? %0% : "D:\Google Диск\HTML\tmp\html\Dawson_Miller_2.html"
 	; DOCUMENT_FILE := RegExReplace(DOCUMENT_PATH, ".*\\(.*)", "$1")
 	DOCUMENT_NPP_TITLE := DOCUMENT_PATH . " - Notepad++"
 	
-	if (WinExist("*" . DOCUMENT_NPP_TITLE) || WinExist(DOCUMENT_NPP_TITLE))
+	If (WinExist("*" . DOCUMENT_NPP_TITLE) || WinExist(DOCUMENT_NPP_TITLE))
 	{
-		WinGet, Npp_WinID, ID
+		WinGet Npp_WinID, ID
 	}
 	
 	EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
 	
-	if (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH))
+	If (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH))
 	{
-		if (not Npp_WinID) {
-			Run, "%EDITOR_PATH%" "%DOCUMENT_PATH%" -multiInst -nosession,,, Npp_WinPID
-			WinWait, ahk_pid %Npp_WinPID%
-			WinGet, Npp_WinID, ID
+		If (not Npp_WinID) {
+			Run "%EDITOR_PATH%" "%DOCUMENT_PATH%" -multiInst -nosession,,, Npp_WinPID
+			WinWait ahk_pid %Npp_WinPID%
+			WinGet Npp_WinID, ID
 		}
 		
-		WinActivate, ahk_id %Npp_WinID%
+		WinActivate ahk_id %Npp_WinID%
 		
 		; Center Win
 		; --------------------------------------
 		WinGetPos,,, Width, Height, ahk_id %Npp_WinID%
-		WinMove, ahk_id %Npp_WinID%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2)
+		WinMove ahk_id %Npp_WinID%,, (A_ScreenWidth/2)-(Width/2), (A_ScreenHeight/2)-(Height/2)
 		; --------------------------------------
 	}
 	
-	IfWinExist, ahk_id %Npp_WinID%
+	IfWinExist ahk_id %Npp_WinID%
 	{
-		WinActivate, ahk_id %Npp_WinID%
-		WinWaitActive, ahk_id %Npp_WinID%
-		WinMaximize, ahk_id %Npp_WinID%
-		if (Window.State("ahk_id " Npp_WinID) != 0) {
-			WinRestore, ahk_id %Npp_WinID%
+		WinActivate ahk_id %Npp_WinID%
+		WinWaitActive ahk_id %Npp_WinID%
+		WinMaximize ahk_id %Npp_WinID%
+		If (Window.State("ahk_id " Npp_WinID) != 0) {
+			WinRestore ahk_id %Npp_WinID%
 		}
-		MsgBox, 0, %SCRIPT_WIN_TITLE%, Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%, 1.5
-		WinWaitClose, ahk_id %Npp_WinID%
-		SoundPlay, *64
-	ExitApp
+		MsgBox 0, %SCRIPT_WIN_TITLE%, Path: %DOCUMENT_PATH%`nID: %Npp_WinID%`nPID: %Npp_WinPID%, 1.5
+		WinWaitClose ahk_id %Npp_WinID%
+		SoundPlay *64
+		ExitApp
 	} Else {
-		SoundPlay, *16
-		MsgBox, 0, Error, Open document:`n%DOCUMENT_PATH%, 1.5
+		SoundPlay *16
+		MsgBox 0, Error, Open document:`n%DOCUMENT_PATH%, 1.5
 		ExitApp
 	}
 }
 
-MsgBox, 0, %SCRIPT_WIN_TITLE%, Ready!, 0.5
+MsgBox 0, %SCRIPT_WIN_TITLE%, Ready!, 0.5
 
 SC052:: ; Numpad0
 {
-	WinGet, LastActive_WinID, ID, A
-	WinGet, Chrome_WinID, ID, ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1
+	WinGet LastActive_WinID, ID, A
+	WinGet Chrome_WinID, ID, ahk_exe chrome.exe ahk_class Chrome_WidgetWin_1
 	
 	ArrayLengthBefore := ItemsArray.Length()
 	
-	IfWinExist, ahk_id %Chrome_WinID%
+	IfWinExist ahk_id %Chrome_WinID%
 	{
-		if (SaveClipboard)
+		If (SaveClipboard)
 		{
 			CUR_CLIPBOARD := "" ; Null
 			CUR_CLIPBOARD := Clipboard
 		}
 		
-		if not WinActive("ahk_id " Chrome_WinID)
+		If not WinActive("ahk_id " Chrome_WinID)
 		{
-			WinActivate, ahk_id %Chrome_WinID%
-			WinWaitActive, ahk_id %Chrome_WinID%
+			WinActivate ahk_id %Chrome_WinID%
+			WinWaitActive ahk_id %Chrome_WinID%
 		}
 		
 		Clipboard := "" ; Null
-		SendInput, % Ctrl_C
-		ClipWait, 0.05
+		SendInput % Ctrl_C
+		ClipWait 0.05
 		
 		Selected_Text := "" ; Null
 		Selected_Text := Clipboard
-		if (StrLen(Selected_Text) = 0) {
-			Loop, 1
+		If (StrLen(Selected_Text) = 0) {
+			Loop 1
 			{
 				Clipboard := "" ; Null
 				CoordMode, Mouse, Screen
@@ -164,52 +164,52 @@ SC052:: ; Numpad0
 				MouseMove, 10, 110
 				Send, {Click}
 				Sleep, 5
-				SendInput, % Ctrl_C
-				ClipWait, 0.5
+				SendInput % Ctrl_C
+				ClipWait 0.5
 			}
 			CoordMode, Mouse, Screen
 			MouseMove, %X%, %Y%
 			Selected_Text := Clipboard
 		}
 		
-		if In_Array(ItemsArray, Selected_Text)
+		If In_Array(ItemsArray, Selected_Text)
 		{
-			MsgBox, 0, Error, Already in Array!, 0.5
-			return
+			MsgBox 0, Error, Already in Array!, 0.5
+			Return
 		}
 		
-		if ((StrLen(Selected_Text) = 0) or Selected_Text == CUR_CLIPBOARD)
+		If ((StrLen(Selected_Text) = 0) or Selected_Text == CUR_CLIPBOARD)
 		{
-			MsgBox, 0, Error, There is nothing to paste!, 0.5
-			return
+			MsgBox 0, Error, There is nothing to paste!, 0.5
+			Return
 		}
 		
-		if (Pattern and not RegExMatch(Selected_Text, Pattern,, 1) && StrLen(Selected_Text) < 200)
+		If (Pattern and not RegExMatch(Selected_Text, Pattern,, 1) && StrLen(Selected_Text) < 200)
 		{
-			MsgBox, 0, Error, Text not match pattern!, 0.5
-			return
+			MsgBox 0, Error, Text not match pattern!, 0.5
+			Return
 		}
 		
-		IfWinExist, ahk_id %Npp_WinID%
+		IfWinExist ahk_id %Npp_WinID%
 		{
-			WinRestore, ahk_id %Npp_WinID%
-			WinActivate, ahk_id %Npp_WinID%
-			WinWaitActive, ahk_id %Npp_WinID%
+			WinRestore ahk_id %Npp_WinID%
+			WinActivate ahk_id %Npp_WinID%
+			WinWaitActive ahk_id %Npp_WinID%
 			
-			WinGetActiveTitle, Npp_EditorTitle
+			WinGetActiveTitle Npp_EditorTitle
 			Npp_EditorTitle := RegExReplace(Npp_EditorTitle, "^[?] ", "")
 			Npp_EditorTitle := RegExReplace(Npp_EditorTitle, "^[*]", "")
 			
-			if (Npp_EditorTitle == A_ScriptName or Npp_EditorTitle != DOCUMENT_NPP_TITLE)
+			If (Npp_EditorTitle == A_ScriptName or Npp_EditorTitle != DOCUMENT_NPP_TITLE)
 			{
-				MsgBox, 0, Error, Select another document!, 1.5
-				return
+				MsgBox 0, Error, Select another document!, 1.5
+				Return
 			}
 			
 			ClipBody := Selected_Text
 			ClipText := Selected_Text
 			
-			if (InsertCounter == "Yes")
+			If (InsertCounter == "Yes")
 			{
 				Counter := ItemsArray.Length() + 1
 				ClipText := "<!-- " . Counter . " -->" . "`r`n" . ClipText
@@ -218,105 +218,105 @@ SC052:: ; Numpad0
 			EmptyLines := ""
 			AddLines := Abs(NewLines) + 1
 			
-			if (UseEnter == "No")
+			If (UseEnter == "No")
 			{
-				Loop, %AddLines%
+				Loop %AddLines%
 				{
 					EmptyLines .= "`r`n"
 				}
 				ClipText := NewLines > -1 ? ClipText . EmptyLines : EmptyLines . ClipText
 			}
-			
+						
 			Clipboard := "" ; Null
 			Clipboard := ClipText
-			ClipWait, 1.0
-			
-			if ((StrLen(Clipboard) = 0) or (not RegExMatch(Clipboard, Pattern,, 1) && StrLen(Selected_Text) < 200))
+			ClipWait 1.0
+					
+			If ((StrLen(Clipboard) = 0) or (not RegExMatch(Clipboard, Pattern,, 1) && StrLen(Selected_Text) < 200))
 			{
-				MsgBox, 0, Error, Plaease`, %A_Space%Retry!, 0.5
-				return
+				MsgBox 0, Error, Plaease`, %A_Space%Retry!, 0.5
+				Return
 			}
 			
-			if (MsgTime > 0) 
+			If (MsgTime > 0) 
 			{
-				MsgBox, 0,, %Clipboard%, % Round(MsgTime/1000, 3)
+				MsgBox 0,, %Clipboard%, % Round(MsgTime/1000, 3)
 			}
 			
-			WinActivate, ahk_id %Npp_WinID%
-			WinWaitActive, ahk_id %Npp_WinID%
+			WinActivate ahk_id %Npp_WinID%
+			WinWaitActive ahk_id %Npp_WinID%
 			
-			SendInput, {F2}
-			Sleep, 10
-			SendInput, {Up}
-			Sleep, 10
-			SendInput, {End}
-			Sleep, 10
+			SendInput {F2}
+			Sleep 10
+			SendInput {Up}
+			Sleep 10
+			SendInput {End}
+			Sleep 10
 			
-			if (UseEnter == "Yes" and NewLines < 0)
+			If (UseEnter == "Yes" and NewLines < 0)
 			{
-				SendInput, {Enter %AddLines%}
-				Sleep, 10
+				SendInput {Enter %AddLines%}
+				Sleep 10
 			}
 			
-			SendInput, % Ctrl_V ; Send Ctrl+V
+			SendInput % Ctrl_V ; Send Ctrl+V
 			
-			Sleep, 500
+			Sleep 500
 			
-			if (UseEnter == "Yes" and NewLines > -1)
+			If (UseEnter == "Yes" and NewLines > -1)
 			{
-				SendInput, {Enter %AddLines%}
-				Sleep, 10
+				SendInput {Enter %AddLines%}
+				Sleep 10
 			}
 			
-			if RegExMatch(Npp_EditorTitle, ".*[.].*",, 1)
+			If RegExMatch(Npp_EditorTitle, ".*[.].*",, 1)
 			{
-				SendInput, ^{SC01F} ; Send Ctrl+S
+				SendInput ^{SC01F} ; Send Ctrl+S
 			}
 			
 			ItemsArray.Insert(ClipBody)
 			ArrayLengthAfter := ItemsArray.Length()
 		}
 		
-		if (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore)
+		If (CloseWindow == "Yes" && ArrayLengthAfter > ArrayLengthBefore)
 		{
-			WinActivate, ahk_id %Chrome_WinID%
-			WinWaitActive, ahk_id %Chrome_WinID%
-			SendInput, ^{F4} ; Send Control+F4
+			WinActivate ahk_id %Chrome_WinID%
+			WinWaitActive ahk_id %Chrome_WinID%
+			SendInput ^{F4} ; Send Control+F4
 		}
 		
-		if (StrLen(CUR_CLIPBOARD) > 0)
+		If (StrLen(CUR_CLIPBOARD) > 0)
 		{
 			Clipboard := "" ; Null
 			Clipboard := CUR_CLIPBOARD
-			ClipWait, 1.0
+			ClipWait 1.0
 		}
 		
-		WinActivate, ahk_id %LastActive_WinID%
+		WinActivate ahk_id %LastActive_WinID%
 	}	
-	return
+	Return
 }
 
 SC04F:: ; Numpad1
 {
-	ControlGet, Bool, Visible,,, %SCRIPT_WIN_TITLE%
-	if (Bool)
+	ControlGet Bool, Visible,,, %SCRIPT_WIN_TITLE%
+	If (Bool)
 	{
-		Gui, %MainGUI%:Submit, Hide
+		Gui %MainGUI%:Submit, Hide
 	} 
-	else
+	Else
 	{
-		Gui, %MainGUI%:Show, xCenter yCenter h50 w340, %SCRIPT_WIN_TITLE%
+		Gui %MainGUI%:Show, xCenter yCenter h50 w340, %SCRIPT_WIN_TITLE%
 	}
-	return
+	Return
 }
 
 ; ------------ Gui Buttons ------------
 ResetArray:
 {
 	ItemsArray := [] ; Сброс таблицы проверки дубликатов
-	Gui, Submit, Hide
-	MsgBox, 0, %SCRIPT_WIN_TITLE%, Done!, 0.5
-	return
+	Gui Submit, Hide
+	MsgBox 0, %SCRIPT_WIN_TITLE%, Done!, 0.5
+	Return
 }
 
 #Include %A_ScriptDir%\Includes\FUNC_In_Array.ahk

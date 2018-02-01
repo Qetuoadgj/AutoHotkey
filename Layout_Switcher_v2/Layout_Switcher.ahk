@@ -1,38 +1,38 @@
 ﻿#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn, All, MsgBox ; Enable warnings to assist with detecting common errors.
-SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
+#Warn All, MsgBox ; Enable warnings to assist with detecting common errors.
+SendMode Input ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
-#Warn, ClassOverwrite, Off
+#Warn ClassOverwrite, Off
 
-ListLines, Off	; Disable them as they're only useful for debugging purposes.
-#KeyHistory, 0	; ListLines and #KeyHistory are functions used to "log your keys".
+ListLines Off	; Disable them as they're only useful for debugging purposes.
+#KeyHistory 0	; ListLines and #KeyHistory are functions used to "log your keys".
 
-DetectHiddenWindows, On
+DetectHiddenWindows On
 
 /* Generic optimizations 			; https://autohotkey.com/boards/viewtopic.php?f=6&t=6413
 #NoEnv								; #NoEnv is recommended for all scripts, it disables environment variables.
-#MaxHotkeysPerInterval, 99000000		; The default #MaxHotkeysPerInterval along with #HotkeyInterval will stop your script by showing message boxes if you have some kind of rapid autofire loop in it.
-#HotkeyInterval, 99000000			; Just put some insane unreachable high number to ignore this limit.
-#KeyHistory, 0						; ListLines and #KeyHistory are functions used to "log your keys".
-ListLines, Off						; Disable them as they're only useful for debugging purposes.
-; Process, Priority,, A				; Setting an higher priority to a Windows program is supposed to improve its performance. Use AboveNormal/A. If you feel like it's making things worse, comment or remove this line.
-SetBatchLines, -1					; The default SetBatchLines value makes your script sleep 10 milliseconds every line. Make it -1 to not sleep (but remember to include at least one Sleep in your loops, if any!)
-SetKeyDelay, -1, -1					; Even though SendInput ignores SetKeyDelay, SetMouseDelay and SetDefaultMouseSpeed,
-SetMouseDelay, -1					; having these delays at -1 improves SendEvent's speed just in case SendInput is not available and falls back to SendEvent.
-SetDefaultMouseSpeed, 0				;
-SetWinDelay, -1						; SetWinDelay and SetControlDelay may affect performance depending on the script.
-SetControlDelay, -1					;
-SendMode, Input						; SendInput is the fastest send method. SendEvent (the default one) is 2nd place, SendPlay a far 3rd place (it's the most compatible one though). SendInput does not obey to SetKeyDelay, SetMouseDelay, SetDefaultMouseSpeed; there is no delay between keystrokes in that mode.
+#MaxHotkeysPerInterval 99000000		; The default #MaxHotkeysPerInterval along with #HotkeyInterval will stop your script by showing message boxes if you have some kind of rapid autofire loop in it.
+#HotkeyInterval 99000000			; Just put some insane unreachable high number to ignore this limit.
+#KeyHistory 0						; ListLines and #KeyHistory are functions used to "log your keys".
+ListLines Off						; Disable them as they're only useful for debugging purposes.
+; Process Priority,, A				; Setting an higher priority to a Windows program is supposed to improve its performance. Use AboveNormal/A. If you feel like it's making things worse, comment or remove this line.
+SetBatchLines -1					; The default SetBatchLines value makes your script sleep 10 milliseconds every line. Make it -1 to not sleep (but remember to include at least one Sleep in your loops, if any!)
+SetKeyDelay -1, -1					; Even though SendInput ignores SetKeyDelay, SetMouseDelay and SetDefaultMouseSpeed,
+SetMouseDelay -1					; having these delays at -1 improves SendEvent's speed just in case SendInput is not available and falls back to SendEvent.
+SetDefaultMouseSpeed 0				;
+SetWinDelay -1						; SetWinDelay and SetControlDelay may affect performance depending on the script.
+SetControlDelay -1					;
+SendMode Input						; SendInput is the fastest send method. SendEvent (the default one) is 2nd place, SendPlay a far 3rd place (it's the most compatible one though). SendInput does not obey to SetKeyDelay, SetMouseDelay, SetDefaultMouseSpeed; there is no delay between keystrokes in that mode.
 */
 
 ; Определение классов (для исключения их прямой перезаписи)
-; New Script		:= c_Script
-; New Task_Sheduler	:= c_Task_Sheduler
-; New Windows		:= c_Windows
-; New Window		:= c_Window
-; New Layout		:= c_Layout
-; New Edit_Text		:= c_Edit_Text
+; new Script		:= c_Script
+; new Task_Sheduler	:= c_Task_Sheduler
+; new Windows		:= c_Windows
+; new Window		:= c_Window
+; new Layout		:= c_Layout
+; new Edit_Text		:= c_Edit_Text
 ;
 
 Script_Name := Script.Name()
@@ -43,9 +43,9 @@ Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
 
 Clipboard_Tmp := "" ; Null
 
-gosub, CREATE_LOCALIZATION
-gosub, SET_DEFAULTS
-gosub, READ_CONFIG_FILE
+gosub CREATE_LOCALIZATION
+gosub SET_DEFAULTS
+gosub READ_CONFIG_FILE
 
 if (system_start_with_admin_rights) {
 	Script.Run_As_Admin(%0%)
@@ -57,20 +57,20 @@ if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(
 
 App_PID := DllCall("GetCurrentProcessId")
 if (system_run_with_high_priority) {
-	Process, Priority, %App_PID%, High
+	Process Priority, %App_PID%, High
 }
 else {
-	Process, Priority, %App_PID%, Normal
+	Process Priority, %App_PID%, Normal
 }
 
-gosub, FLAG_Create_GUI
-gosub, FLAG_Customize_Menus
-gosub, FLAG_Add_Picture
+gosub FLAG_Create_GUI
+gosub FLAG_Customize_Menus
+gosub FLAG_Add_Picture
 
 Last_Layout_Full_Name := ""
-SetTimer, FLAG_Update, % system_check_layout_change_interval
+SetTimer FLAG_Update, % system_check_layout_change_interval
 
-gosub, SAVE_CONFIG_FILE
+gosub SAVE_CONFIG_FILE
 
 SystemCursor("On")
 
@@ -85,34 +85,34 @@ CREATE_LOCALIZATION:
 	; MsgBox, % Translation_Language
 	
 	; Info
-	IniRead, l_info_app_site, %Translation_File%, Info, info_app_site, % "App Site"
-	IniRead, l_info_app_update, %Translation_File%, Info, info_app_update, % "Update App"
+	IniRead l_info_app_site, %Translation_File%, Info, info_app_site, % "App Site"
+	IniRead l_info_app_update, %Translation_File%, Info, info_app_update, % "Update App"
 	
 	; System
-	IniRead, l_system_suspend_hotkeys, %Translation_File%, System, system_suspend_hotkeys, % "Suspend HotKeys"
-	IniRead, l_system_enable_auto_start, %Translation_File%, System, system_enable_auto_start, % "Auto Start"
-	IniRead, l_system_start_with_admin_rights, %Translation_File%, System, system_start_with_admin_rights, % "Admin Rights"
-	IniRead, l_system_run_with_high_priority, %Translation_File%, System, system_run_with_high_priority, % "High priority"
+	IniRead l_system_suspend_hotkeys, %Translation_File%, System, system_suspend_hotkeys, % "Suspend HotKeys"
+	IniRead l_system_enable_auto_start, %Translation_File%, System, system_enable_auto_start, % "Auto Start"
+	IniRead l_system_start_with_admin_rights, %Translation_File%, System, system_start_with_admin_rights, % "Admin Rights"
+	IniRead l_system_run_with_high_priority, %Translation_File%, System, system_run_with_high_priority, % "High priority"
 	; IniRead, l_system_encoding_compatibility_mode, %Translation_File%, System, system_encoding_compatibility_mode, % "Encoding Compatibility Mode"
-	IniRead, l_system_show_tray_icon, %Translation_File%, System, system_show_tray_icon, % "Show Tray Icon"
-	IniRead, l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
-	IniRead, l_system_fix_config_file_encoding, %Translation_File%, System, system_fix_config_file_encoding, % "Fix Config File Encoding"
-	IniRead, l_system_switch_layouts_by_send, %Translation_File%, System, system_switch_layouts_by_send, % "Use Alternative Layout Switch"
+	IniRead l_system_show_tray_icon, %Translation_File%, System, system_show_tray_icon, % "Show Tray Icon"
+	IniRead l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
+	IniRead l_system_fix_config_file_encoding, %Translation_File%, System, system_fix_config_file_encoding, % "Fix Config File Encoding"
+	IniRead l_system_switch_layouts_by_send, %Translation_File%, System, system_switch_layouts_by_send, % "Use Alternative Layout Switch"
 	
 	; Flag
-	IniRead, l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
-	IniRead, l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
-	IniRead, l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
-	IniRead, l_flag_hide_in_fullscreen_mode, %Translation_File%, Flag, flag_hide_in_fullscreen_mode, % "Hide In Fullscreen Mode"
+	IniRead l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
+	IniRead l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
+	IniRead l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
+	IniRead l_flag_hide_in_fullscreen_mode, %Translation_File%, Flag, flag_hide_in_fullscreen_mode, % "Hide In Fullscreen Mode"
 	
 	; Sound
-	IniRead, l_sound_enable, %Translation_File%, Sound, sound_enable, % "Enable Sounds"
+	IniRead l_sound_enable, %Translation_File%, Sound, sound_enable, % "Enable Sounds"
 	
 	; App
-	IniRead, l_app_restart, %Translation_File%, App, app_restart, % "Restart App"
-	IniRead, l_app_exit, %Translation_File%, App, app_exit, % "Close App"
-	IniRead, l_app_options, %Translation_File%, App, app_options, % "Open Settings"
-	IniRead, l_app_generate_dictionaries, %Translation_File%, App, app_generate_dictionaries, % "Generate Dictionaries"
+	IniRead l_app_restart, %Translation_File%, App, app_restart, % "Restart App"
+	IniRead l_app_exit, %Translation_File%, App, app_exit, % "Close App"
+	IniRead l_app_options, %Translation_File%, App, app_options, % "Open Settings"
+	IniRead l_app_generate_dictionaries, %Translation_File%, App, app_generate_dictionaries, % "Generate Dictionaries"
 	
 	return
 }
@@ -183,33 +183,33 @@ SET_DEFAULTS:
 READ_CONFIG_FILE:
 {
 	; Info
-	IniRead, info_app_site, %Config_File%, Info, info_app_site, % Defaults.info_app_site
-	IniRead, info_updater, %Config_File%, Info, info_updater, % Defaults.info_updater
+	IniRead info_app_site, %Config_File%, Info, info_app_site, % Defaults.info_app_site
+	IniRead info_updater, %Config_File%, Info, info_updater, % Defaults.info_updater
 	
 	Normalize("info_updater", Defaults.info_updater)
 	
 	; System
-	IniRead, system_suspend_hotkeys, %Config_File%, System, system_suspend_hotkeys, % Defaults.system_suspend_hotkeys
-	IniRead, system_enable_auto_start, %Config_File%, System, system_enable_auto_start, % Defaults.system_enable_auto_start
-	IniRead, system_start_with_admin_rights, %Config_File%, System, system_start_with_admin_rights, % Defaults.system_start_with_admin_rights
-	IniRead, system_run_with_high_priority, %Config_File%, System, system_run_with_high_priority, % Defaults.system_run_with_high_priority
-	IniRead, system_check_layout_change_interval, %Config_File%, System, system_check_layout_change_interval, % Defaults.system_check_layout_change_interval
-	IniRead, system_detect_dictionary, %Config_File%, System, system_detect_dictionary, % Defaults.system_detect_dictionary
+	IniRead system_suspend_hotkeys, %Config_File%, System, system_suspend_hotkeys, % Defaults.system_suspend_hotkeys
+	IniRead system_enable_auto_start, %Config_File%, System, system_enable_auto_start, % Defaults.system_enable_auto_start
+	IniRead system_start_with_admin_rights, %Config_File%, System, system_start_with_admin_rights, % Defaults.system_start_with_admin_rights
+	IniRead system_run_with_high_priority, %Config_File%, System, system_run_with_high_priority, % Defaults.system_run_with_high_priority
+	IniRead system_check_layout_change_interval, %Config_File%, System, system_check_layout_change_interval, % Defaults.system_check_layout_change_interval
+	IniRead system_detect_dictionary, %Config_File%, System, system_detect_dictionary, % Defaults.system_detect_dictionary
 	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, % Defaults.system_encoding_compatibility_mode
-	IniRead, system_show_tray_icon, %Config_File%, System, system_show_tray_icon, % Defaults.system_show_tray_icon
-	IniRead, system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, % Defaults.system_skip_unused_dictionaries
-	IniRead, system_fix_config_file_encoding, %Config_File%, System, system_fix_config_file_encoding, % Defaults.system_fix_config_file_encoding
-	IniRead, system_switch_layouts_by_send, %Config_File%, System, system_switch_layouts_by_send, % Defaults.system_switch_layouts_by_send
+	IniRead system_show_tray_icon, %Config_File%, System, system_show_tray_icon, % Defaults.system_show_tray_icon
+	IniRead system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, % Defaults.system_skip_unused_dictionaries
+	IniRead system_fix_config_file_encoding, %Config_File%, System, system_fix_config_file_encoding, % Defaults.system_fix_config_file_encoding
+	IniRead system_switch_layouts_by_send, %Config_File%, System, system_switch_layouts_by_send, % Defaults.system_switch_layouts_by_send
 	
 	; Flag
-	IniRead, flag_width, %Config_File%, Flag, flag_width, % Defaults.flag_width
-	IniRead, flag_height, %Config_File%, Flag, flag_height, % Defaults.flag_height
-	IniRead, flag_position_x, %Config_File%, Flag, flag_position_x, % Defaults.flag_position_x
-	IniRead, flag_position_y, %Config_File%, Flag, flag_position_y, % Defaults.flag_position_y
-	IniRead, flag_show_borders, %Config_File%, Flag, flag_show_borders, % Defaults.flag_show_borders
-	IniRead, flag_always_on_top, %Config_File%, Flag, flag_always_on_top, % Defaults.flag_always_on_top
-	IniRead, flag_fixed_position, %Config_File%, Flag, flag_fixed_position, % Defaults.flag_fixed_position
-	IniRead, flag_hide_in_fullscreen_mode, %Config_File%, Flag, flag_hide_in_fullscreen_mode, % Defaults.flag_hide_in_fullscreen_mode
+	IniRead flag_width, %Config_File%, Flag, flag_width, % Defaults.flag_width
+	IniRead flag_height, %Config_File%, Flag, flag_height, % Defaults.flag_height
+	IniRead flag_position_x, %Config_File%, Flag, flag_position_x, % Defaults.flag_position_x
+	IniRead flag_position_y, %Config_File%, Flag, flag_position_y, % Defaults.flag_position_y
+	IniRead flag_show_borders, %Config_File%, Flag, flag_show_borders, % Defaults.flag_show_borders
+	IniRead flag_always_on_top, %Config_File%, Flag, flag_always_on_top, % Defaults.flag_always_on_top
+	IniRead flag_fixed_position, %Config_File%, Flag, flag_fixed_position, % Defaults.flag_fixed_position
+	IniRead flag_hide_in_fullscreen_mode, %Config_File%, Flag, flag_hide_in_fullscreen_mode, % Defaults.flag_hide_in_fullscreen_mode
 	
 	Normalize("flag_width", Defaults.flag_width)
 	Normalize("flag_height", Defaults.flag_height)
@@ -217,52 +217,52 @@ READ_CONFIG_FILE:
 	Normalize("flag_position_y", Defaults.flag_position_y)
 	
 	; Sound
-	IniRead, sound_enable, %Config_File%, Sound, sound_enable, % Defaults.sound_enable
-	IniRead, sound_switch_keyboard_layout, %Config_File%, Sound, sound_switch_keyboard_layout, % Defaults.sound_switch_keyboard_layout
-	IniRead, sound_switch_text_case, %Config_File%, Sound, sound_switch_text_case, % Defaults.sound_switch_text_case
-	IniRead, sound_switch_text_layout, %Config_File%, Sound, sound_switch_text_layout, % Defaults.sound_switch_text_layout
-	IniRead, sound_toggle_cursor, %Config_File%, Sound, sound_toggle_cursor, % Defaults.sound_toggle_cursor
+	IniRead sound_enable, %Config_File%, Sound, sound_enable, % Defaults.sound_enable
+	IniRead sound_switch_keyboard_layout, %Config_File%, Sound, sound_switch_keyboard_layout, % Defaults.sound_switch_keyboard_layout
+	IniRead sound_switch_text_case, %Config_File%, Sound, sound_switch_text_case, % Defaults.sound_switch_text_case
+	IniRead sound_switch_text_layout, %Config_File%, Sound, sound_switch_text_layout, % Defaults.sound_switch_text_layout
+	IniRead sound_toggle_cursor, %Config_File%, Sound, sound_toggle_cursor, % Defaults.sound_toggle_cursor
 	; IniRead sound_toggle_fullscreen, %Config_File%, Sound, sound_toggle_fullscreen, % Defaults.sound_toggle_fullscreen
 	
 	; HotKeys
-	IniRead, key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, % Defaults.key_switch_keyboard_layout
-	IniRead, key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, % Defaults.key_switch_text_case
-	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
-	IniRead, key_toggle_cursor, %Config_File%, HotKeys, key_toggle_cursor, % Defaults.key_toggle_cursor
+	IniRead key_switch_keyboard_layout, %Config_File%, HotKeys, key_switch_keyboard_layout, % Defaults.key_switch_keyboard_layout
+	IniRead key_switch_text_case, %Config_File%, HotKeys, key_switch_text_case, % Defaults.key_switch_text_case
+	IniRead key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
+	IniRead key_toggle_cursor, %Config_File%, HotKeys, key_toggle_cursor, % Defaults.key_toggle_cursor
 	; IniRead key_toggle_fullscreen, %Config_File%, HotKeys, key_toggle_fullscreen, % Defaults.key_toggle_fullscreen
 	
 	; KeyCombos
-	IniRead, combo_switch_layout, %Config_File%, KeyCombos, combo_switch_layout, % Defaults.combo_switch_layout
+	IniRead combo_switch_layout, %Config_File%, KeyCombos, combo_switch_layout, % Defaults.combo_switch_layout
 	Normalize("combo_switch_layout", Defaults.combo_switch_layout)
 	Layout.Switch_Layout_Combo := combo_switch_layout
 	
 	; Text
-	IniRead, text_title_case_symbols, %Config_File%, Text, text_title_case_symbols, % Defaults.text_title_case_symbols
-	IniRead, text_title_case_match, %Config_File%, Text, text_title_case_match, % Defaults.text_title_case_match
-	IniRead, text_upper_case_words, %Config_File%, Text, text_upper_case_words, % Defaults.text_upper_case_words
+	IniRead text_title_case_symbols, %Config_File%, Text, text_title_case_symbols, % Defaults.text_title_case_symbols
+	IniRead text_title_case_match, %Config_File%, Text, text_title_case_match, % Defaults.text_title_case_match
+	IniRead text_upper_case_words, %Config_File%, Text, text_upper_case_words, % Defaults.text_upper_case_words
 	
 	Edit_Text.Title_Case_Symbols := text_title_case_symbols
 	Edit_Text.Title_Case_Match := text_title_case_match
 	Edit_Text.Upper_Case_Words := text_upper_case_words
 	
 	; Dictionaries
-	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, % Defaults.dictionary_english
-	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, % Defaults.dictionary_russian
-	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, % Defaults.dictionary_ukrainian
+	IniRead dictionary_english, %Config_File%, Dictionaries, dictionary_english, % Defaults.dictionary_english
+	IniRead dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, % Defaults.dictionary_russian
+	IniRead dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, % Defaults.dictionary_ukrainian
 	
 	Get_Dictionaries(Config_File, "Dictionaries", "dictionary_", system_skip_unused_dictionaries)
 	; Remove_Unused_Dictionaries()
 	
 	; for k, v in Edit_Text.Dictionaries_Order {
-		; MsgBox, % v
+	; MsgBox, % v
 	; }
 	
 	Get_Binds(Config_File, "HotKeys", "key_")
 	
 	/*
 	if (system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
-		Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
-		; system_enable_auto_start := Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)
+	Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+	; system_enable_auto_start := Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)
 	}
 	*/
 	
@@ -273,9 +273,9 @@ READ_CONFIG_FILE:
 			ini_data := ini.Read()
 			if (ini_data) {
 				ini.Close()
-				MsgBox, 0, Test, % "Encoding of the program: " app_ecoding "`n" "Encoding of " Config_File ": " ini.Encoding
-				FileDelete, %Config_File%
-				FileAppend, %ini_data%, %Config_File%, %app_ecoding%
+				MsgBox 0, Test, % "Encoding of the program: " app_ecoding "`n" "Encoding of " Config_File ": " ini.Encoding
+				FileDelete %Config_File%
+				FileAppend %ini_data%, %Config_File%, %app_ecoding%
 			}
 		}
 	}
@@ -283,7 +283,7 @@ READ_CONFIG_FILE:
 	/*
 	for key, value in Defaults
 	{ ; нормализация переменных
-		Normalize(key, value)
+	Normalize(key, value)
 	}
 	*/
 	
@@ -353,15 +353,15 @@ SAVE_CONFIG_FILE:
 SWITCH_KEYBOARD_LAYOUT:
 {
 	if WinActive("ahk_id " Windows.Tray_ID) {
-		WinActivate, % "ahk_id " Windows.Desktop_ID
+		WinActivate % "ahk_id " Windows.Desktop_ID
 	}
 	Layout.Next("A", system_switch_layouts_by_send)
 	Layout_HKL := Layout.Get_HKL("A")
 	ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
-		SoundPlay, %sound_switch_keyboard_layout%
+		SoundPlay %sound_switch_keyboard_layout%
 	}
-	Sleep, 50
+	Sleep 50
 	return
 }
 
@@ -369,33 +369,33 @@ TOGGLE_CURSOR:
 {
 	SystemCursor("Toggle")
 	if (sound_enable and FileExist(sound_toggle_cursor)) {
-		SoundPlay, %sound_toggle_cursor%
+		SoundPlay %sound_toggle_cursor%
 	}
-	Sleep, 50
+	Sleep 50
 	return
 }
 /*
 TOGGLE_FULLSCREEN:
 {
-	WinGet, Win_PID, PID, A
-	if (Win_PID != App_PID) {
-		WinGet, Style, Style, A
-		if (Style & 0xC40000) {
-			WinSet, Style, -0xC40000, A
-			WinMaximize, A
-			; if WinActive("ahk_exe chrome.exe") {
-				; WinMove, A,, -5, -15, % A_ScreenWidth + 5*2, % A_ScreenHeight + 5 + 15
-			; }
-		}
-		else {
-			WinSet, Style, +0xC40000, A
-			WinRestore, A
-			; if WinActive("ahk_exe chrome.exe") {
-				; WinMove, A,, 0, 0, % A_ScreenWidth / 2, % A_ScreenHeight / 2
-			; }
-		}
-	}
-	return
+WinGet, Win_PID, PID, A
+if (Win_PID != App_PID) {
+WinGet Style, Style, A
+if (Style & 0xC40000) {
+WinSet Style, -0xC40000, A
+WinMaximize A
+; if WinActive("ahk_exe chrome.exe") {
+; WinMove A,, -5, -15, % A_ScreenWidth + 5*2, % A_ScreenHeight + 5 + 15
+; }
+}
+else {
+WinSet Style, +0xC40000, A
+WinRestore A
+; if WinActive("ahk_exe chrome.exe") {
+; WinMove A,, 0, 0, % A_ScreenWidth / 2, % A_ScreenHeight / 2
+; }
+}
+}
+return
 }
 */
 SWITCH_TEXT_CASE:
@@ -406,13 +406,13 @@ SWITCH_TEXT_CASE:
 		Converted_Text := Edit_Text.Convert_Case(Selected_Text, false)
 		Edit_Text.Paste(Converted_Text)
 		if (sound_enable and FileExist(sound_switch_text_case)) {
-			SoundPlay, %sound_switch_text_case%
+			SoundPlay %sound_switch_text_case%
 		}
 	}
-	Sleep, 50
+	Sleep 50
 	Clipboard := "" ; Null
 	Clipboard := Clipboard_Tmp
-	ClipWait, 0.05
+	ClipWait 0.05
 	return
 }
 
@@ -442,13 +442,13 @@ SWITCH_TEXT_LAYOUT:
 			}
 		}
 		if (sound_enable and FileExist(sound_switch_text_layout)) {
-			SoundPlay, %sound_switch_text_layout%
+			SoundPlay %sound_switch_text_layout%
 		}
 	}
-	Sleep, 50
+	Sleep 50
 	Clipboard := "" ; Null
 	Clipboard := Clipboard_Tmp
-	ClipWait, 0.05
+	ClipWait 0.05
 	return
 }
 ; */
@@ -456,44 +456,44 @@ SWITCH_TEXT_LAYOUT:
 /*
 SWITCH_TEXT_LAYOUT:
 {
-	Clipboard_Tmp := "" ; Null
-	Clipboard_Tmp := Clipboard
-	if (Selected_Text := Edit_Text.Select()) {
-		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
-		if (not Selected_Text_Dictionary) {
-			Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
-			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
-		}
-		if (Selected_Text_Dictionary) {
-			Text_Dictionary_Index := Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Selected_Text_Dictionary)
-			Next_Dictionary_Index := Text_Dictionary_Index + 1 > Edit_Text.Dictionaries_Order.MaxIndex() ? 1 : Text_Dictionary_Index + 1
-			Next_Dictionary_Name := Edit_Text.Dictionaries_Order[Next_Dictionary_Index]
-			
-			MsgBox, % Selected_Text_Dictionary "`n" Next_Dictionary_Name
-			
-			Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text_Dictionary, Next_Dictionary_Name)
-			Edit_Text.Paste(Converted_Text)
-			
-			if (Next_Layout_Index :=  Layout.Get_Index_By_Name(Next_Dictionary_Name)) {
-				Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
-				Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
-				Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
-				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
-				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
-			}
-			else {
-				ToolTip(Next_Dictionary_Name)
-			}
-		}
-		if (sound_enable and FileExist(sound_switch_text_layout)) {
-			SoundPlay, %sound_switch_text_layout%
-		}
-	}
-	Sleep, 50
-	Clipboard := "" ; Null
-	Clipboard := Clipboard_Tmp
-	ClipWait, 0.05
-	return
+Clipboard_Tmp := "" ; Null
+Clipboard_Tmp := Clipboard
+if (Selected_Text := Edit_Text.Select()) {
+Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
+if (not Selected_Text_Dictionary) {
+Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
+Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
+}
+if (Selected_Text_Dictionary) {
+Text_Dictionary_Index := Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Selected_Text_Dictionary)
+Next_Dictionary_Index := Text_Dictionary_Index + 1 > Edit_Text.Dictionaries_Order.MaxIndex() ? 1 : Text_Dictionary_Index + 1
+Next_Dictionary_Name := Edit_Text.Dictionaries_Order[Next_Dictionary_Index]
+
+MsgBox % Selected_Text_Dictionary "`n" Next_Dictionary_Name
+
+Converted_Text := Edit_Text.Replace_By_Dictionaries(Selected_Text, Selected_Text_Dictionary, Next_Dictionary_Name)
+Edit_Text.Paste(Converted_Text)
+
+if (Next_Layout_Index :=  Layout.Get_Index_By_Name(Next_Dictionary_Name)) {
+Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL
+Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
+Next_Layout_Full_Name := Layout.Layouts_List[Next_Layout_Index].Full_Name
+Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
+ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
+}
+else {
+ToolTip(Next_Dictionary_Name)
+}
+}
+if (sound_enable and FileExist(sound_switch_text_layout)) {
+SoundPlay %sound_switch_text_layout%
+}
+}
+Sleep 50
+Clipboard := "" ; Null
+Clipboard := Clipboard_Tmp
+ClipWait 0.05
+return
 }
 */
 
@@ -504,20 +504,20 @@ Get_Dictionaries(Config_File, Section, Prefix := "", Skip_Unused := False)
 	static Key
 	static Value
 	;
-	IniRead, Dictionaries_List, %Config_File%, %Section%
+	IniRead Dictionaries_List, %Config_File%, %Section%
 	Edit_Text.Dictionaries := {}
 	; Edit_Text.Dictionaries_Order := []
-	Loop, Parse, Dictionaries_List, `n, `r
+	Loop Parse, Dictionaries_List, `n, `r
 	{
 		if RegExMatch(A_LoopField, Prefix . "(.*?)=(.*)", Match) {
 			Key := Trim(Match1)
 			if (Skip_Unused and not Layout.Get_Index_By_Name(Key)) { ; пропуск словарей, для которых нет раскладки
-				continue
+				Continue
 			}
-			IniRead, Value, %Config_File%, %Section%, % Prefix . Key
+			IniRead Value, %Config_File%, %Section%, % Prefix . Key
 			Edit_Text.Dictionaries[Key] := Value
 			; if not In_Array(Edit_Text.Dictionaries_Order, Key) {
-				; Edit_Text.Dictionaries_Order.Push(Key)
+			; Edit_Text.Dictionaries_Order.Push(Key)
 			; }
 			; MsgBox, % Prefix . Key "`n" Value
 		}
@@ -527,16 +527,16 @@ Get_Dictionaries(Config_File, Section, Prefix := "", Skip_Unused := False)
 /*
 Remove_Unused_Dictionaries()
 { ; функция удаления словарей, для которых нет раскладки
-	static Dictionary_Name
-	;
-	for Dictionary_Name in Edit_Text.Dictionaries
-	{
-		if (not Layout.Get_Index_By_Name(Dictionary_Name)) {
-			Edit_Text.Dictionaries.Delete(Dictionary_Name)
-			Edit_Text.Dictionaries_Order.Delete(Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Dictionary_Name))
-			; MsgBox, % Dictionary_Name
-		}
-	}
+static Dictionary_Name
+;
+for Dictionary_Name in Edit_Text.Dictionaries
+{
+if (not Layout.Get_Index_By_Name(Dictionary_Name)) {
+Edit_Text.Dictionaries.Delete(Dictionary_Name)
+Edit_Text.Dictionaries_Order.Delete(Table.Get_Key_Index(Edit_Text.Dictionaries_Order, Dictionary_Name))
+; MsgBox, % Dictionary_Name
+}
+}
 }
 */
 
@@ -548,14 +548,14 @@ Get_Binds(Config_File, Section, Prefix := "")
 	static Key
 	static Value
 	;
-	IniRead, Binds_List, %Config_File%, %Section%
-	Loop, Parse, Binds_List, `n, `r
+	IniRead Binds_List, %Config_File%, %Section%
+	Loop Parse, Binds_List, `n, `r
 	{
 		if RegExMatch(A_LoopField, Prefix . "(.*?)=(.*)", Match) {
 			Key := Trim(Match1)
-			IniRead, Value, %Config_File%, %Section%, % Prefix . Key
+			IniRead Value, %Config_File%, %Section%, % Prefix . Key
 			if (Value != "ERROR" and IsLabel(Key)) {
-				Hotkey, %Value%, %Key%, UseErrorLevel
+				Hotkey %Value%, %Key%, UseErrorLevel
 				; MsgBox, % Key "`n" Value
 			}
 		}
@@ -565,32 +565,32 @@ Get_Binds(Config_File, Section, Prefix := "")
 FLAG_Create_GUI:
 {
 	; Gui, FLAG_: Color, FFFFFF
-	Gui, FLAG_: -SysMenu +Owner -Caption +ToolWindow
+	Gui FLAG_: -SysMenu +Owner -Caption +ToolWindow
 	
 	if (flag_always_on_top) {
-		Gui, FLAG_: +AlwaysOnTop
+		Gui FLAG_: +AlwaysOnTop
 	}
 	else {
-		Gui, FLAG_: -AlwaysOnTop
+		Gui FLAG_: -AlwaysOnTop
 	}
 	
 	if (flag_show_borders) {
-		Gui, FLAG_: +Border
+		Gui FLAG_: +Border
 	}
 	else {
-		Gui, FLAG_: -Border
+		Gui FLAG_: -Border
 	}
 	
-	Gui, FLAG_: Show, w%flag_width% h%flag_height% x%flag_position_x% y%flag_position_y%
-	Gui, FLAG_: +LastFound
-	WinGet, flag_win_id, ID
+	Gui FLAG_: Show, w%flag_width% h%flag_height% x%flag_position_x% y%flag_position_y%
+	Gui FLAG_: +LastFound
+	WinGet flag_win_id, ID
 	OnMessage(WM_LBUTTONDOWN := 0x201, "FLAG_WM_LBUTTONDOWN") ; Зажата LMB
 	return
 }
 
 FLAG_GuiContextMenu:
 { ; Клик RMB по флагу (Gui, FLAG_:...)
-	Menu, Tray, Show
+	Menu Tray, Show
 	return
 }
 
@@ -600,16 +600,16 @@ FLAG_WM_LBUTTONDOWN()
 	if (flag_fixed_position) {
 		return
 	}
-	PostMessage, WM_NCLBUTTONDOWN := 0xA1, 2
-	Sleep, 250
-	PostMessage, WM_NCLBUTTONUP := 0xA2, 2
-	gosub, FLAG_Save_Position
+	PostMessage WM_NCLBUTTONDOWN := 0xA1, 2
+	Sleep 250
+	PostMessage WM_NCLBUTTONUP := 0xA2, 2
+	gosub FLAG_Save_Position
 	return
 }
 
 FLAG_Save_Position:
 {
-	WinGetPos, flag_position_x, flag_position_y,,, ahk_id %flag_win_id%
+	WinGetPos flag_position_x, flag_position_y,,, ahk_id %flag_win_id%
 	IniWrite("flag_position_x", Config_File, "Flag", flag_position_x)
 	IniWrite("flag_position_y", Config_File, "Flag", flag_position_y)
 	return
@@ -617,7 +617,7 @@ FLAG_Save_Position:
 
 FLAG_Add_Picture:
 {
-	Gui, FLAG_: Add, Picture, x0 y0 w%flag_width% h%flag_height% vFLAG_PICTURE
+	Gui FLAG_: Add, Picture, x0 y0 w%flag_width% h%flag_height% vFLAG_PICTURE
 	return
 }
 
@@ -626,10 +626,10 @@ FLAG_Update:
 	if (flag_always_on_top) {
 		if (flag_hide_in_fullscreen_mode and Window.Is_Full_Screen("A")) {
 			; Gui, FLAG_: -AlwaysOnTop
-			WinSet, Bottom,, ahk_id %flag_win_id%
+			WinSet Bottom,, ahk_id %flag_win_id%
 		}
 		else {
-			Gui, FLAG_: +AlwaysOnTop
+			Gui FLAG_: +AlwaysOnTop
 		}
 	}
 	Current_Layout_HKL := Layout.Get_HKL("A")
@@ -640,9 +640,9 @@ FLAG_Update:
 	if (Current_Layout_Full_Name = Last_Layout_Full_Name) {
 		return
 	}
-	gosub, FLAG_Update_Picture
+	gosub FLAG_Update_Picture
 	if (system_show_tray_icon) {
-		gosub, FLAG_Update_Tray_Icon
+		gosub FLAG_Update_Tray_Icon
 	}
 	Last_Layout_Full_Name := Current_Layout_Full_Name
 	return
@@ -651,7 +651,7 @@ FLAG_Update:
 FLAG_Update_Picture:
 {
 	Current_Layout_Png := A_WorkingDir "\images\" Current_Layout_Full_Name ".png"
-	GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%flag_width% *h%flag_height% %Current_Layout_Png%
+	GuiControl FLAG_:, FLAG_PICTURE, *x0 *y0 *w%flag_width% *h%flag_height% %Current_Layout_Png%
 	return
 }
 
@@ -659,107 +659,107 @@ FLAG_Update_Tray_Icon:
 {
 	Current_Layout_Ico := A_WorkingDir "\icons\" Current_Layout_Full_Name ".ico"
 	if FileExist(Current_Layout_Ico) {
-		Menu, Tray, Icon, %Current_Layout_Ico%
+		Menu Tray, Icon, %Current_Layout_Ico%
 	}
 	else {
-		Menu, Tray, Icon, *
+		Menu Tray, Icon, *
 	}
-	Menu, Tray, Tip, %Current_Layout_Full_Name%
+	Menu Tray, Tip, %Current_Layout_Full_Name%
 	return
 }
 
 FLAG_Customize_Menus:
 {
-	Menu, Tray, NoStandard
+	Menu Tray, NoStandard
 	
-	Menu, Tray, Add, %l_system_suspend_hotkeys%, Menu_Toggle_Suspend
+	Menu Tray, Add, %l_system_suspend_hotkeys%, Menu_Toggle_Suspend
 	if (system_suspend_hotkeys) {
-		Suspend, On
-		Menu, Tray, Check, %l_system_suspend_hotkeys%
+		Suspend On
+		Menu Tray, Check, %l_system_suspend_hotkeys%
 	}
 	
-	Menu, Tray, Add, %l_system_enable_auto_start%, Menu_Toggle_Auto_Start
+	Menu Tray, Add, %l_system_enable_auto_start%, Menu_Toggle_Auto_Start
 	if (system_enable_auto_start and Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
-		Menu, Tray, Check, %l_system_enable_auto_start%
+		Menu Tray, Check, %l_system_enable_auto_start%
 	}
 	
-	Menu, Tray, Add, %l_system_start_with_admin_rights%, Menu_Toggle_Admin_Rights
+	Menu Tray, Add, %l_system_start_with_admin_rights%, Menu_Toggle_Admin_Rights
 	if (system_start_with_admin_rights) {
-		Menu, Tray, Check, %l_system_start_with_admin_rights%
+		Menu Tray, Check, %l_system_start_with_admin_rights%
 	}
 	
-	Menu, Tray, Add, %l_system_run_with_high_priority%, Menu_Toggle_High_Priority
+	Menu Tray, Add, %l_system_run_with_high_priority%, Menu_Toggle_High_Priority
 	if (system_run_with_high_priority) {
-		Menu, Tray, Check, %l_system_run_with_high_priority%
+		Menu Tray, Check, %l_system_run_with_high_priority%
 	}
 	
-	Menu, Tray, Add, %l_system_show_tray_icon%, Menu_Toggle_Show_Tray_Icon
+	Menu Tray, Add, %l_system_show_tray_icon%, Menu_Toggle_Show_Tray_Icon
 	if (system_show_tray_icon) {
-		Menu, Tray, Check, %l_system_show_tray_icon%
-		Menu, Tray, Icon
+		Menu Tray, Check, %l_system_show_tray_icon%
+		Menu Tray, Icon
 	}
 	else {
-		Menu, Tray, NoIcon
+		Menu Tray, NoIcon
 	}
 	
-	Menu, Tray, Add, %l_sound_enable%, Menu_Toggle_Sound
+	Menu Tray, Add, %l_sound_enable%, Menu_Toggle_Sound
 	if (sound_enable) {
-		Menu, Tray, Check, %l_sound_enable%
+		Menu Tray, Check, %l_sound_enable%
 	}
 	
-	Menu, Tray, Add
+	Menu Tray, Add
 	
-	Menu, Tray, Add, %l_system_skip_unused_dictionaries%, Menu_Toggle_Skip_Unused_Dictionaries
+	Menu Tray, Add, %l_system_skip_unused_dictionaries%, Menu_Toggle_Skip_Unused_Dictionaries
 	if (system_skip_unused_dictionaries) {
-		Menu, Tray, Check, %l_system_skip_unused_dictionaries%
+		Menu Tray, Check, %l_system_skip_unused_dictionaries%
 	}
 	
-	Menu, Tray, Add, %l_system_fix_config_file_encoding%, Menu_Toggle_Fix_Config_File_Encoding
+	Menu Tray, Add, %l_system_fix_config_file_encoding%, Menu_Toggle_Fix_Config_File_Encoding
 	if (system_fix_config_file_encoding) {
-		Menu, Tray, Check, %l_system_fix_config_file_encoding%
+		Menu Tray, Check, %l_system_fix_config_file_encoding%
 	}
 	
-	Menu, Tray, Add, %l_system_switch_layouts_by_send%, Menu_Toggle_Switch_Layouts_By_Send
+	Menu Tray, Add, %l_system_switch_layouts_by_send%, Menu_Toggle_Switch_Layouts_By_Send
 	if (system_switch_layouts_by_send) {
-		Menu, Tray, Check, %l_system_switch_layouts_by_send%
+		Menu Tray, Check, %l_system_switch_layouts_by_send%
 	}
 	
-	Menu, Tray, Add
+	Menu Tray, Add
 	
-	Menu, Tray, Add, %l_flag_show_borders%, Menu_Toggle_Show_Borders
+	Menu Tray, Add, %l_flag_show_borders%, Menu_Toggle_Show_Borders
 	if (flag_show_borders) {
-		Menu, Tray, Check, %l_flag_show_borders%
+		Menu Tray, Check, %l_flag_show_borders%
 	}
 	
-	Menu, Tray, Add, %l_flag_always_on_top%, Menu_Toggle_Always_On_Top
+	Menu Tray, Add, %l_flag_always_on_top%, Menu_Toggle_Always_On_Top
 	if (flag_always_on_top) {
-		Menu, Tray, Check, %l_flag_always_on_top%
+		Menu Tray, Check, %l_flag_always_on_top%
 	}
 	
-	Menu, Tray, Add, %l_flag_fixed_position%, Menu_Toggle_Fixed_Position
+	Menu Tray, Add, %l_flag_fixed_position%, Menu_Toggle_Fixed_Position
 	if (flag_fixed_position) {
-		Menu, Tray, Check, %l_flag_fixed_position%
+		Menu Tray, Check, %l_flag_fixed_position%
 	}
 	
-	Menu, Tray, Add, %l_flag_hide_in_fullscreen_mode%, Menu_Toggle_Hide_In_Fullscreen_Mode
+	Menu Tray, Add, %l_flag_hide_in_fullscreen_mode%, Menu_Toggle_Hide_In_Fullscreen_Mode
 	if (flag_hide_in_fullscreen_mode) {
-		Menu, Tray, Check, %l_flag_hide_in_fullscreen_mode%
+		Menu Tray, Check, %l_flag_hide_in_fullscreen_mode%
 	}
 	
-	Menu, Tray, Add
+	Menu Tray, Add
 	
-	Menu, Tray, Add, %l_info_app_site%, Menu_App_Site
+	Menu Tray, Add, %l_info_app_site%, Menu_App_Site
 	if FileExist(info_updater) {
-		Menu, Tray, Add, %l_info_app_update%, Menu_App_Update
+		Menu Tray, Add, %l_info_app_update%, Menu_App_Update
 		MenuIcon("Tray", l_info_app_update, "Icons\Menu\Update.ico", 0, 0)
 	}
 	
-	Menu, Tray, Add
+	Menu Tray, Add
 	
-	Menu, Tray, Add, %l_app_generate_dictionaries%, Menu_Generate_Dictionaries
-	Menu, Tray, Add, %l_app_options%, Menu_Options
-	Menu, Tray, Add, %l_app_restart%, Menu_Reload_App
-	Menu, Tray, Add, %l_app_exit%, Menu_Exit_App
+	Menu Tray, Add, %l_app_generate_dictionaries%, Menu_Generate_Dictionaries
+	Menu Tray, Add, %l_app_options%, Menu_Options
+	Menu Tray, Add, %l_app_restart%, Menu_Reload_App
+	Menu Tray, Add, %l_app_exit%, Menu_Exit_App
 	
 	MenuIcon("Tray", l_info_app_site, "Icons\Menu\Home.ico", 0, 0)
 	MenuIcon("Tray", l_app_generate_dictionaries, "Icons\Menu\Dictionaries.ico", 0, 0)
@@ -772,16 +772,16 @@ FLAG_Customize_Menus:
 
 Menu_Toggle_Suspend:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_suspend_hotkeys := not system_suspend_hotkeys
 	IniWrite("system_suspend_hotkeys", Config_File, "System", system_suspend_hotkeys)
-	Suspend, Toggle
+	Suspend Toggle
 	return
 }
 
 Menu_Toggle_Auto_Start:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_enable_auto_start := not system_enable_auto_start
 	IniWrite("system_enable_auto_start", Config_File, "System", system_enable_auto_start)
 	; Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
@@ -796,7 +796,7 @@ Menu_Toggle_Auto_Start:
 
 Menu_Toggle_Admin_Rights:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_start_with_admin_rights := not system_start_with_admin_rights
 	IniWrite("system_start_with_admin_rights", Config_File, "System", system_start_with_admin_rights)
 	if (system_enable_auto_start) {
@@ -814,7 +814,7 @@ Menu_Toggle_Admin_Rights:
 
 Menu_Toggle_High_Priority:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_run_with_high_priority := not system_run_with_high_priority
 	IniWrite("system_run_with_high_priority", Config_File, "System", system_run_with_high_priority)
 	Reload
@@ -823,21 +823,21 @@ Menu_Toggle_High_Priority:
 
 Menu_Toggle_Show_Tray_Icon:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_show_tray_icon := not system_show_tray_icon
 	IniWrite("system_show_tray_icon", Config_File, "System", system_show_tray_icon)
 	if (system_show_tray_icon) {
-		Menu, Tray, Icon
+		Menu Tray, Icon
 	}
 	else {
-		Menu, Tray, NoIcon
+		Menu Tray, NoIcon
 	}
 	return
 }
 
 Menu_Toggle_Sound:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	sound_enable := not sound_enable
 	IniWrite("sound_enable", Config_File, "Sound", sound_enable)
 	return
@@ -845,7 +845,7 @@ Menu_Toggle_Sound:
 
 Menu_Toggle_Skip_Unused_Dictionaries:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_skip_unused_dictionaries := not system_skip_unused_dictionaries
 	IniWrite("system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries)
 	return
@@ -853,7 +853,7 @@ Menu_Toggle_Skip_Unused_Dictionaries:
 
 Menu_Toggle_Fix_Config_File_Encoding:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_fix_config_file_encoding := not system_fix_config_file_encoding
 	IniWrite("system_fix_config_file_encoding", Config_File, "System", system_fix_config_file_encoding)
 	return
@@ -861,7 +861,7 @@ Menu_Toggle_Fix_Config_File_Encoding:
 
 Menu_Toggle_Switch_Layouts_By_Send:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	system_switch_layouts_by_send := not system_switch_layouts_by_send
 	IniWrite("system_switch_layouts_by_send", Config_File, "System", system_switch_layouts_by_send)
 	return
@@ -869,70 +869,70 @@ Menu_Toggle_Switch_Layouts_By_Send:
 
 Menu_Toggle_Show_Borders:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	flag_show_borders := not flag_show_borders
 	IniWrite("flag_show_borders", Config_File, "Flag", flag_show_borders)
 	if (flag_show_borders) {
-		Gui, FLAG_: +Border
+		Gui FLAG_: +Border
 	}
 	else {
-		Gui, FLAG_: -Border
+		Gui FLAG_: -Border
 	}
-	Gui, FLAG_: Show, w%flag_width% h%flag_height%
+	Gui FLAG_: Show, w%flag_width% h%flag_height%
 	return
 }
 
 Menu_Toggle_Always_On_Top:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	flag_always_on_top := not flag_always_on_top
 	IniWrite("flag_always_on_top", Config_File, "Flag", flag_always_on_top)
 	if (flag_always_on_top) {
-		Gui, FLAG_: +AlwaysOnTop
+		Gui FLAG_: +AlwaysOnTop
 	}
 	else {
-		Gui, FLAG_: -AlwaysOnTop
+		Gui FLAG_: -AlwaysOnTop
 	}
 	return
 }
 
 Menu_Toggle_Fixed_Position:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	flag_fixed_position := not flag_fixed_position
 	IniWrite("flag_fixed_position", Config_File, "Flag", flag_fixed_position)
 	if (flag_always_on_top) {
-		Gui, FLAG_: +AlwaysOnTop
+		Gui FLAG_: +AlwaysOnTop
 	}
 	else {
-		Gui, FLAG_: -AlwaysOnTop
+		Gui FLAG_: -AlwaysOnTop
 	}
 	return
 }
 
 Menu_Toggle_Hide_In_Fullscreen_Mode:
 {
-	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	Menu Tray, ToggleCheck, %A_ThisMenuItem%
 	flag_hide_in_fullscreen_mode := not flag_hide_in_fullscreen_mode
 	IniWrite("flag_hide_in_fullscreen_mode", Config_File, "Flag", flag_hide_in_fullscreen_mode)
 	if (flag_always_on_top) {
-		Gui, FLAG_: +AlwaysOnTop
+		Gui FLAG_: +AlwaysOnTop
 	}
 	else {
-		Gui, FLAG_: -AlwaysOnTop
+		Gui FLAG_: -AlwaysOnTop
 	}
 	return
 }
 
 Menu_App_Site:
 {
-	Run, %info_app_site%
+	Run %info_app_site%
 	return
 }
 
 Menu_App_Update:
 {
-	Run, %info_updater% -app_pid="%App_PID%"
+	Run %info_updater% -app_pid="%App_PID%"
 	return
 }
 
@@ -944,7 +944,7 @@ Menu_Generate_Dictionaries:
 
 Menu_Options:
 {
-	Run, notepad.exe "%Config_File%"
+	Run notepad.exe "%Config_File%"
 	return
 }
 
@@ -965,10 +965,10 @@ Generate_Dictionaries(Prefix := "")
 	static Notepad_PID, Notepad_ID, Win_Title, Keys
 	global system_switch_layouts_by_send
 	;
-	Run, % "notepad.exe /W",,, Notepad_PID
+	Run % "notepad.exe /W",,, Notepad_PID
 	
-	WinWait, ahk_pid %Notepad_PID%
-	WinGet, Notepad_ID, ID, ahk_pid %Notepad_PID%
+	WinWait ahk_pid %Notepad_PID%
+	WinGet Notepad_ID, ID, ahk_pid %Notepad_PID%
 	
 	Win_Title = ahk_id %Notepad_ID%
 	
@@ -983,33 +983,33 @@ Generate_Dictionaries(Prefix := "")
 	,"SC02D","SC02E","SC02F","SC030","SC031"
 	,"SC032","SC033","SC034","SC035"]
 	
-	WinActivate, %Win_Title%
-	WinWaitActive, %Win_Title%
+	WinActivate %Win_Title%
+	WinWaitActive %Win_Title%
 	
 	static Layout_Index, Layout_Data
 	static Dictionary_Name, k, v
 	;
 	for Layout_Index, Layout_Data in Layout.Layouts_List {
-		WinActivate, %Win_Title%
-		WinWaitActive, %Win_Title%
-		IfWinActive, %Win_Title%
+		WinActivate %Win_Title%
+		WinWaitActive %Win_Title%
+		IfWinActive %Win_Title%
 		{
 			while (Layout.Get_HKL(Win_Title) != Layout_Data.HKL and A_Index < 5) {
 				Layout.Change(Layout_Data.HKL, Win_Title, system_switch_layouts_by_send)
-				Sleep, 50
+				Sleep 50
 			}
 			if (Layout.Get_HKL(Win_Title) = Layout_Data.HKL) {
 				Dictionary_Name := Prefix . Layout_Data.Full_Name
-				StringLower, Dictionary_Name, Dictionary_Name
-				SendRaw, %Dictionary_Name%=
+				StringLower Dictionary_Name, Dictionary_Name
+				SendRaw %Dictionary_Name%=
 				for k, v in Keys {
-					Send, {%v%}
+					Send {%v%}
 				}
-				Send, {SC039}
+				Send {SC039}
 				for k, v in Keys {
-					Send, +{%v%}
+					Send +{%v%}
 				}
-				SendRaw, % "`n"
+				SendRaw % "`n"
 			}
 		}
 	}

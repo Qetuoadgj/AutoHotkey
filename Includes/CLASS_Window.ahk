@@ -4,8 +4,10 @@ class Window
 {
 	Is_Full_Screen(Win_Title := "A")
 	{ ; функция проверки полноэкранного режима
-		static Win_ID, Win_Style, Win_W, Win_H
-		Win_ID := "", Win_Style := "", Win_W := 0, Win_H := 0
+		static Win_ID
+		static Win_Style
+		static Win_W
+		static Win_H
 		;		
 		Win_ID := WinExist(Win_Title)
 		if (not Win_ID) {
@@ -14,11 +16,11 @@ class Window
 		if (Win_ID = Windows.Desktop_ID) {
 			return False
 		}
-		WinGet, Win_Style, Style, ahk_id %Win_ID%
+		WinGet Win_Style, Style, ahk_id %Win_ID%
 		if (Win_Style & 0x20800000) { ; 0x800000 is WS_BORDER, 0x20000000 is WS_MINIMIZE, no border and not minimized
 			return False
 		}
-		WinGetPos,,,, Win_W, Win_H, %Win_Title%
+		WinGetPos ,,, Win_W, Win_H, %Win_Title%
 		if (Win_H < A_ScreenHeight or Win_W < A_ScreenWidth) {
 			return False
 		}

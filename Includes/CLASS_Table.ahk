@@ -11,7 +11,7 @@
 			if (Key = Key_Name) {
 				return A_Index
 			}
-			}
+		}
 		for Index, Key in Table {
 			if (Key = Key_Name) {
 				return A_Index

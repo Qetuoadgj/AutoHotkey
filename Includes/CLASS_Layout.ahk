@@ -20,7 +20,7 @@ class Layout
 		VarSetCapacity(List, A_PtrSize * 5)
 		Layouts_List_Size := DllCall("GetKeyboardLayoutList", Int, 5, Str, List)
 		Layouts_List := []
-		Loop, % Layouts_List_Size
+		Loop % Layouts_List_Size
 		{
 			Layout_HKL := NumGet(List, A_PtrSize * (A_Index - 1)) ; & 0xFFFF
 			Layout_Name := This.Language_Name(Layout_HKL, false)
@@ -52,13 +52,13 @@ class Layout
 		static KLID, Display_Name, outBufSize
 		;
 		KLID := This.Get_KLID(HKL)
-		RegRead, Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Display Name"
+		RegRead Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Display Name"
 		if (not Display_Name) {
 			return False
 		}
 		DllCall("Shlwapi.dll\SHLoadIndirectString", "Ptr", &Display_Name, "Ptr", &Display_Name, "UInt", outBufSize := 50, "UInt", 0)
 		if (not Display_Name) {
-			RegRead, Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Text"
+			RegRead Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Text"
 		}
 		return Display_Name
 	}
@@ -68,9 +68,9 @@ class Layout
 		static Window_ID, Window_Class, Console_PID, HKL
 		;
 		Window_ID := WinExist(Window)
-		WinGetClass, Window_Class
+		WinGetClass Window_Class
 		if (Window_Class == "ConsoleWindowClass") {
-			WinGet, Console_PID, PID
+			WinGet Console_PID, PID
 			DllCall("AttachConsole", Ptr, Console_PID)
 			VarSetCapacity(Buff, 16)
 			DllCall("GetConsoleKeyboardLayoutName", Str, Buff)
@@ -99,16 +99,16 @@ class Layout
 	Next(Window := "A", BySend := false)
 	{ ; функция смены раскладки (вперед)
 		if BySend { ; с помощью команды Send
-			SendInput, % This.Switch_Layout_Combo
+			SendInput % This.Switch_Layout_Combo
 		}
 		else { ; с помощью команды PostMessage
 			static Window_ID
 			;
 			if (Window_ID := WinExist(Window)) {
-				PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
+				PostMessage % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
 			}
 		}
-		Sleep, 1
+		Sleep 1
 	}
 	
 	Change(HKL, Window := "A", BySend := false)
@@ -120,25 +120,25 @@ class Layout
 				static This_Layout_KLID
 				static Next_Layout_KLID
 				;
-				Loop, % This.Layouts_List.MaxIndex()
+				Loop % This.Layouts_List.MaxIndex()
 				{
 					This_Layout_KLID := This.Get_KLID(This.Get_HKL("ahk_id " Window_ID))
 					Next_Layout_KLID := This.Get_KLID(HKL)
-					Sleep, 1
+					Sleep 1
 					if (This_Layout_KLID == Next_Layout_KLID) {
-						break
+						Break
 					}
-					SendInput, % This.Switch_Layout_Combo
-					Sleep, 1
+					SendInput % This.Switch_Layout_Combo
+					Sleep 1
 				}
 			}
 			else { ; с помощью команды PostMessage
-				PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
+				PostMessage % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
 			}
 		}
-		Sleep, 1
+		Sleep 1
 	}
-	
+
 	Get_Index(HKL)
 	{ ; функция получения порядкового номера раскладки по "HKL"
 		static Index, Layout

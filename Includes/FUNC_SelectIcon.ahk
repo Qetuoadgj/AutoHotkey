@@ -9,4 +9,4 @@ SelectIcon(IconPath := "", Index := 0)
 }
 ; #SelectedIcon := StrSplit(SelectIcon(), ",", "`s")
 ; #IconFile := #SelectedIcon[1], #IconIndex := #SelectedIcon[2]
-; MsgBox, % #IconFile . ", " . #IconIndex
+; MsgBox % #IconFile . ", " . #IconIndex

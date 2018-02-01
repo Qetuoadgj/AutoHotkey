@@ -11,8 +11,8 @@ SystemCursor(OnOff=1) ; INIT = "I","Init"; OFF = 0,"Off"; TOGGLE = -1,"T","Toggl
 		VarSetCapacity( AndMask, 32*4, 0xFF )
 		VarSetCapacity( XorMask, 32*4, 0 )
 		system_cursors = 32512,32513,32514,32515,32516,32642,32643,32644,32645,32646,32648,32649,32650
-		StringSplit, c, system_cursors, `,
-		Loop, %c0%
+		StringSplit c, system_cursors, `,
+		Loop %c0%
 		{
 			h_cursor   := DllCall( "LoadCursor", "Ptr",0, "Ptr",c%A_Index% )
 			h%A_Index% := DllCall( "CopyImage", "Ptr",h_cursor, "UInt",2, "Int",0, "Int",0, "UInt",0 )
@@ -25,7 +25,7 @@ SystemCursor(OnOff=1) ; INIT = "I","Init"; OFF = 0,"Off"; TOGGLE = -1,"T","Toggl
 	else {
 		$ = h  ; use the saved cursors
 	}
-	Loop, %c0%
+	Loop %c0%
 	{
 		h_cursor := DllCall( "CopyImage", "Ptr",%$%%A_Index%, "UInt",2, "Int",0, "Int",0, "UInt",0 )
 		DllCall( "SetSystemCursor", "Ptr",h_cursor, "UInt",c%A_Index% )

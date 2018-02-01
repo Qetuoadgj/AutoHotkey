@@ -23,18 +23,18 @@ FileReadSection(SourceFile, StartString, EndString = "", SkipComments := 1, Comm
 	}
 	Loop, Read, %SourceFile%
 	{
-		if (SkipEmptyLines) {
+		If (SkipEmptyLines) {
 			if (Trim(A_LoopReadLine) = "") { ; if looped line is empty
 				continue ; skip the current Loop instance
 			}
 		}
-		if (SkipComments) {
-			if RegExMatch(A_LoopReadLine, CommentPattern) { ; if looped line is commented
+		If (SkipComments) {
+			If RegExMatch(A_LoopReadLine, CommentPattern) { ; if looped line is commented
 				continue ; skip the current Loop instance
 			}
 		}
 		CurrentLine := A_Index
-		if (CurrentLine > StartLine) && (CurrentLine < EndLine) {
+		If (CurrentLine > StartLine) && (CurrentLine < EndLine) {
 			SectionContains .= A_LoopReadLine . "`n"
 		}
 	}

@@ -12,17 +12,17 @@
 GetPhysicallyInstalledSystemMemory()
 {
     if !(DllCall("kernel32.dll\GetPhysicallyInstalledSystemMemory", "UInt64*", TotalMemory))
-	return DllCall("kernel32.dll\GetLastError")
+        return DllCall("kernel32.dll\GetLastError")
     return TotalMemory
 }
 ; ===============================================================================================================================
 
-MsgBox, % GetPhysicallyInstalledSystemMemory() " KB`n"
-. Round(GetPhysicallyInstalledSystemMemory() / 1024, 2) " MB`n"
-. Round(GetPhysicallyInstalledSystemMemory() / 1024**2, 2) " GB`n"
+MsgBox % GetPhysicallyInstalledSystemMemory() " KB`n"
+       . Round(GetPhysicallyInstalledSystemMemory() / 1024, 2) " MB`n"
+       . Round(GetPhysicallyInstalledSystemMemory() / 1024**2, 2) " GB`n"
 
 /* C++ ==========================================================================================================================
 BOOL WINAPI GetPhysicallyInstalledSystemMemory(                                      // UInt
-_Out_  PULONGLONG TotalMemoryInKilobytes                                         // UInt64*
+    _Out_  PULONGLONG TotalMemoryInKilobytes                                         // UInt64*
 );
 ============================================================================================================================== */

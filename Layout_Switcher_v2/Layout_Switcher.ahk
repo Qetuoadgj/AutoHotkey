@@ -1065,6 +1065,7 @@ Generate_Dictionaries(Prefix := "")
 				Dictionary_Name := Prefix . Layout_Data.Full_Name
 				StringLower, Dictionary_Name, Dictionary_Name
 				ControlSendRaw,, %Dictionary_Name%=, %Edit1_Title%
+				; ControlSend,, {Esc}, %Edit1_Title%
 				; SendRaw, %Dictionary_Name%=
 				for k, v in Keys {
 					; Send, {%v%}
@@ -1072,7 +1073,7 @@ Generate_Dictionaries(Prefix := "")
 					Sleep, 1
 				}
 				; Send, {SC039}
-				; ControlSend,, {SC039}, %Edit1_Title%
+				ControlSend,, {SC039}, %Edit1_Title%
 				for k, v in Keys {
 					; Send, {RShift Down}{%v%}{RShift Up}
 					ControlSend,, {RShift Down}{%v%}{RShift Up}, %Edit1_Title%

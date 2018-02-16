@@ -12,11 +12,12 @@
 	static Upper_Case_Words := "(ID\b|PID\b|UI\b|HKL\b|KLID\b)"
 	;
 	static Next_Case_ID := "U"
+	static Whitespace_Replace_ID := 0
 	;
 	static Dictionaries := {}
-	static Dictionaries.English := "``1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:`"`"||ZXCVBNM<>?"
-	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!`"`"№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
-	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!`"`"№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
+	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
+	static Dictionaries.English := "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
+	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	;
 	; static Dictionaries_Order := ["English", "Russian", "Ukrainian"]
 	;
@@ -27,26 +28,26 @@
 		; Выделение текста / получение уже выделенного, назначение переменной "Selected_Text"
 		; -----------------------------------------------------------------------------------
 		Clipboard := "" ; Null
-		SendInput % "{Ctrl Down}"
+		SendInput, % "{Ctrl Down}"
 		; Sleep 1
-		SendInput % "{vk43}"
-		Sleep 1
-		SendInput % "{Ctrl Up}"
-		ClipWait 0.05
+		SendInput, % "{vk43}"
+		Sleep, 1
+		SendInput, % "{Ctrl Up}"
+		ClipWait, 0.05
 		Selected_Text := Clipboard
 		if (StrLen(Selected_Text) = 0) {
-			Loop 100 {
+			Loop, 100 {
 				Clipboard := "" ; Null
-				SendInput % "{Ctrl Down}{Shift Down}"
+				SendInput, % "{Ctrl Down}{Shift Down}"
 				; Sleep 1
-				SendInput % "{Left}"
+				SendInput, % "{Left}"
 				; Sleep 1
-				SendInput % "{Shift Up}"
-				Sleep 1
-				SendInput % "{vk43}"
-				Sleep 1
-				SendInput % "{Ctrl Up}"
-				ClipWait 0.5
+				SendInput, % "{Shift Up}"
+				Sleep, 1
+				SendInput, % "{vk43}"
+				Sleep, 1
+				SendInput, % "{Ctrl Up}"
+				ClipWait, 0.5
 				if (StrLen(Clipboard) = 0) { ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					return
 				}
@@ -54,51 +55,51 @@
 					Break
 				}
 				if RegExMatch(Clipboard, "^\s+$") { ; строка состоит из пробелов
-					SendInput % "{Right}"
+					SendInput, % "{Right}"
 					Break
 				}
 				if RegExMatch(Clipboard, "\s+$") { ; курсор стоял перед пробелом, его нужно "перескочить"
 					Clipboard := "" ; Null
-					SendInput % "{Left}"
+					SendInput, % "{Left}"
 					; Sleep 1
-					SendInput % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
-					SendInput % "{Right}"
+					SendInput, % "{Right}"
 					; Sleep 1
-					SendInput % "{Shift Up}"
-					Sleep 1
-					SendInput % "{vk43}"
-					Sleep 1
-					SendInput % "{Ctrl Up}"
-					ClipWait 0.5
+					SendInput, % "{Shift Up}"
+					Sleep, 1
+					SendInput, % "{vk43}"
+					Sleep, 1
+					SendInput, % "{Ctrl Up}"
+					ClipWait, 0.5
 					Break
 				}
 				if RegExMatch(Clipboard, "^[^\s]+\s+[^\s]+") { ; в выделение попал пробел или перенос на новую строку
 					Clipboard := "" ; Null
-					SendInput % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
-					SendInput % "{Right 2}{Left}"
+					SendInput, % "{Right 2}{Left}"
 					; Sleep 1
-					SendInput % "{Shift Up}"
-					Sleep 1
-					SendInput % "{vk43}"
-					Sleep 1
-					SendInput % "{Ctrl Up}"
-					ClipWait 0.5
+					SendInput, % "{Shift Up}"
+					Sleep, 1
+					SendInput, % "{vk43}"
+					Sleep, 1
+					SendInput, % "{Ctrl Up}"
+					ClipWait, 0.5
 					Break
 				}
 				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел, который находится в самом начале области редактирования
 					Clipboard := "" ; Null
-					SendInput % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Ctrl Down}{Shift Down}"
 					; Sleep 1
-					SendInput % "{Right}{Left}"
+					SendInput, % "{Right}{Left}"
 					; Sleep 1
-					SendInput % "{Shift Up}"
-					Sleep 1
-					SendInput % "{vk43}"
-					Sleep 1
-					SendInput % "{Ctrl Up}"
-					ClipWait 0.5
+					SendInput, % "{Shift Up}"
+					Sleep, 1
+					SendInput, % "{vk43}"
+					Sleep, 1
+					SendInput, % "{Ctrl Up}"
+					ClipWait, 0.5
 					Break
 				}
 				Selected_Text := Clipboard ; необходимо для сравнения текущего результата с предыдущим
@@ -109,7 +110,7 @@
 		; ToolTip, '%Selected_Text%'
 		return Selected_Text
 	}
-	
+
 	Convert_Case(Selected_Text, Force_Case_ID := 0)
 	{ ; функция смены регистра текста
 		static Converted_Text
@@ -121,13 +122,13 @@
 		}
 		This.Next_Case_ID := Force_Case_ID ? Force_Case_ID : This.Next_Case_ID
 		if (This.Next_Case_ID = "U") {
-			StringUpper Converted_Text, Selected_Text
+			StringUpper, Converted_Text, Selected_Text
 			if (not Force_Case_ID and Converted_Text == Selected_Text) {
 				This.Next_Case_ID := "T"
 			}
 		}
 		if (This.Next_Case_ID = "T") {
-			StringLower Converted_Text, Selected_Text, T
+			StringLower, Converted_Text, Selected_Text, T
 			Converted_Text := RegExReplace(Converted_Text, This.Title_Case_Symbols . This.Title_Case_Match, "$1$U2")
 			Converted_Text := RegExReplace(Converted_Text, "i)" . This.Title_Case_Symbols . This.Upper_Case_Words, "$1$U2")
 			if (not Force_Case_ID and Converted_Text == Selected_Text) {
@@ -135,7 +136,7 @@
 			}
 		}
 		if (This.Next_Case_ID = "L") {
-			StringLower Converted_Text, Selected_Text
+			StringLower, Converted_Text, Selected_Text
 			if (not Force_Case_ID and Converted_Text == Selected_Text) {
 				This.Next_Case_ID := "U"
 			}
@@ -143,10 +144,10 @@
 		if (not Force_Case_ID) {
 			if (This.Next_Case_ID = "U") {
 				This.Next_Case_ID := "T"
-			} 
+			}
 			else if (This.Next_Case_ID = "T") {
 				This.Next_Case_ID := "L"
-			} 
+			}
 			else if (This.Next_Case_ID = "L") {
 				This.Next_Case_ID := "U"
 			}
@@ -154,7 +155,36 @@
 		; -----------------------------------------------------------------------------------
 		return Converted_Text
 	}
-	
+
+	Convert_Whitespace(Selected_Text, Replace_With := "_", Tab_Size := 4)
+	{ ; функция смены регистра текста
+		static Converted_Text
+		static Tab
+		; -----------------------------------------------------------------------------------
+		; Преобразование регистра текста, назначение переменной "Converted_Text"
+		; -----------------------------------------------------------------------------------
+		if (StrLen(Selected_Text) = 0) {
+			return
+		}
+		Tab_Replacement := ""
+		Loop, %Tab_Size%
+		{
+			Tab_Replacement .= Replace_With
+		}
+		if (This.Whitespace_Replace_ID = 0) {
+			StringReplace, Converted_Text, Selected_Text, %A_Tab%, %Tab_Replacement%, All
+			StringReplace, Converted_Text, Converted_Text, %A_Space%, %Replace_With%, All
+			This.Whitespace_Replace_ID := 1
+		}
+		else if (This.Whitespace_Replace_ID = 1) {
+			StringReplace, Converted_Text, Selected_Text, %Tab_Replacement%, %A_Tab%, All
+			StringReplace, Converted_Text, Converted_Text, %Replace_With%, %A_Space%, All
+			This.Whitespace_Replace_ID := 0
+		}
+		; -----------------------------------------------------------------------------------
+		return Converted_Text
+	}
+
 	Dictionary(Selected_Text)
 	{ ; функция сравнения текста со словарями (определение словаря, соответствующего тексту)
 		static Language
@@ -168,7 +198,7 @@
 		}
 		for Language, Dictionary in This.Dictionaries {
 			; MsgBox, % Language " = " Dictionary
-			Loop Parse, Selected_Text
+			Loop, Parse, Selected_Text
 			{
 				Same_Dictionary := InStr(Dictionary, A_LoopField, 1) or RegExMatch(A_LoopField, "\s")
 				if (not Same_Dictionary) {
@@ -181,7 +211,7 @@
 		}
 		; -----------------------------------------------------------------------------------
 	}
-	
+
 	Replace_By_Dictionaries(Selected_Text, Current_Dictionary, Next_Dictionary)
 	{ ; функция замены символов одного словаря соответствующими (по порядку) символами другого (смена раскладки текста)
 		static Converted_Text
@@ -192,7 +222,7 @@
 			return
 		}
 		Converted_Text := "" ; Null
-		Loop Parse, Selected_Text
+		Loop, Parse, Selected_Text
 		{
 			if (Current_Dictionary_Match := InStr(This.Dictionaries[Current_Dictionary], A_LoopField, 1)) {
 				Converted_Text .= SubStr(This.Dictionaries[Next_Dictionary], Current_Dictionary_Match, 1)
@@ -204,7 +234,7 @@
 		; -----------------------------------------------------------------------------------
 		return Converted_Text
 	}
-	
+
 	Paste(Converted_Text)
 	{ ; функция отправки буфер текста обмена / вывода текста
 		; -----------------------------------------------------------------------------------
@@ -215,16 +245,16 @@
 		}
 		Clipboard := "" ; Null
 		Clipboard := Converted_Text
-		ClipWait 1.0
-		SendInput % "{Ctrl Down}"
-		Sleep 1
-		SendInput % "{vk56}" 
-		Sleep 1
-		SendInput % "{Ctrl Up}"
+		ClipWait, 1.0
+		SendInput, % "{Ctrl Down}"
+		Sleep, 1
+		SendInput, % "{vk56}"
+		Sleep, 1
+		SendInput, % "{Ctrl Up}"
 		; -----------------------------------------------------------------------------------
 		return Clipboard
 	}
-	
+
 	/*
 	Get_Index_By_Name(Name)
 	{ ; функция получения порядкового номера словаря по полному имени ("English")

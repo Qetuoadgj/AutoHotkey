@@ -278,12 +278,13 @@ READ_CONFIG_FILE:
 		if (ini.Encoding != app_ecoding) {
 			ini_data := ini.Read()
 			if (ini_data) {
-				ini.Close()
+				; ini.Close()
 				MsgBox, 0, Test, % "Encoding of the program: " app_ecoding "`n" "Encoding of " Config_File ": " ini.Encoding
 				FileDelete, %Config_File%
 				FileAppend, %ini_data%, %Config_File%, %app_ecoding%
 			}
 		}
+		ini.Close()
 	}
 
 	/*
@@ -954,7 +955,8 @@ Menu_Toggle_Hide_In_Fullscreen_Mode:
 
 Menu_App_Site:
 {
-	Run, %info_app_site%
+	; Run, %info_app_site%
+	ShellRun(info_app_site)
 	return
 }
 
@@ -990,15 +992,21 @@ Menu_Exit_App:
 
 Generate_Dictionaries(Prefix := "")
 { ; функция создания словарей для текущих раскладок
-	static Notepad_PID, Notepad_ID, Win_Title, Keys
+	; static Notepad_PID, Notepad_ID, Win_Title, Keys
 	global system_switch_layouts_by_send
 	;
+	/*
 	Run, % "notepad.exe /W",,, Notepad_PID
 
 	WinWait, ahk_pid %Notepad_PID%
 	WinGet, Notepad_ID, ID, ahk_pid %Notepad_PID%
 
 	Win_Title = ahk_id %Notepad_ID%
+	*/
+	
+	static Gui_Hwnd, Win_Title, Edit1_Hwnd, Edit1_Title, Keys
+	static Edit_W, GUI_W
+	static Edit1_Text
 
 	Keys := ["SC029","SC002","SC003","SC004"
 	,"SC005","SC006","SC007","SC008","SC009"
@@ -1010,9 +1018,36 @@ Generate_Dictionaries(Prefix := "")
 	,"SC027","SC028","SC02B","SC056","SC02C"
 	,"SC02D","SC02E","SC02F","SC030","SC031"
 	,"SC032","SC033","SC034","SC035"]
+	
+	Edit_Font_Size := 10
+	
+	Edit_H := (Layout.Layouts_List.MaxIndex() + 4) * Edit_Font_Size*1.3
+	Edit_W := (Keys.MaxIndex() + StrLen("dictionary_dictionary_name=")) * Edit_Font_Size*1.3 + 1
+	
+	GUI_H := Edit_H + 2*5
+	GUI_W := Edit_W + 2*5
+	
+	Gui, Show, h%GUI_H% w%GUI_W% ;, %Script_Win_Title%
+	Gui, Font, % "s" . Edit_Font_Size, % "Lucida Console"
+	Gui, +LastFound +AlwaysOnTop
+	Gui_Hwnd := WinExist()
+	
+	Win_Title = ahk_id %Gui_Hwnd%
+	
+	Gui, Add, Edit, Multi x5 y5 h%Edit_H% w%Edit_W% vEdit1_Text, %A_Space%
+	ControlGet, Edit1_Hwnd, Hwnd,, % "Edit1", %Win_Title%
+	Edit1_Title = ahk_id %Edit1_Hwnd%
 
 	WinActivate, %Win_Title%
 	WinWaitActive, %Win_Title%
+	
+	; #IfWinActive Win_Title
+	; {
+		; BlockInput, SendAndMouse
+	; }
+	; #IfWinNotActive Win_Title
+		; BlockInput, Off
+	; }
 
 	static Layout_Index, Layout_Data
 	static Dictionary_Name, k, v
@@ -1029,22 +1064,36 @@ Generate_Dictionaries(Prefix := "")
 			if (Layout.Get_HKL(Win_Title) = Layout_Data.HKL) {
 				Dictionary_Name := Prefix . Layout_Data.Full_Name
 				StringLower, Dictionary_Name, Dictionary_Name
-				SendRaw, %Dictionary_Name%=
+				ControlSendRaw,, %Dictionary_Name%=, %Edit1_Title%
+				; SendRaw, %Dictionary_Name%=
 				for k, v in Keys {
-					Send, {%v%}
+					; Send, {%v%}
+					ControlSend,, {%v%}, %Edit1_Title%
 					Sleep, 1
 				}
-				Send, {SC039}
+				; Send, {SC039}
+				; ControlSend,, {SC039}, %Edit1_Title%
 				for k, v in Keys {
-					Send, {RShift Down}{%v%}{RShift Up}
+					; Send, {RShift Down}{%v%}{RShift Up}
+					ControlSend,, {RShift Down}{%v%}{RShift Up}, %Edit1_Title%
 					Sleep, 1
 				}
-				SendRaw, % "`n"
+				; SendRaw, % "`n"
+				ControlSendRaw,, % "`n", %Edit1_Title%
 				Sleep, 1
 			}
 		}
 	}
-	SendRaw, % "`nOK!`n"
+	; SendRaw, % "`nOK!`n"
+	
+	Gui, Submit, NoHide
+	ControlSendRaw,, % "`nOK!`n", %Edit1_Title%
+	Sleep, 1000
+	Gui, Destroy
+	global Config_File
+	IniDelete, %Config_File%, % "Dictionaries"
+	Edit1_Text := Trim(Edit1_Text)
+	IniWrite, %Edit1_Text%, %Config_File%, % "Dictionaries"
 }
 
 App_Close:
@@ -1059,6 +1108,8 @@ App_Close:
 #Include ..\Includes\FUNC_ToolTip.ahk
 #Include ..\Includes\FUNC_MenuIcon.ahk
 #Include ..\Includes\FUNC_SystemCursor.ahk
+
+#Include ..\Includes\FUNC_ShellRun.ahk
 
 #Include ..\Includes\FUNC_hexToDecimal.ahk ; необходим для CLASS_Task_Sheduler.ahk
 

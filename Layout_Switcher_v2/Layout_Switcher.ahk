@@ -992,22 +992,10 @@ Menu_Exit_App:
 
 Generate_Dictionaries(Prefix := "")
 { ; функция создания словарей для текущих раскладок
-	; static Notepad_PID, Notepad_ID, Win_Title, Keys
-	global system_switch_layouts_by_send
+	local
+	static
+	global Config_File, Layout, system_switch_layouts_by_send, flag_win_id
 	;
-	/*
-	Run, % "notepad.exe /W",,, Notepad_PID
-
-	WinWait, ahk_pid %Notepad_PID%
-	WinGet, Notepad_ID, ID, ahk_pid %Notepad_PID%
-
-	Win_Title = ahk_id %Notepad_ID%
-	*/
-	
-	static Gui_Hwnd, Win_Title, Edit1_Hwnd, Edit1_Title, Keys
-	static Edit_W, GUI_W
-	static Edit1_Text
-
 	Keys := ["SC029","SC002","SC003","SC004"
 	,"SC005","SC006","SC007","SC008","SC009"
 	,"SC00A","SC00B","SC00C","SC00D","SC010"
@@ -1018,83 +1006,61 @@ Generate_Dictionaries(Prefix := "")
 	,"SC027","SC028","SC02B","SC056","SC02C"
 	,"SC02D","SC02E","SC02F","SC030","SC031"
 	,"SC032","SC033","SC034","SC035"]
-	
+	;
 	Edit_Font_Size := 10
-	
 	Edit_H := (Layout.Layouts_List.MaxIndex() + 4) * Edit_Font_Size*1.3
 	Edit_W := (Keys.MaxIndex() + StrLen("dictionary_dictionary_name=")) * Edit_Font_Size*1.3 + 1
-	
 	GUI_H := Edit_H + 2*5
 	GUI_W := Edit_W + 2*5
-	
-	Gui, Show, h%GUI_H% w%GUI_W% ;, %Script_Win_Title%
-	Gui, Font, % "s" . Edit_Font_Size, % "Lucida Console"
-	Gui, +LastFound +AlwaysOnTop
+	;
+	Gui, DICT_: Show, h%GUI_H% w%GUI_W% NoActivate ;, %Script_Win_Title%
+	Gui, DICT_: Font, % "s" . Edit_Font_Size, % "Lucida Console"
+	Gui, DICT_: +LastFound +AlwaysOnTop +Disabled -SysMenu +E0x8000000 ; WS_EX_NOACTIVATE
 	Gui_Hwnd := WinExist()
-	
+	;
 	Win_Title = ahk_id %Gui_Hwnd%
-	
-	Gui, Add, Edit, Multi x5 y5 h%Edit_H% w%Edit_W% vEdit1_Text, %A_Space%
+	;
+	Gui, DICT_: Add, Edit, Multi x5 y5 h%Edit_H% w%Edit_W% vEdit1_Text, %A_Space%
 	ControlGet, Edit1_Hwnd, Hwnd,, % "Edit1", %Win_Title%
+	Gui, DICT_: Add, Edit, Multi x5 y5 h0 w0, %A_Space%
 	Edit1_Title = ahk_id %Edit1_Hwnd%
-
-	WinActivate, %Win_Title%
-	WinWaitActive, %Win_Title%
-	
-	; #IfWinActive Win_Title
-	; {
-		; BlockInput, SendAndMouse
-	; }
-	; #IfWinNotActive Win_Title
-		; BlockInput, Off
-	; }
-
-	static Layout_Index, Layout_Data
-	static Dictionary_Name, k, v
 	;
 	for Layout_Index, Layout_Data in Layout.Layouts_List {
-		WinActivate, %Win_Title%
-		WinWaitActive, %Win_Title%
-		IfWinActive, %Win_Title%
-		{
+		WinActivate, ahk_id %flag_win_id% ; деактивируем окно
+		; WinActivate, %Win_Title%
+		; WinWaitActive, %Win_Title%
+		; IfWinActive, %Win_Title%
+		; {
+			SendMessage, 0x8, 0, 0, Edit1, A  ; WM_KILLFOCUS = 0x08
 			while (Layout.Get_HKL(Win_Title) != Layout_Data.HKL and A_Index < 5) {
-				Layout.Change(Layout_Data.HKL, Win_Title, system_switch_layouts_by_send)
+				Layout.Change(Layout_Data.HKL, Win_Title, system_switch_layouts_by_send := 1)
 				Sleep, 50
 			}
 			if (Layout.Get_HKL(Win_Title) = Layout_Data.HKL) {
 				Dictionary_Name := Prefix . Layout_Data.Full_Name
 				StringLower, Dictionary_Name, Dictionary_Name
 				ControlSendRaw,, %Dictionary_Name%=, %Edit1_Title%
-				; ControlSend,, {Esc}, %Edit1_Title%
-				; SendRaw, %Dictionary_Name%=
 				for k, v in Keys {
-					; Send, {%v%}
 					ControlSend,, {%v%}, %Edit1_Title%
 					Sleep, 1
 				}
-				; Send, {SC039}
 				ControlSend,, {SC039}, %Edit1_Title%
 				for k, v in Keys {
-					; Send, {RShift Down}{%v%}{RShift Up}
 					ControlSend,, {RShift Down}{%v%}{RShift Up}, %Edit1_Title%
 					Sleep, 1
 				}
-				; SendRaw, % "`n"
 				ControlSendRaw,, % "`n", %Edit1_Title%
 				Sleep, 1
 			}
-		}
+		; }
 	}
-	; SendRaw, % "`nOK!`n"
-	
-	Gui, Submit, NoHide
+	Gui, DICT_: Submit, NoHide
 	ControlSendRaw,, % "`nOK!`n", %Edit1_Title%
-	Sleep, 1000
-	Gui, Destroy
-	global Config_File
 	IniDelete, %Config_File%, % "Dictionaries"
 	Edit1_Text := Trim(Edit1_Text)
 	IniWrite, %Edit1_Text%, %Config_File%, % "Dictionaries"
+	Sleep, 1000
+	Gui, DICT_: Destroy
 }
 
 App_Close:

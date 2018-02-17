@@ -15,7 +15,7 @@ class Layout
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок
 		static Layouts_List, Layouts_List_Size
-		static Layout_HKL, Layout_Name, Layout_Full_Name, Layout_Display_Name
+		static Layout_HKL, Layout_KLID, Layout_Name, Layout_Full_Name, Layout_Display_Name
 		;
 		VarSetCapacity(List, A_PtrSize * 5)
 		Layouts_List_Size := DllCall("GetKeyboardLayoutList", Int, 5, Str, List)

@@ -20,23 +20,25 @@ class Layout
 		VarSetCapacity(List, A_PtrSize * 5)
 		Layouts_List_Size := DllCall("GetKeyboardLayoutList", Int, 5, Str, List)
 		Layouts_List := []
-		Loop % Layouts_List_Size
+		Loop, % Layouts_List_Size
 		{
 			Layout_HKL := NumGet(List, A_PtrSize * (A_Index - 1)) ; & 0xFFFF
+			Layout_KLID := This.Get_KLID(Layout_HKL)
 			Layout_Name := This.Language_Name(Layout_HKL, false)
 			Layout_Full_Name := This.Language_Name(Layout_HKL, true)
 			Layout_Display_Name := This.Display_Name(Layout_HKL)
 			Layouts_List[A_Index] := {}
 			Layouts_List[A_Index].HKL := Layout_HKL
+			Layouts_List[A_Index].KLID := Layout_KLID
 			Layouts_List[A_Index].Name := Layout_Name
 			Layouts_List[A_Index].Full_Name := Layout_Full_Name
 			Layouts_List[A_Index].Display_Name := Layout_Display_Name
 		}
 		return Layouts_List
 	}
-	
+
 	Language_Name(HKL, Full_Name := false)
-	{ ; функция получения наименования (сокращенного "en" или полного "English") раскладки по ее "HKL" 
+	{ ; функция получения наименования (сокращенного "en" или полного "English") раскладки по ее "HKL"
 		static LocID, LCType, Size
 		;
 		LocID := HKL & 0xFFFF
@@ -46,31 +48,31 @@ class Layout
 		DllCall("GetLocaleInfo", UInt, LocID, UInt, LCType, Str, localeSig, UInt, Size)
 		return localeSig
 	}
-	
+
 	Display_Name(HKL)
-	{ ; функция получения названия ("Английская") раскладки по ее "HKL" 
+	{ ; функция получения названия ("Английская") раскладки по ее "HKL"
 		static KLID, Display_Name, outBufSize
 		;
 		KLID := This.Get_KLID(HKL)
-		RegRead Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Display Name"
+		RegRead, Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Display Name"
 		if (not Display_Name) {
 			return False
 		}
 		DllCall("Shlwapi.dll\SHLoadIndirectString", "Ptr", &Display_Name, "Ptr", &Display_Name, "UInt", outBufSize := 50, "UInt", 0)
 		if (not Display_Name) {
-			RegRead Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Text"
+			RegRead, Display_Name, % "HKEY_LOCAL_MACHINE", % "SYSTEM\CurrentControlSet\Control\Keyboard Layouts\" . KLID, % "Layout Text"
 		}
 		return Display_Name
 	}
-	
+
 	Get_HKL(Window := "A")
 	{ ; функция получения названия "HKL" текущей раскладки
 		static Window_ID, Window_Class, Console_PID, HKL
 		;
 		Window_ID := WinExist(Window)
-		WinGetClass Window_Class
+		WinGetClass, Window_Class
 		if (Window_Class == "ConsoleWindowClass") {
-			WinGet Console_PID, PID
+			WinGet, Console_PID, PID
 			DllCall("AttachConsole", Ptr, Console_PID)
 			VarSetCapacity(Buff, 16)
 			DllCall("GetConsoleKeyboardLayoutName", Str, Buff)
@@ -83,9 +85,9 @@ class Layout
 		}
 		return HKL
 	}
-	
+
 	Get_KLID(HKL)
-	{ ; функция получения названия "KLID" раскладки по ее "HKL" 
+	{ ; функция получения названия "KLID" раскладки по ее "HKL"
 		static Prior_HKL, KLID
 		;
 		Prior_HKL := DllCall("GetKeyboardLayout", "Ptr", DllCall("GetWindowThreadProcessId", "Ptr", 0, "UInt", 0, "Ptr"), "Ptr")
@@ -95,22 +97,22 @@ class Layout
 		}
 		return StrGet(&KLID)
 	}
-	
+
 	Next(Window := "A", BySend := false)
 	{ ; функция смены раскладки (вперед)
 		if BySend { ; с помощью команды Send
-			SendInput % This.Switch_Layout_Combo
+			SendInput, % This.Switch_Layout_Combo
 		}
 		else { ; с помощью команды PostMessage
 			static Window_ID
 			;
 			if (Window_ID := WinExist(Window)) {
-				PostMessage % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
+				PostMessage, % This.WM_INPUTLANGCHANGEREQUEST, % This.INPUTLANGCHANGE_FORWARD,,, ahk_id %Window_ID%
 			}
 		}
-		Sleep 1
+		Sleep, 1
 	}
-	
+
 	Change(HKL, Window := "A", BySend := false)
 	{ ; функция смены раскладки по "HKL"
 		static Window_ID
@@ -120,23 +122,23 @@ class Layout
 				static This_Layout_KLID
 				static Next_Layout_KLID
 				;
-				Loop % This.Layouts_List.MaxIndex()
+				Loop, % This.Layouts_List.MaxIndex()
 				{
 					This_Layout_KLID := This.Get_KLID(This.Get_HKL("ahk_id " Window_ID))
 					Next_Layout_KLID := This.Get_KLID(HKL)
-					Sleep 1
+					Sleep, 1
 					if (This_Layout_KLID == Next_Layout_KLID) {
 						Break
 					}
-					SendInput % This.Switch_Layout_Combo
-					Sleep 1
+					SendInput, % This.Switch_Layout_Combo
+					Sleep, 1
 				}
 			}
 			else { ; с помощью команды PostMessage
-				PostMessage % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
+				PostMessage, % This.WM_INPUTLANGCHANGEREQUEST,, % HKL,, ahk_id %Window_ID%
 			}
 		}
-		Sleep 1
+		Sleep, 1
 	}
 
 	Get_Index(HKL)
@@ -149,7 +151,7 @@ class Layout
 			}
 		}
 	}
-	
+
 	Get_Index_By_Name(Full_Name)
 	{ ; функция получения порядкового номера раскладки по полному имени ("English")
 		static Index, Layout

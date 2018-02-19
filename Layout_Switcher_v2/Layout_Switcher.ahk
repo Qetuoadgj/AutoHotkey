@@ -43,6 +43,8 @@ Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
 
 Clipboard_Tmp := "" ; Null
 
+Magnifier_Win_PID := 0
+
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
 gosub, READ_CONFIG_FILE
@@ -178,7 +180,20 @@ SET_DEFAULTS:
 	Defaults.dictionary_russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	Defaults.dictionary_english := "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
 	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
-
+	
+	; Modules
+	Defaults.module_magnifier := "modules\magnifier\magnifier_" . (A_Is64bitOS ? "x64" : "x32") . ".exe"
+	
+	; Magnifier
+	Defaults.magnifier_key_toggle := "LWin & Z"
+	;
+	Defaults.magnifier_key_close_app := "Escape"
+	Defaults.magnifier_key_toggle_follow := "Space"
+	Defaults.magnifier_key_zoom_in := "WheelUp"
+	Defaults.magnifier_key_zoom_out := "WheelDown"
+	Defaults.magnifier_key_size_encrease := "+WheelUp"
+	Defaults.magnifier_key_size_decrease := "+WheelDown"
+	
 	return
 }
 
@@ -255,6 +270,35 @@ READ_CONFIG_FILE:
 	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, % Defaults.dictionary_english
 	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, % Defaults.dictionary_russian
 	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, % Defaults.dictionary_ukrainian
+	
+	; Modules
+	IniRead, module_magnifier, %Config_File%, Modules, module_magnifier, % Defaults.module_magnifier
+	module_magnifier_long_path := FileGetLongPath(module_magnifier)
+	
+	; Magnifier	
+	if FileExist(module_magnifier_long_path) {
+		SplitPath, module_magnifier_long_path, module_magnifier_file_name, module_magnifier_file_dir, module_magnifier_file_extension, module_magnifier_file_name_no_ext, module_magnifier_file_drive
+		;
+		IniRead, magnifier_key_toggle, %Config_File%, Magnifier, magnifier_key_toggle, % Defaults.magnifier_key_toggle
+		; получение настроек для модуля из общего Config_File
+		IniRead, magnifier_key_close_app, %Config_File%, Magnifier, magnifier_key_close_app, % Defaults.magnifier_key_close_app ; Escape
+		IniRead, magnifier_key_toggle_follow, %Config_File%, Magnifier, magnifier_key_toggle_follow, % Defaults.magnifier_key_toggle_follow ; Space
+		IniRead, magnifier_key_zoom_in, %Config_File%, Magnifier, magnifier_key_zoom_in, % Defaults.magnifier_key_zoom_in ; WheelUp
+		IniRead, magnifier_key_zoom_out, %Config_File%, Magnifier, magnifier_key_zoom_out, % Defaults.magnifier_key_zoom_out ; WheelDown
+		IniRead, magnifier_key_size_encrease, %Config_File%, Magnifier, magnifier_key_size_encrease, % Defaults.magnifier_key_size_encrease ; +WheelUp
+		IniRead, magnifier_key_size_decrease, %Config_File%, Magnifier, magnifier_key_size_decrease, % Defaults.magnifier_key_size_decrease ; +WheelDown
+		; запись настроек, полученных из общего Config_File в файл настроек модуля
+		module_magnifier_config_file := module_magnifier_file_dir . "\Magnifier.ini"		
+		IniWrite("key_close_app", module_magnifier_config_file, "HotKeys", magnifier_key_close_app) ; Escape
+		IniWrite("key_toggle_follow", module_magnifier_config_file, "HotKeys", magnifier_key_toggle_follow) ; Space
+		IniWrite("key_zoom_in", module_magnifier_config_file, "HotKeys", magnifier_key_zoom_in) ; WheelUp
+		IniWrite("key_zoom_out", module_magnifier_config_file, "HotKeys", magnifier_key_zoom_out) ; WheelDown
+		IniWrite("key_size_encrease", module_magnifier_config_file, "HotKeys", magnifier_key_size_encrease) ; +WheelUp
+		IniWrite("key_size_decrease", module_magnifier_config_file, "HotKeys", magnifier_key_size_decrease) ; +WheelDown
+		;
+		Hotkey, %magnifier_key_toggle%, toggle_magnifier ;, UseErrorLevel
+		; MsgBox, %magnifier_key_toggle%
+	}
 
 	Get_Dictionaries(Config_File, "Dictionaries", "dictionary_", system_skip_unused_dictionaries)
 	; Remove_Unused_Dictionaries()
@@ -357,6 +401,21 @@ SAVE_CONFIG_FILE:
 	IniWrite("dictionary_english", Config_File, "Dictionaries", dictionary_english)
 	IniWrite("dictionary_russian", Config_File, "Dictionaries", dictionary_russian)
 	IniWrite("dictionary_ukrainian", Config_File, "Dictionaries", dictionary_ukrainian)
+	
+	; Modules
+	IniWrite("module_magnifier", Config_File, "Modules", module_magnifier)
+	
+	; Magnifier
+	if FileExist(module_magnifier_long_path) {
+		IniWrite("magnifier_key_toggle", Config_File, "Magnifier", magnifier_key_toggle)
+		;
+		IniWrite("magnifier_key_close_app", Config_File, "Magnifier", magnifier_key_close_app) ; Escape
+		IniWrite("magnifier_key_toggle_follow", Config_File, "Magnifier", magnifier_key_toggle_follow) ; Space
+		IniWrite("magnifier_key_zoom_in", Config_File, "Magnifier", magnifier_key_zoom_in) ; WheelUp
+		IniWrite("magnifier_key_zoom_out", Config_File, "Magnifier", magnifier_key_zoom_out) ; WheelDown
+		IniWrite("magnifier_key_size_encrease", Config_File, "Magnifier", magnifier_key_size_encrease) ; +WheelUp
+		IniWrite("magnifier_key_size_decrease", Config_File, "Magnifier", magnifier_key_size_decrease) ; +WheelDown
+	}
 
 	return
 }
@@ -385,6 +444,22 @@ TOGGLE_CURSOR:
 	Sleep, 50
 	return
 }
+
+TOGGLE_MAGNIFIER:
+{
+	if FileExist(module_magnifier_long_path) {
+		; MsgBox, %Magnifier_Win_PID%
+		if (Magnifier_Win_PID) {
+			gosub, Magnifier_Close
+		}
+		else {
+			gosub, Magnifier_Init
+		}
+	}
+	Sleep, 50
+	return
+}
+
 /*
 TOGGLE_FULLSCREEN:
 {
@@ -1063,8 +1138,28 @@ Generate_Dictionaries(Prefix := "")
 	Gui, DICT_: Destroy
 }
 
+Magnifier_Init:
+{
+	if (Magnifier_Win_PID = 0) {
+		Run, % module_magnifier_long_path,, UseErrorLevel, Magnifier_Win_PID
+	}
+	return
+}
+
+Magnifier_Close:
+{
+	if (Magnifier_Win_PID != 0) {
+		; MsgBox, %Magnifier_Win_PID%
+		Process, Close, %Magnifier_Win_PID%
+		WinWaitClose, ahk_pid %Magnifier_Win_PID%
+		Magnifier_Win_PID := 0
+	}
+	return
+}
+
 App_Close:
 {
+	gosub, Magnifier_Close
 	SystemCursor("On")
 	ExitApp
 	return
@@ -1077,6 +1172,7 @@ App_Close:
 #Include ..\Includes\FUNC_SystemCursor.ahk
 
 #Include ..\Includes\FUNC_ShellRun.ahk
+#Include ..\Includes\FUNC_FileGetLongPath.ahk
 
 #Include ..\Includes\FUNC_hexToDecimal.ahk ; необходим для CLASS_Task_Sheduler.ahk
 

@@ -38,8 +38,8 @@ SET_DEFAULTS:
 	; Params
 	defaults.zoom := 2
 	defaults.follow := 1
-	defaults.width := 350
-	defaults.height := 250
+	defaults.width := 420 ;350
+	defaults.height := 240 ;250
 	defaults.antialiasing := 1
 	defaults.processing_delay := 10
 	

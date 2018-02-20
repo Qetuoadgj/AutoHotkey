@@ -10,7 +10,7 @@ OnExit, handle_exit
 ListLines, Off	; Disable them as they're only useful for debugging purposes.
 #KeyHistory, 0	; ListLines and #KeyHistory are functions used to "Log your keys".
 
-DetectHiddenWindows, On
+DetectHiddenWindows, Off ;On
 
 Process, Priority,, High
 

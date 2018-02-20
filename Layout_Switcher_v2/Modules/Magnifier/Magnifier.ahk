@@ -145,7 +145,7 @@ INIT_MAGNIFIER:
 	Gui, +AlwaysOnTop +Owner -Resize -ToolWindow +E0x00000020
 	Gui, Show, NoActivate W%ww% H%wh% X-1000 Y-1000, MagWindow ; start offscreen
 
-	WinSet, Transparent, 254, MagWindow
+	WinSet, Transparent, 255, MagWindow
 	Gui, -Caption
 	Gui, +Border
 
@@ -223,7 +223,7 @@ repaint:
 
 	if(mx != mxp) or (my != myp)
 	{
-		DllCall( "gdi32.dll\StretchBlt"
+		DllCall("gdi32.dll\StretchBlt"
 		, UInt, hdc_frame
 		, Int, 2 ; nXOriginDest
 		, Int, 2 ; nYOriginDest
@@ -252,8 +252,8 @@ GuiClose:
 handle_exit:
 close_app:
 {
-	DllCall("gdi32.dll\DeleteDC", UInt, hdc_frame )
-	DllCall("gdi32.dll\DeleteDC", UInt, hdd_frame )
+	DllCall("gdi32.dll\DeleteDC", UInt, hdc_frame)
+	DllCall("gdi32.dll\DeleteDC", UInt, hdd_frame)
 	Process, Priority,, Normal
 	ExitApp
 }

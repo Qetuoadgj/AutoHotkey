@@ -445,8 +445,8 @@ TOGGLE_CURSOR:
 TOGGLE_MAGNIFIER:
 {
 	if FileExist(module_magnifier_long_path) {
-		; MsgBox, %Magnifier_Win_PID%
-		if (Magnifier_Win_PID) {
+		WinGet, Magnifier_Path, ProcessPath, ahk_pid %Magnifier_Win_PID%
+		if (Magnifier_Path) {
 			gosub, Magnifier_Close
 		}
 		else {
@@ -1138,9 +1138,9 @@ Generate_Dictionaries(Prefix := "")
 
 Magnifier_Init:
 {
-	if (not Magnifier_Win_PID) {
+	; if (not Magnifier_Win_PID) {
 		Run, % module_magnifier_long_path,,, Magnifier_Win_PID
-	}
+	; }
 	return
 }
 

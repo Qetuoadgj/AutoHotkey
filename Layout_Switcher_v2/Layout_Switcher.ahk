@@ -190,6 +190,7 @@ SET_DEFAULTS:
 	;
 	Defaults.magnifier_key_close_app := "Escape"
 	Defaults.magnifier_key_toggle_follow := "Space"
+	Defaults.magnifier_key_toggle_negative := "LWin & N"
 	Defaults.magnifier_key_zoom_in := "WheelUp"
 	Defaults.magnifier_key_zoom_out := "WheelDown"
 	
@@ -282,12 +283,14 @@ READ_CONFIG_FILE:
 		; получение настроек для модуля из общего Config_File
 		IniRead, magnifier_key_close_app, %Config_File%, Magnifier, magnifier_key_close_app, % Defaults.magnifier_key_close_app ; Escape
 		IniRead, magnifier_key_toggle_follow, %Config_File%, Magnifier, magnifier_key_toggle_follow, % Defaults.magnifier_key_toggle_follow ; Space
+		IniRead, magnifier_key_toggle_negative, %Config_File%, Magnifier, magnifier_key_toggle_negative, % Defaults.magnifier_key_toggle_negative ; LWin & N
 		IniRead, magnifier_key_zoom_in, %Config_File%, Magnifier, magnifier_key_zoom_in, % Defaults.magnifier_key_zoom_in ; WheelUp
 		IniRead, magnifier_key_zoom_out, %Config_File%, Magnifier, magnifier_key_zoom_out, % Defaults.magnifier_key_zoom_out ; WheelDown
 		; запись настроек, полученных из общего Config_File в файл настроек модуля
 		module_magnifier_config_file := module_magnifier_file_dir . "\Magnifier.ini"		
 		IniWrite("key_close_app", module_magnifier_config_file, "HotKeys", magnifier_key_close_app) ; Escape
 		IniWrite("key_toggle_follow", module_magnifier_config_file, "HotKeys", magnifier_key_toggle_follow) ; Space
+		IniWrite("key_toggle_negative", module_magnifier_config_file, "HotKeys", magnifier_key_toggle_negative) ; LWin & N
 		IniWrite("key_zoom_in", module_magnifier_config_file, "HotKeys", magnifier_key_zoom_in) ; WheelUp
 		IniWrite("key_zoom_out", module_magnifier_config_file, "HotKeys", magnifier_key_zoom_out) ; WheelDown
 		;
@@ -406,6 +409,7 @@ SAVE_CONFIG_FILE:
 		;
 		IniWrite("magnifier_key_close_app", Config_File, "Magnifier", magnifier_key_close_app) ; Escape
 		IniWrite("magnifier_key_toggle_follow", Config_File, "Magnifier", magnifier_key_toggle_follow) ; Space
+		IniWrite("magnifier_key_toggle_negative", Config_File, "Magnifier", magnifier_key_toggle_negative) ; LWin & N
 		IniWrite("magnifier_key_zoom_in", Config_File, "Magnifier", magnifier_key_zoom_in) ; WheelUp
 		IniWrite("magnifier_key_zoom_out", Config_File, "Magnifier", magnifier_key_zoom_out) ; WheelDown
 	}

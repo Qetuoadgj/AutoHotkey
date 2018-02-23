@@ -70,7 +70,8 @@ gosub, FLAG_Customize_Menus
 gosub, FLAG_Add_Picture
 
 Last_Layout_Full_Name := ""
-SetTimer, FLAG_Update, % system_check_layout_change_interval
+; SetTimer, FLAG_Update, % system_check_layout_change_interval
+gosub, FLAG_Update
 
 gosub, SAVE_CONFIG_FILE
 
@@ -191,8 +192,6 @@ SET_DEFAULTS:
 	Defaults.magnifier_key_toggle_follow := "Space"
 	Defaults.magnifier_key_zoom_in := "WheelUp"
 	Defaults.magnifier_key_zoom_out := "WheelDown"
-	Defaults.magnifier_key_size_encrease := "+WheelUp"
-	Defaults.magnifier_key_size_decrease := "+WheelDown"
 	
 	return
 }
@@ -285,16 +284,12 @@ READ_CONFIG_FILE:
 		IniRead, magnifier_key_toggle_follow, %Config_File%, Magnifier, magnifier_key_toggle_follow, % Defaults.magnifier_key_toggle_follow ; Space
 		IniRead, magnifier_key_zoom_in, %Config_File%, Magnifier, magnifier_key_zoom_in, % Defaults.magnifier_key_zoom_in ; WheelUp
 		IniRead, magnifier_key_zoom_out, %Config_File%, Magnifier, magnifier_key_zoom_out, % Defaults.magnifier_key_zoom_out ; WheelDown
-		IniRead, magnifier_key_size_encrease, %Config_File%, Magnifier, magnifier_key_size_encrease, % Defaults.magnifier_key_size_encrease ; +WheelUp
-		IniRead, magnifier_key_size_decrease, %Config_File%, Magnifier, magnifier_key_size_decrease, % Defaults.magnifier_key_size_decrease ; +WheelDown
 		; запись настроек, полученных из общего Config_File в файл настроек модуля
 		module_magnifier_config_file := module_magnifier_file_dir . "\Magnifier.ini"		
 		IniWrite("key_close_app", module_magnifier_config_file, "HotKeys", magnifier_key_close_app) ; Escape
 		IniWrite("key_toggle_follow", module_magnifier_config_file, "HotKeys", magnifier_key_toggle_follow) ; Space
 		IniWrite("key_zoom_in", module_magnifier_config_file, "HotKeys", magnifier_key_zoom_in) ; WheelUp
 		IniWrite("key_zoom_out", module_magnifier_config_file, "HotKeys", magnifier_key_zoom_out) ; WheelDown
-		IniWrite("key_size_encrease", module_magnifier_config_file, "HotKeys", magnifier_key_size_encrease) ; +WheelUp
-		IniWrite("key_size_decrease", module_magnifier_config_file, "HotKeys", magnifier_key_size_decrease) ; +WheelDown
 		;
 		Hotkey, %magnifier_key_toggle%, toggle_magnifier ;, UseErrorLevel
 		; MsgBox, %magnifier_key_toggle%
@@ -413,8 +408,6 @@ SAVE_CONFIG_FILE:
 		IniWrite("magnifier_key_toggle_follow", Config_File, "Magnifier", magnifier_key_toggle_follow) ; Space
 		IniWrite("magnifier_key_zoom_in", Config_File, "Magnifier", magnifier_key_zoom_in) ; WheelUp
 		IniWrite("magnifier_key_zoom_out", Config_File, "Magnifier", magnifier_key_zoom_out) ; WheelDown
-		IniWrite("magnifier_key_size_encrease", Config_File, "Magnifier", magnifier_key_size_encrease) ; +WheelUp
-		IniWrite("magnifier_key_size_decrease", Config_File, "Magnifier", magnifier_key_size_decrease) ; +WheelDown
 	}
 
 	return
@@ -749,6 +742,7 @@ FLAG_Update:
 		gosub, FLAG_Update_Tray_Icon
 	}
 	Last_Layout_Full_Name := Current_Layout_Full_Name
+	SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
 	return
 }
 
@@ -1140,15 +1134,15 @@ Generate_Dictionaries(Prefix := "")
 
 Magnifier_Init:
 {
-	if (Magnifier_Win_PID = 0) {
-		Run, % module_magnifier_long_path,, UseErrorLevel, Magnifier_Win_PID
+	if (not Magnifier_Win_PID) {
+		Run, % module_magnifier_long_path,,, Magnifier_Win_PID
 	}
 	return
 }
 
 Magnifier_Close:
 {
-	if (Magnifier_Win_PID != 0) {
+	if (Magnifier_Win_PID) {
 		; MsgBox, %Magnifier_Win_PID%
 		Process, Close, %Magnifier_Win_PID%
 		WinWaitClose, ahk_pid %Magnifier_Win_PID%

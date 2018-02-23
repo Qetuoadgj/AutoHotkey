@@ -16,7 +16,6 @@ zoom_max := 32.0
 zoom_step := 2^0.5
 width := 400
 height := 400/1.5
-screen_operation := 0xCC0020
 */
 
 config_file := A_ScriptDir . "\Magnifier.ini"
@@ -31,8 +30,6 @@ if (hotkeys_created) {
 	gosub, INIT_LUPE
 	follow := 1 - follow
 	gosub, TOGGLE_FOLLOW
-	negative := 1 - negative
-	gosub, TOGGLE_NEGATIVE
 }
 
 gosub, SAVE_CONFIG_FILE
@@ -82,7 +79,6 @@ SET_DEFAULTS:
 	defaults.zoom_max := 32
 	defaults.zoom_step := 2 ;^0.5
 	defaults.follow := 1
-	defaults.negative := 0
 	defaults.width := 400
 	defaults.height := 400/2 ;^0.5
 	defaults.antialiasing := 0 ;1
@@ -91,7 +87,6 @@ SET_DEFAULTS:
 	; HotKeys
 	defaults.key_close_app := "Escape"
 	defaults.key_toggle_follow := "Space"
-	defaults.key_toggle_negative := "LWin & N"
 	defaults.key_zoom_in := "WheelUp"
 	defaults.key_zoom_out := "WheelDown"
 
@@ -105,7 +100,6 @@ GET_SETTINGS:
 	IniRead, zoom_max, %config_file%, Params, zoom_max, % defaults.zoom_max
 	IniRead, zoom_step, %config_file%, Params, zoom_step, % defaults.zoom_step
 	IniRead, follow, %config_file%, Params, follow, % defaults.follow
-	IniRead, negative, %config_file%, Params, negative, % defaults.negative
 	IniRead, width, %config_file%, Params, width, % defaults.width
 	IniRead, height, %config_file%, Params, height, % defaults.height
 	IniRead, antialiasing, %config_file%, Params, antialiasing, % defaults.antialiasing
@@ -114,7 +108,6 @@ GET_SETTINGS:
 	; HotKeys
 	IniRead, key_close_app, %config_file%, HotKeys, key_close_app, % defaults.key_close_app
 	IniRead, key_toggle_follow, %config_file%, HotKeys, key_toggle_follow, % defaults.key_toggle_follow
-	IniRead, key_toggle_negative, %config_file%, HotKeys, key_toggle_negative, % defaults.key_toggle_negative
 	IniRead, key_zoom_in, %config_file%, HotKeys, key_zoom_in, % defaults.key_zoom_in
 	IniRead, key_zoom_out, %config_file%, HotKeys, key_zoom_out, % defaults.key_zoom_out
 
@@ -135,7 +128,6 @@ SAVE_CONFIG_FILE:
 	IniWrite("zoom_max", config_file, "Params", zoom_max)
 	IniWrite("zoom_step", config_file, "Params", zoom_step)
 	IniWrite("follow", config_file, "Params", follow)
-	IniWrite("negative", config_file, "Params", negative)
 	IniWrite("width", config_file, "Params", width)
 	IniWrite("height", config_file, "Params", height)
 	IniWrite("antialiasing", config_file, "Params", antialiasing)
@@ -144,7 +136,6 @@ SAVE_CONFIG_FILE:
 	; HotKeys
 	IniWrite("key_close_app", config_file, "HotKeys", key_close_app)
 	IniWrite("key_toggle_follow", config_file, "HotKeys", key_toggle_follow)
-	IniWrite("key_toggle_negative", config_file, "HotKeys", key_toggle_negative)
 	IniWrite("key_zoom_in", config_file, "HotKeys", key_zoom_in)
 	IniWrite("key_zoom_out", config_file, "HotKeys", key_zoom_out)
 
@@ -182,8 +173,6 @@ INIT_LUPE:
 	; dx := 7, dy := 26
 	; dx := 10, dy := 17
 	dx := 5, dy := 9
-	
-	screen_operation := 0xCC0020
 
 	lupe_output_window_name := "lupe_output_window_title"
 
@@ -238,7 +227,7 @@ MAGNIFICATION_PROCESSING:
 	, "Int", my-(wh/2/zoom)+dy/zoom
 	, "Int", ww/zoom
 	, "Int", wh/zoom
-	,"UInt", screen_operation) ; SRCCOPY
+	,"UInt", 0xCC0020) ; SRCCOPY
 
 	if (follow) {
 		WinMove, %lupe_output_window_name%,, mx-ww/2, my-wh/2
@@ -278,17 +267,6 @@ TOGGLE_FOLLOW:
 		Gui, LUPE_: +Caption
 		Gui, LUPE_: +Border
 		dx := 7, dy := 26
-	}
-	return
-}
-TOGGLE_NEGATIVE:
-{
-	negative := 1 - negative
-	if (negative) {
-		screen_operation := 0x330008
-	}
-	else {
-		screen_operation := 0xCC0020
 	}
 	return
 }

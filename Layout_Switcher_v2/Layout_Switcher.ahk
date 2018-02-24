@@ -35,6 +35,10 @@ SendMode, Input						; SendInput is the fastest send method. SendEvent (the defa
 ; new Edit_Text		:= c_Edit_Text
 ;
 
+OS_MajorVersion := DllCall("GetVersion") & 0xFF                ; 10
+OS_MinorVersion := DllCall("GetVersion") >> 8 & 0xFF           ; 0
+OS_BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF        ; 10532
+
 Script_Name := Script.Name()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 
@@ -186,6 +190,8 @@ SET_DEFAULTS:
 	Defaults.module_magnifier := "modules\magnifier\magnifier_" . (A_Is64bitOS ? "x64" : "x32") . ".exe"
 	
 	; Magnifier
+	Defaults.magnifier_use_dll := (OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
+	;
 	Defaults.magnifier_key_toggle := "LWin & Z"
 	;
 	Defaults.magnifier_key_close_app := "Escape"
@@ -279,6 +285,8 @@ READ_CONFIG_FILE:
 	if FileExist(module_magnifier_long_path) {
 		SplitPath, module_magnifier_long_path, module_magnifier_file_name, module_magnifier_file_dir, module_magnifier_file_extension, module_magnifier_file_name_no_ext, module_magnifier_file_drive
 		;
+		IniRead, magnifier_use_dll, %Config_File%, Magnifier, magnifier_use_dll, % Defaults.magnifier_use_dll
+		;
 		IniRead, magnifier_key_toggle, %Config_File%, Magnifier, magnifier_key_toggle, % Defaults.magnifier_key_toggle
 		; получение настроек для модуля из общего Config_File
 		IniRead, magnifier_key_close_app, %Config_File%, Magnifier, magnifier_key_close_app, % Defaults.magnifier_key_close_app ; Escape
@@ -288,6 +296,8 @@ READ_CONFIG_FILE:
 		IniRead, magnifier_key_zoom_out, %Config_File%, Magnifier, magnifier_key_zoom_out, % Defaults.magnifier_key_zoom_out ; WheelDown
 		; запись настроек, полученных из общего Config_File в файл настроек модуля
 		module_magnifier_config_file := module_magnifier_file_dir . "\Magnifier.ini"		
+		IniWrite("use_dll", module_magnifier_config_file, "Params", magnifier_use_dll)
+		;
 		IniWrite("key_close_app", module_magnifier_config_file, "HotKeys", magnifier_key_close_app) ; Escape
 		IniWrite("key_toggle_follow", module_magnifier_config_file, "HotKeys", magnifier_key_toggle_follow) ; Space
 		IniWrite("key_toggle_negative", module_magnifier_config_file, "HotKeys", magnifier_key_toggle_negative) ; LWin & N
@@ -405,6 +415,8 @@ SAVE_CONFIG_FILE:
 	
 	; Magnifier
 	if FileExist(module_magnifier_long_path) {
+		IniWrite("magnifier_use_dll", Config_File, "Magnifier", magnifier_use_dll)
+		;
 		IniWrite("magnifier_key_toggle", Config_File, "Magnifier", magnifier_key_toggle)
 		;
 		IniWrite("magnifier_key_close_app", Config_File, "Magnifier", magnifier_key_close_app) ; Escape

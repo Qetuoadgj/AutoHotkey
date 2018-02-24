@@ -730,7 +730,7 @@ FLAG_Save_Position:
 
 FLAG_Add_Picture:
 {
-	Gui, FLAG_: Add, Picture, x0 y0 w%flag_width% h%flag_height% vFLAG_PICTURE
+	Gui, FLAG_: Add, Picture, x0 y0 w%flag_width% h%flag_height% vFLAG_PICTURE gCAPTURE_GUI_EVENTS
 	return
 }
 
@@ -1072,6 +1072,14 @@ Menu_Reload_App:
 Menu_Exit_App:
 {
 	ExitApp
+	return
+}
+
+CAPTURE_GUI_EVENTS:
+{
+	if (A_GuiEvent == "DoubleClick") {
+		gosub, Menu_Options
+	}
 	return
 }
 

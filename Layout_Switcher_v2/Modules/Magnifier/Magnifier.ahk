@@ -6,6 +6,10 @@
 
 OnExit, HANDLE_EXIT
 
+OS_MajorVersion := DllCall("GetVersion") & 0xFF                ; 10
+OS_MinorVersion := DllCall("GetVersion") >> 8 & 0xFF           ; 0
+OS_BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF        ; 10532
+
 /*
 delay := 10
 antialiasing := 0
@@ -16,7 +20,7 @@ zoom_max := 32.0
 zoom_step := 2^0.5
 width := 400
 height := 400/1.5
-screen_operation := 0xCC0020
+BitBlt_operation := 0xCC0020
 */
 
 config_file := A_ScriptDir . "\Magnifier.ini"
@@ -87,6 +91,7 @@ SET_DEFAULTS:
 	defaults.height := 400/2 ;^0.5
 	defaults.antialiasing := 0 ;1
 	defaults.processing_delay := 15
+	defaults.use_dll := (OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
 
 	; HotKeys
 	defaults.key_close_app := "Escape"
@@ -110,6 +115,7 @@ GET_SETTINGS:
 	IniRead, height, %config_file%, Params, height, % defaults.height
 	IniRead, antialiasing, %config_file%, Params, antialiasing, % defaults.antialiasing
 	IniRead, delay, %config_file%, Params, processing_delay, % defaults.processing_delay
+	IniRead, use_dll, %config_file%, Params, use_dll, % defaults.use_dll
 
 	; HotKeys
 	IniRead, key_close_app, %config_file%, HotKeys, key_close_app, % defaults.key_close_app
@@ -136,10 +142,11 @@ SAVE_CONFIG_FILE:
 	IniWrite("zoom_step", config_file, "Params", zoom_step)
 	IniWrite("follow", config_file, "Params", follow)
 	IniWrite("negative", config_file, "Params", negative)
-	IniWrite("width", config_file, "Params", width)
-	IniWrite("height", config_file, "Params", height)
+	IniWrite("width", config_file, "Params", Round(width))
+	IniWrite("height", config_file, "Params", Round(height))
 	IniWrite("antialiasing", config_file, "Params", antialiasing)
 	IniWrite("processing_delay", config_file, "Params", delay)
+	IniWrite("use_dll", config_file, "Params", use_dll)
 
 	; HotKeys
 	IniWrite("key_close_app", config_file, "HotKeys", key_close_app)
@@ -178,81 +185,115 @@ Get_Binds(config_file, Section, Prefix := "")
 ;====================================================================================================
 INIT_LUPE:
 {
-	; follow := 0
-	; dx := 7, dy := 26
-	; dx := 10, dy := 17
-	dx := 5, dy := 9
-	
-	screen_operation := 0xCC0020
-
 	lupe_output_window_name := "lupe_output_window_title"
-
-	Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow ; window for the dock
+	Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
 	Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
-
 	WinGet, lupe_output_window_id, ID, %lupe_output_window_name%
-	WinGet, image_source_window_id, ID
-
-	; ToolTip, lupe_output_window_id: %lupe_output_window_id%`nimage_source_window_id: %image_source_window_id%
-
-	; WinSet, Region, 0-0 w365 h365 E, %lupe_output_window_name%
-
-	WinSet, Transparent, % 254*1, %lupe_output_window_name% ; exclude lupe window from source image processing
-
-	hdd_frame := DllCall("GetDC", UInt, image_source_window_id)
-	hdc_frame := DllCall("GetDC", UInt, lupe_output_window_id)
-
-	; ToolTip, hdc_frame: %hdd_frame%
-
-	hdc_buffer := DllCall("gdi32.dll\CreateCompatibleDC", UInt, hdc_frame) ; buffer
-	hbm_buffer := DllCall("gdi32.dll\CreateCompatibleBitmap", UInt, hdc_frame, Int, A_ScreenWidth, Int, A_ScreenHeight)
-
+	WinSet, Transparent, 254, ahk_id %lupe_output_window_id%
+	if (use_dll) {
+		vSfx := (A_PtrSize=8) ? "Ptr" : ""
+		hInstance := DllCall("GetWindowLong",vSfx, Ptr,lupe_output_window_id, Int,-6) ; GWL_HINSTANCE := -6
+		DllCall("LoadLibrary", Str,"magnification.dll")
+		DllCall("magnification.dll\MagInitialize")
+		WS_CHILD := 0x40000000
+		WS_VISIBLE := 0x10000000
+		MS_SHOWMAGNIFIEDCURSOR := 0x1
+		MS_INVERTCOLORS := 0x4
+		vWinStyle := WS_CHILD | WS_VISIBLE
+		gosub, DLL_CALCULATE_ZOOM
+	}
+	else {
+		SRCCOPY := 0xCC0020
+		SRCINVERT := 0x330008
+		BitBlt_operation := SRCCOPY
+		hdd_frame := DllCall("GetDC", UInt, 0)
+		hdc_frame := DllCall("GetDC", UInt, lupe_output_window_id)
+		hdc_buffer := DllCall("gdi32.dll\CreateCompatibleDC", UInt, hdc_frame) ; buffer
+		hbm_buffer := DllCall("gdi32.dll\CreateCompatibleBitmap", UInt, hdc_frame, Int, A_ScreenWidth, Int, A_ScreenHeight)
+		if (antialiasing) {
+			DllCall("gdi32.dll\SetStretchBltMode", "UInt", hdc_frame, "Int", 4*antialiasing) ; Halftone better quality with stretch
+		}
+	}
 	delay := delay < 10 ? 10 : delay
 	antialiasing := antialiasing >= 1 ? 1 : 0
-
 	SetWinDelay, %delay%
-
 	gosub, MAGNIFICATION_PROCESSING
+	return
+}
+DLL_CALCULATE_ZOOM:
+{
+	VarSetCapacity(MAGTRANSFORM, 36, 0)
+	NumPut(zoom, MAGTRANSFORM, (1-1)*4, "Float")
+	NumPut(zoom, MAGTRANSFORM, (5-1)*4, "Float")
+	NumPut(1, MAGTRANSFORM, (9-1)*4, "Float")
+	return
+}
+DLL_UPDATE_OUTPUT_IMAGE:
+{
+	WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
+	hCtl := DllCall("CreateWindowEx"
+	, UInt, 0
+	, Str, "Magnifier"
+	, Str, "MagnifierWindow"
+	, UInt, vWinStyle
+	, Int, 0
+	, Int, 0
+	, Int, ww
+	, Int, wh
+	, Ptr, lupe_output_window_id
+	, Ptr, 0
+	, Ptr, hInstance
+	, Ptr, 0
+	, Ptr)
 	return
 }
 MAGNIFICATION_PROCESSING:
 {
 	CoordMode, Mouse, Screen
 	MouseGetPos, mx, my ; position of mouse
-	WinGetPos, wx, wy, ww, wh, %lupe_output_window_name%
-
-	; ToolTip, wx: %wx%`nwy: %wy%`nww: %ww%`nwh: %wh%`ndx: %dx%`ndy: %dy%`nzoom: %zoom%
-
-	if (antialiasing) {
-		DllCall("gdi32.dll\SetStretchBltMode", "UInt", hdc_frame, "Int", 4*antialiasing) ; Halftone better quality with stretch
+	WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
+	if (use_dll) {
+		DllCall("magnification.dll\MagSetWindowTransform"
+		, Ptr, hCtl
+		, Ptr, &MAGTRANSFORM)
+		DllCall("magnification.dll\MagSetWindowSource"
+		, Ptr, hCtl
+		, Int, mx-(ww/2/zoom)+dx/zoom
+		, Int, my-(wh/2/zoom)+dy/zoom
+		, Int, ww
+		, Int, wh)
 	}
-
-	DllCall("gdi32.dll\StretchBlt"
-	,"UInt", hdc_frame
-	, "Int", 0
-	, "Int", 0
-	, "Int", ww
-	, "Int", wh
-	,"UInt", hdd_frame
-	, "Int", mx-(ww/2/zoom)+dx/zoom
-	, "Int", my-(wh/2/zoom)+dy/zoom
-	, "Int", ww/zoom
-	, "Int", wh/zoom
-	,"UInt", screen_operation) ; SRCCOPY
-
+	else {
+		DllCall("gdi32.dll\StretchBlt"
+		,UInt, hdc_frame
+		, Int, 0
+		, Int, 0
+		, Int, ww
+		, Int, wh
+		,UInt, hdd_frame
+		, Int, mx-(ww/2/zoom)+dx/zoom
+		, Int, my-(wh/2/zoom)+dy/zoom
+		, Int, ww/zoom
+		, Int, wh/zoom
+		,UInt, BitBlt_operation)
+	}
 	if (follow) {
-		WinMove, %lupe_output_window_name%,, mx-ww/2, my-wh/2
+		WinMove, ahk_id %lupe_output_window_id%,, mx-ww/2, my-wh/2
 	}
-
 	SetTimer, %A_ThisLabel%, %delay%
 	return
 }
 CLEAR_MEMORY:
 {
-	DllCall("gdi32.dll\DeleteObject", UInt, hbm_buffer)
-	DllCall("gdi32.dll\DeleteDC", UInt, hdc_frame)
-	DllCall("gdi32.dll\DeleteDC", UInt, hdd_frame)
-	DllCall("gdi32.dll\DeleteDC", UInt, hdc_buffer)
+	if (use_dll) {
+		DllCall("magnification.dll\MagUninitialize")
+	}
+	else {
+		DllCall("gdi32.dll\DeleteObject", UInt, hbm_buffer)
+		DllCall("gdi32.dll\DeleteDC", UInt, hdc_frame)
+		DllCall("gdi32.dll\DeleteDC", UInt, hdd_frame)
+		DllCall("gdi32.dll\DeleteDC", UInt, hdc_buffer)
+	}
 	return
 }
 CLOSE_APP:
@@ -265,30 +306,60 @@ HANDLE_EXIT:
 TOGGLE_FOLLOW:
 {
 	follow := 1 - follow
-	if (follow) {
-		Gui, LUPE_: +E0x00000020
-		Gui, LUPE_: -Resize
-		Gui, LUPE_: -Caption
-		Gui, LUPE_: +Border
-		dx := 0, dy := 1
+	if (use_dll) {
+		if (follow) {
+			Gui, LUPE_: +E0x00000020
+			Gui, LUPE_: -Resize
+			Gui, LUPE_: -Caption
+			Gui, LUPE_: +Border
+			dx := 0, dy := 0
+		}
+		else {
+			Gui, LUPE_: -E0x00000020
+			Gui, LUPE_: +Resize
+			Gui, LUPE_: +Caption
+			Gui, LUPE_: +Border
+			dx := 0, dy := 12
+		}
+		gosub, DLL_UPDATE_OUTPUT_IMAGE
 	}
 	else {
-		Gui, LUPE_: -E0x00000020
-		Gui, LUPE_: +Resize
-		Gui, LUPE_: +Caption
-		Gui, LUPE_: +Border
-		dx := 7, dy := 26
+		if (follow) {
+			Gui, LUPE_: +E0x00000020
+			Gui, LUPE_: -Resize
+			Gui, LUPE_: -Caption
+			Gui, LUPE_: +Border
+			dx := 0, dy := 1
+		}
+		else {
+			Gui, LUPE_: -E0x00000020
+			Gui, LUPE_: +Resize
+			Gui, LUPE_: +Caption
+			Gui, LUPE_: +Border
+			dx := 7, dy := 26
+		}
 	}
 	return
 }
 TOGGLE_NEGATIVE:
 {
 	negative := 1 - negative
-	if (negative) {
-		screen_operation := 0x330008
+	if (use_dll) {
+		if (negative) {
+			vWinStyle := WS_CHILD | WS_VISIBLE | MS_INVERTCOLORS
+		}
+		else {
+			vWinStyle := WS_CHILD | WS_VISIBLE
+		}
+		gosub, DLL_UPDATE_OUTPUT_IMAGE
 	}
 	else {
-		screen_operation := 0xCC0020
+		if (negative) {
+			BitBlt_operation := SRCINVERT
+		}
+		else {
+			BitBlt_operation := SRCCOPY
+		}
 	}
 	return
 }
@@ -296,18 +367,24 @@ ZOOM_IN:
 {
 	zoom *= zoom_step
 	zoom := zoom > zoom_max ? zoom_max : zoom
+	if (use_dll) {
+		gosub, DLL_CALCULATE_ZOOM
+	}
 	return
 }
 ZOOM_OUT:
 {
 	zoom /= zoom_step
 	zoom := zoom < zoom_min ? zoom_min : zoom
+	if (use_dll) {
+		gosub, DLL_CALCULATE_ZOOM
+	}
 	return
 }
 /*
 LUPE_GuiSize:
 {
-	WinGetPos,,, width, height, %lupe_output_window_name%
+	WinGetPos,,, width, height, ahk_id %lupe_output_window_id%
 
 	; Params
 	IniWrite("width", config_file, "Params", width)

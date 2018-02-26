@@ -88,7 +88,7 @@ SET_DEFAULTS:
 	defaults.follow := 1
 	defaults.negative := 0
 	defaults.width := 400
-	defaults.height := 250 ;400/2 ;^0.5
+	defaults.height := 400/2 ;^0.5
 	defaults.antialiasing := 0 ;1
 	defaults.processing_delay := 15
 	defaults.processing_mode := 3 ;(OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
@@ -185,14 +185,14 @@ Get_Binds(config_file, Section, Prefix := "")
 ;====================================================================================================
 #Include Gdip_All.ahk ; https://autohotkey.com/boards/viewtopic.php?t=6517
 ;====================================================================================================
-Gdip_BitmapFromHwnd2(hWnd, x=0, y=0, w=0, h=0) {
+Gdip_BitmapFromHwnd2(hWnd, x=0,y=0, w=0,h=0) {
 	if (!w || !h)
     WinGetPos,,, w,h, ahk_id %hWnd%
 	hhdc := GetDCEx(hWnd, 3)
 	chdc := CreateCompatibleDC()
 	hbm := CreateDIBSection(w,h, chdc)
 	obm := SelectObject(chdc, hbm)
-	BitBlt(chdc, 0, 0, w, h, hhdc, x, y)
+	BitBlt(chdc, 0,0, w,h, hhdc, x,y)
 	ReleaseDC(hhdc)
 	pBitmap := Gdip_CreateBitmapFromHBITMAP(hbm)
 	SelectObject(chdc, obm)
@@ -204,8 +204,7 @@ Gdip_BitmapFromHwnd2(hWnd, x=0, y=0, w=0, h=0) {
 ;====================================================================================================
 INIT_LUPE:
 {
-	if (processing_mode == 3)
-	{ ; GDIP magnifier - https://autohotkey.com/boards/viewtopic.php?t=28937#
+	if (processing_mode == 3) {
 		if (!pToken := Gdip_Startup()) {
 			ExitApp
 		}
@@ -227,18 +226,15 @@ INIT_LUPE:
 		G := Gdip_GraphicsFromHDC(hdc)
 		Gdip_SetInterpolationMode(G, 7)
 		pPen := Gdip_CreatePen(0xFF000000,1)
-		; pBrush := Gdip_BrushCreateHatch(0xFFFFFFFF, 0xFF000000, 38) ; HatchStyleDiagonalBrick
+		pBrush := Gdip_BrushCreateHatch(0xFFFFFFFF, 0xFF000000, 38) ; HatchStyleDiagonalBrick
 		
 		MouseGetPos, mX, mY, mWin
 		tX := mX-display_width/2
 		ty := mY-display_height/2
 		
-		GDIP_COLOR_MATRIX_INVERT := "-1|0|0|0|0|0|-1|0|0|0|0|0|-1|0|0|0|0|0|1|0|1|1|1|0|1"
-		GDIP_COLOR_MATRIX_DEFAULT := ""
-		GDIP_COLOR_MATRIX := GDIP_COLOR_MATRIX_DEFAULT
+		GDIP_COLOR_MATRIX := ""
 	}
-	else if (processing_mode == 2) 
-	{ ; Magnification API and AutoHotkey - //autohotkey.com/board/topic/64060-magnification-api-and-autohotkey/?p=403936
+	else if (processing_mode == 2) {
 		lupe_output_window_name := "lupe_output_window_title"
 		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
 		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
@@ -258,8 +254,7 @@ INIT_LUPE:
 		vWinStyle := WS_CHILD | WS_VISIBLE
 		gosub, DLL_CALCULATE_ZOOM
 	}
-	else
-	{ ; Screen Magnifier by Holomind - ://autohotkey.com/board/topic/10660-screenmagnifier/?p=67011
+	else {
 		lupe_output_window_name := "lupe_output_window_title"
 		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
 		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
@@ -319,7 +314,6 @@ MAGNIFICATION_PROCESSING:
 		WinGetPos, X, Y, W, H, ahk_id %mWin%
 		pBitmap := Gdip_BitmapFromHwnd2(mWin, x1 := mX-X-capture_width/2, y1 := mY-Y-capture_height/2, capture_width, capture_height)
 		G2 := Gdip_GraphicsFromImage(pBitmap)
-		/*
 		if (x1 < 0) {
 			Gdip_FillRectangle(G2, pBrush, 0, 0, -x1, capture_height)
 		}
@@ -332,7 +326,6 @@ MAGNIFICATION_PROCESSING:
 		if (H < y1+capture_height) {
 			Gdip_FillRectangle(G2, pBrush, 0, -y1+H, capture_width, capture_height-y1+H)
 		}
-		*/
 		Gdip_DeleteGraphics(G2)
 		; Gdip_DrawImage(G, pBitmap, 0, 0, display_width, display_height, 0, 0, capture_width, capture_height)
 		Gdip_DrawImage(G, pBitmap, 0, 0, display_width, display_height, 0,0 , capture_width, capture_height, GDIP_COLOR_MATRIX)
@@ -389,7 +382,7 @@ MAGNIFICATION_PROCESSING:
 CLEAR_MEMORY:
 {
 	if (processing_mode == 3) {
-		; Gdip_DeleteBrush(pBrush)
+		Gdip_DeleteBrush(pBrush)
 		Gdip_DeletePen(pPen)
 		SelectObject(hdc, obm)
 		DeleteObject(hbm)
@@ -465,7 +458,7 @@ TOGGLE_NEGATIVE:
 	negative := 1 - negative
 	gosub, SAVE_CONFIG_FILE
 	if (processing_mode == 3) {
-		GDIP_COLOR_MATRIX := negative ? GDIP_COLOR_MATRIX_INVERT : GDIP_COLOR_MATRIX_DEFAULT
+		GDIP_COLOR_MATRIX := negative ? "-1|0|0|0|0|0|-1|0|0|0|0|0|-1|0|0|0|0|0|1|0|1|1|1|0|1" : ""
 	}
 	if (processing_mode == 2) {
 		if (negative) {

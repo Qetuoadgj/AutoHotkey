@@ -6,9 +6,9 @@
 
 OnExit, HANDLE_EXIT
 
-; OS_MajorVersion := DllCall("GetVersion") & 0xFF                ; 10
-; OS_MinorVersion := DllCall("GetVersion") >> 8 & 0xFF           ; 0
-; OS_BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF        ; 10532
+OS_MajorVersion := DllCall("GetVersion") & 0xFF                ; 10
+OS_MinorVersion := DllCall("GetVersion") >> 8 & 0xFF           ; 0
+OS_BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF        ; 10532
 
 /*
 delay := 10
@@ -88,10 +88,10 @@ SET_DEFAULTS:
 	defaults.follow := 1
 	defaults.negative := 0
 	defaults.width := 400
-	defaults.height := 250 ;400/2 ;^0.5
+	defaults.height := 400/2 ;^0.5
 	defaults.antialiasing := 0 ;1
 	defaults.processing_delay := 15
-	defaults.processing_mode := 3 ;(OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
+	defaults.use_dll := (OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
 
 	; HotKeys
 	defaults.key_close_app := "Escape"
@@ -115,7 +115,7 @@ GET_SETTINGS:
 	IniRead, height, %config_file%, Params, height, % defaults.height
 	IniRead, antialiasing, %config_file%, Params, antialiasing, % defaults.antialiasing
 	IniRead, delay, %config_file%, Params, processing_delay, % defaults.processing_delay
-	IniRead, processing_mode, %config_file%, Params, processing_mode, % defaults.processing_mode
+	IniRead, use_dll, %config_file%, Params, use_dll, % defaults.use_dll
 
 	; HotKeys
 	IniRead, key_close_app, %config_file%, HotKeys, key_close_app, % defaults.key_close_app
@@ -146,7 +146,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("height", config_file, "Params", Round(height))
 	IniWrite("antialiasing", config_file, "Params", antialiasing)
 	IniWrite("processing_delay", config_file, "Params", delay)
-	IniWrite("processing_mode", config_file, "Params", processing_mode)
+	IniWrite("use_dll", config_file, "Params", use_dll)
 
 	; HotKeys
 	IniWrite("key_close_app", config_file, "HotKeys", key_close_app)
@@ -183,70 +183,14 @@ Get_Binds(config_file, Section, Prefix := "")
 	}
 }
 ;====================================================================================================
-#Include Gdip_All.ahk ; https://autohotkey.com/boards/viewtopic.php?t=6517
-;====================================================================================================
-Gdip_BitmapFromHwnd2(hWnd, x=0, y=0, w=0, h=0) {
-	if (!w || !h)
-    WinGetPos,,, w,h, ahk_id %hWnd%
-	hhdc := GetDCEx(hWnd, 3)
-	chdc := CreateCompatibleDC()
-	hbm := CreateDIBSection(w,h, chdc)
-	obm := SelectObject(chdc, hbm)
-	BitBlt(chdc, 0, 0, w, h, hhdc, x, y)
-	ReleaseDC(hhdc)
-	pBitmap := Gdip_CreateBitmapFromHBITMAP(hbm)
-	SelectObject(chdc, obm)
-	DeleteObject(hbm)
-	DeleteDC(hhdc)
-	DeleteDC(chdc)
-	return pBitmap
-}
-;====================================================================================================
 INIT_LUPE:
 {
-	if (processing_mode == 3)
-	{ ; GDIP magnifier - https://autohotkey.com/boards/viewtopic.php?t=28937#
-		if (!pToken := Gdip_Startup()) {
-			ExitApp
-		}
-
-		CoordMode, Mouse, Screen
-
-		display_width  := width
-		display_height := height
-		capture_width  := display_width
-		capture_height := display_height
-
-		Gui, LUPE_: -Caption +E0x00080020 +LastFound +AlwaysOnTop +ToolWindow +OwnDialogs
-		Gui, LUPE_: Show, NA
-		hwnd := WinExist()
-		
-		hbm := CreateDIBSection(display_width, display_height)
-		hdc := CreateCompatibleDC()
-		obm := SelectObject(hdc, hbm)
-		G := Gdip_GraphicsFromHDC(hdc)
-		Gdip_SetInterpolationMode(G, 7)
-		pPen := Gdip_CreatePen(0xFF000000,1)
-		; pBrush := Gdip_BrushCreateHatch(0xFFFFFFFF, 0xFF000000, 38) ; HatchStyleDiagonalBrick
-		
-		MouseGetPos, mX, mY, mWin
-		tX := mX-display_width/2
-		ty := mY-display_height/2
-		
-		GDIP_COLOR_MATRIX_INVERT := "-1|0|0|0|0|0|-1|0|0|0|0|0|-1|0|0|0|0|0|1|0|1|1|1|0|1"
-		GDIP_COLOR_MATRIX_DEFAULT := ""
-		GDIP_COLOR_MATRIX := GDIP_COLOR_MATRIX_DEFAULT
-	}
-	else if (processing_mode == 2) 
-	{ ; Magnification API and AutoHotkey - //autohotkey.com/board/topic/64060-magnification-api-and-autohotkey/?p=403936
-		lupe_output_window_name := "lupe_output_window_title"
-		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
-		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
-		WinGet, lupe_output_window_id, ID, %lupe_output_window_name%
-		WinSet, Transparent, 254, ahk_id %lupe_output_window_id%
-
-		CoordMode, Mouse, Screen
-
+	lupe_output_window_name := "lupe_output_window_title"
+	Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
+	Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
+	WinGet, lupe_output_window_id, ID, %lupe_output_window_name%
+	WinSet, Transparent, 254, ahk_id %lupe_output_window_id%
+	if (use_dll) {
 		vSfx := (A_PtrSize=8) ? "Ptr" : ""
 		hInstance := DllCall("GetWindowLong",vSfx, Ptr,lupe_output_window_id, Int,-6) ; GWL_HINSTANCE := -6
 		DllCall("LoadLibrary", Str,"magnification.dll")
@@ -258,23 +202,14 @@ INIT_LUPE:
 		vWinStyle := WS_CHILD | WS_VISIBLE
 		gosub, DLL_CALCULATE_ZOOM
 	}
-	else
-	{ ; Screen Magnifier by Holomind - ://autohotkey.com/board/topic/10660-screenmagnifier/?p=67011
-		lupe_output_window_name := "lupe_output_window_title"
-		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
-		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
-		WinGet, lupe_output_window_id, ID, %lupe_output_window_name%
-		WinSet, Transparent, 254, ahk_id %lupe_output_window_id%
-
-		CoordMode, Mouse, Screen
-
+	else {
 		SRCCOPY := 0xCC0020
 		SRCINVERT := 0x330008
 		BitBlt_operation := SRCCOPY
 		hdd_frame := DllCall("GetDC", UInt, 0)
 		hdc_frame := DllCall("GetDC", UInt, lupe_output_window_id)
-		; hdc_buffer := DllCall("gdi32.dll\CreateCompatibleDC", UInt, hdc_frame) ; buffer
-		; hbm_buffer := DllCall("gdi32.dll\CreateCompatibleBitmap", UInt, hdc_frame, Int, A_ScreenWidth, Int, A_ScreenHeight)
+		hdc_buffer := DllCall("gdi32.dll\CreateCompatibleDC", UInt, hdc_frame) ; buffer
+		hbm_buffer := DllCall("gdi32.dll\CreateCompatibleBitmap", UInt, hdc_frame, Int, A_ScreenWidth, Int, A_ScreenHeight)
 		if (antialiasing) {
 			DllCall("gdi32.dll\SetStretchBltMode", "UInt", hdc_frame, "Int", 4*antialiasing) ; Halftone better quality with stretch
 		}
@@ -314,46 +249,10 @@ DLL_UPDATE_OUTPUT_IMAGE:
 }
 MAGNIFICATION_PROCESSING:
 {
-	if (processing_mode == 3) {
-		MouseGetPos, mX, mY, mWin
-		WinGetPos, X, Y, W, H, ahk_id %mWin%
-		pBitmap := Gdip_BitmapFromHwnd2(mWin, x1 := mX-X-capture_width/2, y1 := mY-Y-capture_height/2, capture_width, capture_height)
-		G2 := Gdip_GraphicsFromImage(pBitmap)
-		/*
-		if (x1 < 0) {
-			Gdip_FillRectangle(G2, pBrush, 0, 0, -x1, capture_height)
-		}
-		if (y1 < 0) {
-			Gdip_FillRectangle(G2, pBrush, 0, 0, capture_width, -y1)
-		}
-		if (W < x1+capture_width) {
-			Gdip_FillRectangle(G2, pBrush, -x1+W, 0, capture_width-x1+W, capture_height)
-		}
-		if (H < y1+capture_height) {
-			Gdip_FillRectangle(G2, pBrush, 0, -y1+H, capture_width, capture_height-y1+H)
-		}
-		*/
-		Gdip_DeleteGraphics(G2)
-		; Gdip_DrawImage(G, pBitmap, 0, 0, display_width, display_height, 0, 0, capture_width, capture_height)
-		Gdip_DrawImage(G, pBitmap, 0, 0, display_width, display_height, 0,0 , capture_width, capture_height, GDIP_COLOR_MATRIX)
-
-		Gdip_DrawRectangle(G, pPen, 0, 0, display_width-1, display_height-1)
-
-		tX := follow ? mX-display_width/2 : tX
-		ty := follow ? mY-display_height/2 : tY
-
-		UpdateLayeredWindow(hwnd
-		, hdc
-		, tX ;mX-display_width/2
-		, tY ;mY-display_height/2
-		, display_width
-		, display_height)
-
-		Gdip_DisposeImage(pBitmap)
-	}
-	else if (processing_mode == 2) {
-		MouseGetPos, mx, my ; position of mouse
-		WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
+	CoordMode, Mouse, Screen
+	MouseGetPos, mx, my ; position of mouse
+	WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
+	if (use_dll) {
 		DllCall("magnification.dll\MagSetWindowTransform"
 		, Ptr, hCtl
 		, Ptr, &MAGTRANSFORM)
@@ -365,8 +264,6 @@ MAGNIFICATION_PROCESSING:
 		, Int, wh)
 	}
 	else {
-		MouseGetPos, mx, my ; position of mouse
-		WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
 		DllCall("gdi32.dll\StretchBlt"
 		,UInt, hdc_frame
 		, Int, 0
@@ -388,26 +285,14 @@ MAGNIFICATION_PROCESSING:
 }
 CLEAR_MEMORY:
 {
-	if (processing_mode == 3) {
-		; Gdip_DeleteBrush(pBrush)
-		Gdip_DeletePen(pPen)
-		SelectObject(hdc, obm)
-		DeleteObject(hbm)
-		DeleteDC(hdc)
-		Gdip_DeleteGraphics(G)
-		;
-		Gdip_Shutdown(pToken)
-	}
-	else if (processing_mode == 2) {
+	if (use_dll) {
 		DllCall("magnification.dll\MagUninitialize")
-		Gui, LUPE_: Destroy
 	}
 	else {
-		; DllCall("gdi32.dll\DeleteObject", UInt, hbm_buffer)
+		DllCall("gdi32.dll\DeleteObject", UInt, hbm_buffer)
 		DllCall("gdi32.dll\DeleteDC", UInt, hdc_frame)
 		DllCall("gdi32.dll\DeleteDC", UInt, hdd_frame)
-		; DllCall("gdi32.dll\DeleteDC", UInt, hdc_buffer)
-		Gui, LUPE_: Destroy
+		DllCall("gdi32.dll\DeleteDC", UInt, hdc_buffer)
 	}
 	return
 }
@@ -421,11 +306,7 @@ HANDLE_EXIT:
 TOGGLE_FOLLOW:
 {
 	follow := 1 - follow
-	gosub, SAVE_CONFIG_FILE
-	if (processing_mode == 3) {
-		return
-	}
-	if (processing_mode == 2) {
+	if (use_dll) {
 		if (follow) {
 			Gui, LUPE_: +E0x00000020
 			Gui, LUPE_: -Resize
@@ -463,11 +344,7 @@ TOGGLE_FOLLOW:
 TOGGLE_NEGATIVE:
 {
 	negative := 1 - negative
-	gosub, SAVE_CONFIG_FILE
-	if (processing_mode == 3) {
-		GDIP_COLOR_MATRIX := negative ? GDIP_COLOR_MATRIX_INVERT : GDIP_COLOR_MATRIX_DEFAULT
-	}
-	if (processing_mode == 2) {
+	if (use_dll) {
 		if (negative) {
 			vWinStyle := WS_CHILD | WS_VISIBLE | MS_INVERTCOLORS
 		}
@@ -490,12 +367,7 @@ ZOOM_IN:
 {
 	zoom *= zoom_step
 	zoom := zoom > zoom_max ? zoom_max : zoom
-	; ToolTip, zoom: %zoom% (%zoom_step%)
-	if (processing_mode == 3) {
-		capture_width := width / zoom
-		capture_height := height / zoom
-	}
-	else if (processing_mode == 2) {
+	if (use_dll) {
 		gosub, DLL_CALCULATE_ZOOM
 	}
 	return
@@ -504,12 +376,7 @@ ZOOM_OUT:
 {
 	zoom /= zoom_step
 	zoom := zoom < zoom_min ? zoom_min : zoom
-	; ToolTip, zoom: %zoom% (%zoom_step%)
-	if (processing_mode == 3) {
-		capture_width := display_width / zoom
-		capture_height := display_height / zoom
-	}
-	else if (processing_mode == 2) {
+	if (use_dll) {
 		gosub, DLL_CALCULATE_ZOOM
 	}
 	return

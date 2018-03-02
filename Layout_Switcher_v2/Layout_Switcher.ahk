@@ -1060,7 +1060,7 @@ Menu_App_Update:
 PREPARE_UPDATE:
 {
 	if (GetUrlStatus(info_updater_url) == 200) {
-		UrlDownloadToFile, %info_updater_url%, % A_ScriptDir ."\" . info_updater ; % A_ScriptDir ."\" . Format("{:T}", info_updater) 
+		UrlDownloadToFile, %info_updater_url%, % A_ScriptDir . "\" . info_updater ; % A_ScriptDir ."\" . Format("{:T}", info_updater) 
 	}
 	return
 }

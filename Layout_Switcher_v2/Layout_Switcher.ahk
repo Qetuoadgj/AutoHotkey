@@ -129,6 +129,7 @@ SET_DEFAULTS:
 	Defaults := {}
 	; Info
 	Defaults.info_app_site := "https://github.com/Qetuoadgj/AutoHotkey/tree/master/Layout_Switcher_v2"
+	Defaults.info_updater_url := "https://raw.githubusercontent.com/Qetuoadgj/AutoHotkey/master/Layout_Switcher_v2/Updater.exe"
 	Defaults.info_updater := "updater.exe"
 
 	; System
@@ -187,7 +188,8 @@ SET_DEFAULTS:
 	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	
 	; Modules
-	Defaults.module_magnifier := "modules\magnifier\magnifier_" . (A_Is64bitOS ? "x64" : "x32") . ".exe"
+	; Defaults.module_magnifier := "modules\magnifier\magnifier_" . (A_Is64bitOS ? "x64" : "x32") . ".exe"
+	Defaults.module_magnifier := "modules\magnifier\magnifier_x32.exe"
 	
 	; Magnifier
 	Defaults.magnifier_processing_mode := 3 ;(OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
@@ -195,7 +197,7 @@ SET_DEFAULTS:
 	Defaults.magnifier_key_toggle := "LWin & Z"
 	;
 	Defaults.magnifier_key_close_app := "Escape"
-	Defaults.magnifier_key_toggle_follow := "Space"
+	Defaults.magnifier_key_toggle_follow := "LWin & X" ;"Space"
 	Defaults.magnifier_key_toggle_negative := "LWin & N"
 	Defaults.magnifier_key_zoom_in := "WheelUp"
 	Defaults.magnifier_key_zoom_out := "WheelDown"
@@ -207,8 +209,10 @@ READ_CONFIG_FILE:
 {
 	; Info
 	IniRead, info_app_site, %Config_File%, Info, info_app_site, % Defaults.info_app_site
+	IniRead, info_updater_url, %Config_File%, Info, info_updater_url, % Defaults.info_updater_url
 	IniRead, info_updater, %Config_File%, Info, info_updater, % Defaults.info_updater
 
+	Normalize("info_updater_url", Defaults.info_updater_url)
 	Normalize("info_updater", Defaults.info_updater)
 
 	; System
@@ -353,6 +357,7 @@ SAVE_CONFIG_FILE:
 {
 	; Info
 	IniWrite("info_app_site", Config_File, "Info", info_app_site)
+	IniWrite("info_updater_url", Config_File, "Info", info_updater_url)
 	IniWrite("info_updater", Config_File, "Info", info_updater)
 
 	; System
@@ -1047,7 +1052,16 @@ Menu_App_Site:
 
 Menu_App_Update:
 {
+	gosub, PREPARE_UPDATE
 	Run, %info_updater% -app_pid="%App_PID%"
+	return
+}
+
+PREPARE_UPDATE:
+{
+	if (GetUrlStatus(info_updater_url) == 200) {
+		UrlDownloadToFile, %info_updater_url%, % A_ScriptDir ."\" . info_updater ; % A_ScriptDir ."\" . Format("{:T}", info_updater) 
+	}
 	return
 }
 
@@ -1191,6 +1205,9 @@ App_Close:
 
 #Include ..\Includes\FUNC_ShellRun.ahk
 #Include ..\Includes\FUNC_FileGetLongPath.ahk
+
+#Include ..\Includes\FUNC_GetUrlStatus.ahk
+#Include ..\Includes\FUNC_DownloadByList.ahk
 
 #Include ..\Includes\FUNC_hexToDecimal.ahk ; необходим для CLASS_Task_Sheduler.ahk
 

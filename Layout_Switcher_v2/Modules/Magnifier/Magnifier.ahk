@@ -83,7 +83,7 @@ SET_DEFAULTS:
 	; Params
 	defaults.zoom := 2 ;^0.5
 	defaults.zoom_min := 1
-	defaults.zoom_max := 32
+	defaults.zoom_max := 4 ;32
 	defaults.zoom_step := 2 ;^0.5
 	defaults.follow := 1
 	defaults.negative := 0
@@ -95,7 +95,7 @@ SET_DEFAULTS:
 
 	; HotKeys
 	defaults.key_close_app := "Escape"
-	defaults.key_toggle_follow := "Space"
+	defaults.key_toggle_follow := "LWin & X" ;"Space"
 	defaults.key_toggle_negative := "LWin & N"
 	defaults.key_zoom_in := "WheelUp"
 	defaults.key_zoom_out := "WheelDown"

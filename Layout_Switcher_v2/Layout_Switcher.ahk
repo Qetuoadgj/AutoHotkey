@@ -868,10 +868,10 @@ FLAG_Customize_Menus:
 	Menu, Tray, Add
 
 	Menu, Tray, Add, %l_info_app_site%, Menu_App_Site
-	if FileExist(info_updater) {
+	; if FileExist(info_updater) {
 		Menu, Tray, Add, %l_info_app_update%, Menu_App_Update
 		MenuIcon("Tray", l_info_app_update, "Icons\Menu\Update.ico", 0, 0)
-	}
+	; }
 
 	Menu, Tray, Add
 

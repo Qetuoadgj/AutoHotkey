@@ -188,8 +188,8 @@ SET_DEFAULTS:
 	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	
 	; Modules
-	; Defaults.module_magnifier := "modules\magnifier\magnifier_" . (A_Is64bitOS ? "x64" : "x32") . ".exe"
-	Defaults.module_magnifier := "modules\magnifier\magnifier_x32.exe"
+	Defaults.module_magnifier := "modules\magnifier\magnifier_" . (A_Is64bitOS ? "x64" : "x32") . ".exe"
+	; Defaults.module_magnifier := "modules\magnifier\magnifier_x32.exe"
 	
 	; Magnifier
 	Defaults.magnifier_processing_mode := 3 ;(OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+

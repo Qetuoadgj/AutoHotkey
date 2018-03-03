@@ -118,8 +118,7 @@ START_UPDATE:
 		; MAIN
 		Layout_Switcher_x64.exe
 		; MAGNIFIER
-		; Modules\Magnifier\Magnifier_x64.exe
-		Modules\Magnifier\Magnifier_x32.exe
+		Modules\Magnifier\Magnifier_x64.exe
 		)
 		;
 		FileAppend, %default_text%, %Config_File%

@@ -73,6 +73,7 @@ Right::
 	return
 }
 */
+
 Exit
 
 ;====================================================================================================
@@ -214,13 +215,12 @@ INIT_LUPE:
 
 		display_width  := width
 		display_height := height
-		capture_width  := display_width
-		capture_height := display_height
+		capture_width  := display_width / zoom
+		capture_height := display_height / zoom
 
-		Gui, LUPE_: -Caption +E0x00080020 +LastFound +AlwaysOnTop +ToolWindow +OwnDialogs
+		Gui, LUPE_: -Caption +E0x00080020 +LastFound +AlwaysOnTop +ToolWindow +OwnDialogs +hwndLUPE_ID
 		Gui, LUPE_: Show, NA
-		hwnd := WinExist()
-		
+
 		hbm := CreateDIBSection(display_width, display_height)
 		hdc := CreateCompatibleDC()
 		obm := SelectObject(hdc, hbm)
@@ -228,27 +228,25 @@ INIT_LUPE:
 		Gdip_SetInterpolationMode(G, 7)
 		pPen := Gdip_CreatePen(0xFF000000,1)
 		; pBrush := Gdip_BrushCreateHatch(0xFFFFFFFF, 0xFF000000, 38) ; HatchStyleDiagonalBrick
-		
+
 		MouseGetPos, mX, mY, mWin
 		tX := mX-display_width/2
 		ty := mY-display_height/2
-		
+
 		GDIP_COLOR_MATRIX_INVERT := "-1|0|0|0|0|0|-1|0|0|0|0|0|-1|0|0|0|0|0|1|0|1|1|1|0|1"
 		GDIP_COLOR_MATRIX_DEFAULT := ""
 		GDIP_COLOR_MATRIX := GDIP_COLOR_MATRIX_DEFAULT
 	}
-	else if (processing_mode == 2) 
+	else if (processing_mode == 2)
 	{ ; Magnification API and AutoHotkey - //autohotkey.com/board/topic/64060-magnification-api-and-autohotkey/?p=403936
-		lupe_output_window_name := "lupe_output_window_title"
-		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
-		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
-		WinGet, lupe_output_window_id, ID, %lupe_output_window_name%
-		WinSet, Transparent, 254, ahk_id %lupe_output_window_id%
+		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow +hwndLUPE_ID
+		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50
+		WinSet, Transparent, 254, ahk_id %LUPE_ID%
 
 		CoordMode, Mouse, Screen
 
 		vSfx := (A_PtrSize=8) ? "Ptr" : ""
-		hInstance := DllCall("GetWindowLong",vSfx, Ptr,lupe_output_window_id, Int,-6) ; GWL_HINSTANCE := -6
+		hInstance := DllCall("GetWindowLong",vSfx, Ptr,LUPE_ID, Int,-6) ; GWL_HINSTANCE := -6
 		DllCall("LoadLibrary", Str,"magnification.dll")
 		DllCall("magnification.dll\MagInitialize")
 		WS_CHILD := 0x40000000
@@ -260,11 +258,9 @@ INIT_LUPE:
 	}
 	else
 	{ ; Screen Magnifier by Holomind - ://autohotkey.com/board/topic/10660-screenmagnifier/?p=67011
-		lupe_output_window_name := "lupe_output_window_title"
-		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow
-		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50, %lupe_output_window_name%
-		WinGet, lupe_output_window_id, ID, %lupe_output_window_name%
-		WinSet, Transparent, 254, ahk_id %lupe_output_window_id%
+		Gui, LUPE_: +AlwaysOnTop +Owner +Resize +ToolWindow +hwndLUPE_ID
+		Gui, LUPE_: Show, NoActivate w%width% h%height% x300 y50
+		WinSet, Transparent, 254, ahk_id %LUPE_ID%
 
 		CoordMode, Mouse, Screen
 
@@ -272,7 +268,7 @@ INIT_LUPE:
 		SRCINVERT := 0x330008
 		BitBlt_operation := SRCCOPY
 		hdd_frame := DllCall("GetDC", UInt, 0)
-		hdc_frame := DllCall("GetDC", UInt, lupe_output_window_id)
+		hdc_frame := DllCall("GetDC", UInt, LUPE_ID)
 		; hdc_buffer := DllCall("gdi32.dll\CreateCompatibleDC", UInt, hdc_frame) ; buffer
 		; hbm_buffer := DllCall("gdi32.dll\CreateCompatibleBitmap", UInt, hdc_frame, Int, A_ScreenWidth, Int, A_ScreenHeight)
 		if (antialiasing) {
@@ -295,7 +291,7 @@ DLL_CALCULATE_ZOOM:
 }
 DLL_UPDATE_OUTPUT_IMAGE:
 {
-	WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
+	WinGetPos, wx, wy, ww, wh, ahk_id %LUPE_ID%
 	hCtl := DllCall("CreateWindowEx"
 	, UInt, 0
 	, Str, "Magnifier"
@@ -305,7 +301,7 @@ DLL_UPDATE_OUTPUT_IMAGE:
 	, Int, 0
 	, Int, ww
 	, Int, wh
-	, Ptr, lupe_output_window_id
+	, Ptr, LUPE_ID
 	, Ptr, 0
 	, Ptr, hInstance
 	, Ptr, 0
@@ -342,7 +338,7 @@ MAGNIFICATION_PROCESSING:
 		tX := follow ? mX-display_width/2 : tX
 		ty := follow ? mY-display_height/2 : tY
 
-		UpdateLayeredWindow(hwnd
+		UpdateLayeredWindow(LUPE_ID
 		, hdc
 		, tX ;mX-display_width/2
 		, tY ;mY-display_height/2
@@ -353,7 +349,7 @@ MAGNIFICATION_PROCESSING:
 	}
 	else if (processing_mode == 2) {
 		MouseGetPos, mx, my ; position of mouse
-		WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
+		WinGetPos, wx, wy, ww, wh, ahk_id %LUPE_ID%
 		DllCall("magnification.dll\MagSetWindowTransform"
 		, Ptr, hCtl
 		, Ptr, &MAGTRANSFORM)
@@ -366,7 +362,7 @@ MAGNIFICATION_PROCESSING:
 	}
 	else {
 		MouseGetPos, mx, my ; position of mouse
-		WinGetPos, wx, wy, ww, wh, ahk_id %lupe_output_window_id%
+		WinGetPos, wx, wy, ww, wh, ahk_id %LUPE_ID%
 		DllCall("gdi32.dll\StretchBlt"
 		,UInt, hdc_frame
 		, Int, 0
@@ -381,7 +377,7 @@ MAGNIFICATION_PROCESSING:
 		,UInt, BitBlt_operation)
 	}
 	if (follow) {
-		WinMove, ahk_id %lupe_output_window_id%,, mx-ww/2, my-wh/2
+		WinMove, ahk_id %LUPE_ID%,, mx-ww/2, my-wh/2
 	}
 	SetTimer, %A_ThisLabel%, %delay%
 	return
@@ -492,8 +488,8 @@ ZOOM_IN:
 	zoom := zoom > zoom_max ? zoom_max : zoom
 	; ToolTip, zoom: %zoom% (%zoom_step%)
 	if (processing_mode == 3) {
-		capture_width := width / zoom
-		capture_height := height / zoom
+		capture_width := display_width / zoom
+		capture_height := display_height / zoom
 	}
 	else if (processing_mode == 2) {
 		gosub, DLL_CALCULATE_ZOOM
@@ -517,7 +513,7 @@ ZOOM_OUT:
 /*
 LUPE_GuiSize:
 {
-	WinGetPos,,, width, height, ahk_id %lupe_output_window_id%
+	WinGetPos,,, width, height, ahk_id %LUPE_ID%
 
 	; Params
 	IniWrite("width", config_file, "Params", width)

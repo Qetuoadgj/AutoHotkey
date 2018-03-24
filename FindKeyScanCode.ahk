@@ -63,6 +63,11 @@ GuiContextMenu:
 	Return
 }
 
+GuiClose:
+{
+	ExitApp
+}
+
 ScriptInfo(Command)
 {
 	static hEdit := 0, pfn, bkp
@@ -80,7 +85,7 @@ ScriptInfo(Command)
 	if (A_PtrSize=8) {	; Disable SetForegroundWindow and ShowWindow.
 		NumPut(0x0000C300000001B8, pfn[1], 0, "int64")	; return TRUE
 		NumPut(0x0000C300000001B8, pfn[2], 0, "int64")	; return TRUE
-		}
+	}
 	else {
 		NumPut(0x0004C200000001B8, pfn[1], 0, "int64")	; return TRUE
 		NumPut(0x0008C200000001B8, pfn[2], 0, "int64")	; return TRUE

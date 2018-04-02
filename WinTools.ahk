@@ -74,7 +74,7 @@ CREATE_LOCALIZATION:
 	Translations.en.geforce610m_disable := "Disable Video Adapter GeForce 610M"
 	Translations.en.geforce610m_enable := "Enable Video Adapter GeForce 610M"
 	Translations.en.reboot := "Reboot"
-	
+
 	Translations.ru := {}
 	Translations.ru.clear_printer_queue := "Очистить очередь печати"
 	Translations.ru.clear_events_log := "Очистить журнал событий"
@@ -87,6 +87,18 @@ CREATE_LOCALIZATION:
 	Translations.ru.geforce610m_disable := "Отключить видео адаптер GeForce 610M"
 	Translations.ru.geforce610m_enable := "Включить видео адаптер GeForce 610M"
 	Translations.ru.reboot := "Перезагрузка"
+
+	WriteTranslation("clear_printer_queue", Translation_File, "en", Translations, "en")
+	WriteTranslation("clear_events_log", Translation_File, "en", Translations, "en")
+	WriteTranslation("fix_desktop_icons_bug", Translation_File, "en", Translations, "en")
+	WriteTranslation("win_safe_mode_minimal", Translation_File, "en", Translations, "en")
+	WriteTranslation("win_safe_mode_network", Translation_File, "en", Translations, "en")
+	WriteTranslation("win_normal_mode", Translation_File, "en", Translations, "en")
+	WriteTranslation("win_updates_disable", Translation_File, "en", Translations, "en")
+	WriteTranslation("win_updates_enable", Translation_File, "en", Translations, "en")
+	WriteTranslation("geforce610m_disable", Translation_File, "en", Translations, "en")
+	WriteTranslation("geforce610m_enable", Translation_File, "en", Translations, "en")
+	WriteTranslation("reboot", Translation_File, "en", Translations, "en")
 
 	WriteTranslation("clear_printer_queue", Translation_File, Translation_Language, Translations, "en")
 	WriteTranslation("clear_events_log", Translation_File, Translation_Language, Translations, "en")
@@ -108,15 +120,15 @@ CREATE_LOCALIZATION:
 	IniRead, l_win_safe_mode_minimal, %Translation_File%, %Translation_Language%, win_safe_mode_minimal, % Translations.en.win_safe_mode_minimal
 	IniRead, l_win_safe_mode_network, %Translation_File%, %Translation_Language%, win_safe_mode_network, % Translations.en.win_safe_mode_network
 	IniRead, l_win_normal_mode, %Translation_File%, %Translation_Language%, win_normal_mode, % Translations.en.win_normal_mode
-	
+
 	IniRead, l_win_updates_disable, %Translation_File%, %Translation_Language%, win_updates_disable, % Translations.en.win_updates_disable
 	IniRead, l_win_updates_enable, %Translation_File%, %Translation_Language%, win_updates_enable, % Translations.en.win_updates_enable
 
 	IniRead, l_geforce610m_disable, %Translation_File%, %Translation_Language%, geforce610m_disable, % Translations.en.geforce610m_disable
 	IniRead, l_geforce610m_enable, %Translation_File%, %Translation_Language%, geforce610m_enable, % Translations.en.geforce610m_enable
-	
+
 	IniRead, l_reboot, %Translation_File%, %Translation_Language%, reboot, % Translations.en.reboot
-	
+
 	return
 }
 
@@ -135,10 +147,10 @@ InitGUI:
 	Gui, Add, Button, % " x+" Btn_Margin " y" Btn_Margin " w" Btn_W " h" Btn_H " g" "WinReBootSafeMin", %l_win_safe_mode_minimal%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinReBootSafeNet", %l_win_safe_mode_network%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinReBootNormal", %l_win_normal_mode%
-	
+
 	Gui, Add, Button, % " x+" Btn_Margin " y" Btn_Margin " w" Btn_W " h" Btn_H " g" "WinUpdatesDisable", %l_win_updates_disable%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinUpdatesEnable", %l_win_updates_enable%
-	
+
 	Gui, Add, Button, % " x+" Btn_Margin " y" Btn_Margin " w" Btn_W " h" Btn_H " g" "GeForce610mDisable", %l_geforce610m_disable%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "GeForce610mEnable", %l_geforce610m_enable%
 

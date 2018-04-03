@@ -14,9 +14,14 @@ Script.Run_As_Admin(Script_Args)
 
 ; Your code here...
 
-DevManView := A_Is64bitOS ? A_ScriptDir . "\DevManView\DevManView_x64.exe" : A_ScriptDir . "\DevManView\DevManView_x32.exe"
+global DevManView := A_Is64bitOS ? A_ScriptDir . "\DevManView\DevManView_x64.exe" : A_ScriptDir . "\DevManView\DevManView_x32.exe"
+global GeForce610M := "NVIDIA GeForce 610M" ;"VideoMate TV Capture" ;"NVIDIA GeForce 610M"
+global WinUpdateService := "wuauserv"
 
 gosub, InitGUI
+gosub, CheckGeForce610mStatus
+gosub, CheckWinUpdatesStatus
+; MsgBox, % GetServiceStatus(WinUpdateService)
 
 Exit
 
@@ -53,6 +58,11 @@ WriteTranslation(Key, File, Section, TransTable, DefaultSection := "en")
 	}
 }
 
+FindTranslation(Key, Section, TransTable, DefaultSection := "en")
+{
+	return TransTable[Section] ? TransTable[Section][Key] : (TransTable[DefaultSection] ? TransTable[DefaultSection][Key] : "")
+}
+
 
 CREATE_LOCALIZATION:
 {
@@ -71,63 +81,65 @@ CREATE_LOCALIZATION:
 	Translations.en.win_normal_mode := "Reboot Windows in Normal Mode"
 	Translations.en.win_updates_disable := "Disable Windows Update Service"
 	Translations.en.win_updates_enable := "Enable Windows Update Service"
-	Translations.en.geforce610m_disable := "Disable Video Adapter GeForce 610M"
-	Translations.en.geforce610m_enable := "Enable Video Adapter GeForce 610M"
+	Translations.en.geforce610m_disable := "Disable" . GeForce610M ;"Disable Video Adapter GeForce 610M"
+	Translations.en.geforce610m_enable := "Enable" . GeForce610M ;"Enable Video Adapter GeForce 610M"
 	Translations.en.reboot := "Reboot"
 
 	Translations.ru := {}
 	Translations.ru.clear_printer_queue := "Очистить очередь печати"
 	Translations.ru.clear_events_log := "Очистить журнал событий"
-	Translations.ru.fix_desktop_icons_bug := "Исправить иконки раб. стола"
+	Translations.ru.fix_desktop_icons_bug := "Исправить иконки рабочего стола"
 	Translations.ru.win_safe_mode_minimal := "Безопасный режим Windows (минимальный)"
 	Translations.ru.win_safe_mode_network := "Безопасный режим Windows (сетевой)"
 	Translations.ru.win_normal_mode := "Обычный режим Windows"
-	Translations.ru.win_updates_disable := "Остановить службу обновлений Windows"
-	Translations.ru.win_updates_enable := "Запустить службу обновлений Windows"
-	Translations.ru.geforce610m_disable := "Отключить видео адаптер GeForce 610M"
-	Translations.ru.geforce610m_enable := "Включить видео адаптер GeForce 610M"
+	Translations.ru.win_updates_disable := "Отключить службу обновлений Windows"
+	Translations.ru.win_updates_enable := "Включить службу обновлений Windows"
+	Translations.ru.geforce610m_disable := "Отключить устроство: " . GeForce610M ;"Отключить видео адаптер GeForce 610M"
+	Translations.ru.geforce610m_enable := "Включить устроство: " . GeForce610M ;"Включить видео адаптер GeForce 610M"
 	Translations.ru.reboot := "Перезагрузка"
 
-	WriteTranslation("clear_printer_queue", Translation_File, "en", Translations, "en")
-	WriteTranslation("clear_events_log", Translation_File, "en", Translations, "en")
-	WriteTranslation("fix_desktop_icons_bug", Translation_File, "en", Translations, "en")
-	WriteTranslation("win_safe_mode_minimal", Translation_File, "en", Translations, "en")
-	WriteTranslation("win_safe_mode_network", Translation_File, "en", Translations, "en")
-	WriteTranslation("win_normal_mode", Translation_File, "en", Translations, "en")
-	WriteTranslation("win_updates_disable", Translation_File, "en", Translations, "en")
-	WriteTranslation("win_updates_enable", Translation_File, "en", Translations, "en")
-	WriteTranslation("geforce610m_disable", Translation_File, "en", Translations, "en")
-	WriteTranslation("geforce610m_enable", Translation_File, "en", Translations, "en")
-	WriteTranslation("reboot", Translation_File, "en", Translations, "en")
+	if Script.InArgs("/L") {
+		WriteTranslation("clear_printer_queue", Translation_File, "en", Translations, "en")
+		WriteTranslation("clear_events_log", Translation_File, "en", Translations, "en")
+		WriteTranslation("fix_desktop_icons_bug", Translation_File, "en", Translations, "en")
+		WriteTranslation("win_safe_mode_minimal", Translation_File, "en", Translations, "en")
+		WriteTranslation("win_safe_mode_network", Translation_File, "en", Translations, "en")
+		WriteTranslation("win_normal_mode", Translation_File, "en", Translations, "en")
+		WriteTranslation("win_updates_disable", Translation_File, "en", Translations, "en")
+		WriteTranslation("win_updates_enable", Translation_File, "en", Translations, "en")
+		WriteTranslation("geforce610m_disable", Translation_File, "en", Translations, "en")
+		WriteTranslation("geforce610m_enable", Translation_File, "en", Translations, "en")
+		WriteTranslation("reboot", Translation_File, "en", Translations, "en")
 
-	WriteTranslation("clear_printer_queue", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("clear_events_log", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("fix_desktop_icons_bug", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("win_safe_mode_minimal", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("win_safe_mode_network", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("win_normal_mode", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("win_updates_disable", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("win_updates_enable", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("geforce610m_disable", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("geforce610m_enable", Translation_File, Translation_Language, Translations, "en")
-	WriteTranslation("reboot", Translation_File, Translation_Language, Translations, "en")
-
+		WriteTranslation("clear_printer_queue", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("clear_events_log", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("fix_desktop_icons_bug", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("win_safe_mode_minimal", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("win_safe_mode_network", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("win_normal_mode", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("win_updates_disable", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("win_updates_enable", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("geforce610m_disable", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("geforce610m_enable", Translation_File, Translation_Language, Translations, "en")
+		WriteTranslation("reboot", Translation_File, Translation_Language, Translations, "en")
+	}
+	
 	; Translations
-	IniRead, l_clear_printer_queue, %Translation_File%, %Translation_Language%, clear_printer_queue, % Translations.en.clear_printer_queue
-	IniRead, l_clear_events_log, %Translation_File%, %Translation_Language%, clear_events_log, % Translations.en.clear_events_log
-	IniRead, l_fix_desktop_icons_bug, %Translation_File%, %Translation_Language%, fix_desktop_icons_bug, % Translations.en.fix_desktop_icons_bug
+	IniRead, l_clear_printer_queue, %Translation_File%, %Translation_Language%, clear_printer_queue, % FindTranslation("clear_printer_queue", Translation_Language, Translations, "en") ;Translations.en.clear_printer_queue
+	IniRead, l_clear_events_log, %Translation_File%, %Translation_Language%, clear_events_log, % FindTranslation("clear_events_log", Translation_Language, Translations, "en") ;Translations.en.clear_events_log
+	IniRead, l_fix_desktop_icons_bug, %Translation_File%, %Translation_Language%, fix_desktop_icons_bug, % FindTranslation("fix_desktop_icons_bug", Translation_Language, Translations, "en") ;Translations.en.fix_desktop_icons_bug
 
-	IniRead, l_win_safe_mode_minimal, %Translation_File%, %Translation_Language%, win_safe_mode_minimal, % Translations.en.win_safe_mode_minimal
-	IniRead, l_win_safe_mode_network, %Translation_File%, %Translation_Language%, win_safe_mode_network, % Translations.en.win_safe_mode_network
-	IniRead, l_win_normal_mode, %Translation_File%, %Translation_Language%, win_normal_mode, % Translations.en.win_normal_mode
+	IniRead, l_win_safe_mode_minimal, %Translation_File%, %Translation_Language%, win_safe_mode_minimal, % FindTranslation("win_safe_mode_minimal", Translation_Language, Translations, "en") ;Translations.en.win_safe_mode_minimal
+	IniRead, l_win_safe_mode_network, %Translation_File%, %Translation_Language%, win_safe_mode_network, % FindTranslation("win_safe_mode_network", Translation_Language, Translations, "en") ;Translations.en.win_safe_mode_network
+	IniRead, l_win_normal_mode, %Translation_File%, %Translation_Language%, win_normal_mode, % FindTranslation("win_normal_mode", Translation_Language, Translations, "en") ;Translations.en.win_normal_mode
 
-	IniRead, l_win_updates_disable, %Translation_File%, %Translation_Language%, win_updates_disable, % Translations.en.win_updates_disable
-	IniRead, l_win_updates_enable, %Translation_File%, %Translation_Language%, win_updates_enable, % Translations.en.win_updates_enable
+	IniRead, l_win_updates_disable, %Translation_File%, %Translation_Language%, win_updates_disable, % FindTranslation("win_updates_disable", Translation_Language, Translations, "en") ;Translations.en.win_updates_disable
+	IniRead, l_win_updates_enable, %Translation_File%, %Translation_Language%, win_updates_enable, % FindTranslation("win_updates_enable", Translation_Language, Translations, "en") ;Translations.en.win_updates_enable
 
-	IniRead, l_geforce610m_disable, %Translation_File%, %Translation_Language%, geforce610m_disable, % Translations.en.geforce610m_disable
-	IniRead, l_geforce610m_enable, %Translation_File%, %Translation_Language%, geforce610m_enable, % Translations.en.geforce610m_enable
+	IniRead, l_geforce610m_disable, %Translation_File%, %Translation_Language%, geforce610m_disable, % FindTranslation("geforce610m_disable", Translation_Language, Translations, "en") ;Translations.en.geforce610m_disable
+	IniRead, l_geforce610m_enable, %Translation_File%, %Translation_Language%, geforce610m_enable, % FindTranslation("geforce610m_enable", Translation_Language, Translations, "en") ;Translations.en.geforce610m_enable
 
-	IniRead, l_reboot, %Translation_File%, %Translation_Language%, reboot, % Translations.en.reboot
+	IniRead, l_reboot, %Translation_File%, %Translation_Language%, reboot, % FindTranslation("reboot", Translation_Language, Translations, "en") ;Translations.en.reboot
 
 	return
 }
@@ -139,20 +151,28 @@ InitGUI:
 	global Btn_Margin_X := 10, Btn_Margin_Y := 10/1.5, Btn_X := Btn_Margin_X, Btn_Y := Btn_Margin_Y, Btn_W := 160, Btn_H := 33
 
 	Gui, +AlwaysOnTop
+	
+	Gui, Font, s8 norm, Arial
 
+	Gui, Font, norm
 	Gui, Add, Button, % " x" Btn_Margin_X " y" Btn_Margin_Y " w" . Btn_W . " h" . Btn_H . " g" . "ClearPrinterQueue", %l_clear_printer_queue%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "ClearEventsLog", %l_clear_events_log%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "FixDesktopIcons", %l_fix_desktop_icons_bug%
 
+	Gui, Font, bold
 	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "WinReBootSafeMin", %l_win_safe_mode_minimal%
+	Gui, Font, norm
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinReBootSafeNet", %l_win_safe_mode_network%
+	Gui, Font, bold
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinReBootNormal", %l_win_normal_mode%
 
-	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "WinUpdatesDisable", %l_win_updates_disable%
-	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinUpdatesEnable", %l_win_updates_enable%
+	Gui, Font, norm
+	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "WinUpdatesDisable" " v" "WinUpdatesDisable", %l_win_updates_disable%
+	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinUpdatesEnable" " v" "WinUpdatesEnable", %l_win_updates_enable%
 
-	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "GeForce610mDisable", %l_geforce610m_disable%
-	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "GeForce610mEnable", %l_geforce610m_enable%
+	Gui, Font, norm
+	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "GeForce610mDisable" " v" "GeForce610mDisable", %l_geforce610m_disable%
+	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "GeForce610mEnable" " v" "GeForce610mEnable", %l_geforce610m_enable%
 
 	Gui, Show,, % Script_Name
 
@@ -459,14 +479,19 @@ WinReBootNormal:
 
 WinUpdatesDisable:
 {
-	RunWait, *RunAs %ComSpec% /k net stop "wuauserv" & exit ;,, Hide
+	
+	; RunWait, *RunAs %ComSpec% /k net stop "%WinUpdateService%" & exit ;,, Hide
+	RunWait, *RunAs %ComSpec% /k sc config "%WinUpdateService%" start= disabled & sc stop "%WinUpdateService%" & exit ;,, Hide
+	gosub, CheckWinUpdatesStatus
 	MsgBox, 262144, % "Win Updates Disable", % "OK", 1
 	return
 }
 
 WinUpdatesEnable:
 {
-	RunWait, *RunAs %ComSpec% /k net start "wuauserv" & exit ;,, Hide
+	; RunWait, *RunAs %ComSpec% /k net start "%WinUpdateService%" & exit ;,, Hide
+	RunWait, *RunAs %ComSpec% /k sc config "%WinUpdateService%" start= delayed-auto & sc start "%WinUpdateService%" & exit ;,, Hide
+	gosub, CheckWinUpdatesStatus
 	MsgBox, 262144, % "Win Updates Enable", % "OK", 1
 	return
 }
@@ -474,8 +499,9 @@ WinUpdatesEnable:
 GeForce610mDisable:
 {
 	if FileExist(DevManView) {
-		RunWait, *RunAs %DevManView% /disable "NVIDIA GeForce 610M"
-		MsgBox, 262144, % "GeForce 610M Disable", % "OK", 1
+		RunWait, *RunAs %DevManView% /disable "%GeForce610M%"
+		gosub, CheckGeForce610mStatus
+		MsgBox, 262144, % "%GeForce610M% Disable", % "OK", 1
 	}
 	return
 }
@@ -483,8 +509,9 @@ GeForce610mDisable:
 GeForce610mEnable:
 {
 	if FileExist(DevManView) {
-		RunWait, *RunAs %DevManView% /enable "NVIDIA GeForce 610M"
-		MsgBox, 262144, % "GeForce 610M Enable", % "OK", 1
+		RunWait, *RunAs %DevManView% /enable "%GeForce610M%"
+		gosub, CheckGeForce610mStatus
+		MsgBox, 262144, % "%GeForce610M% Enable", % "OK", 1
 	}
 	return
 }
@@ -593,5 +620,118 @@ RunExplorer(Delays := 250, Tries := 20)
 	return
 }
 */
+
+GetDeviceStatus(DeviceName)
+{
+	global DevManView
+	
+	static DeviceStatus
+	DeviceStatus := ""
+	
+	static DeviceFound, DeviceIndex, DeviceDisabled
+	DeviceFound := ""
+	DeviceIndex := ""
+	DeviceDisabled := ""
+	
+	static XML_file
+	XML_file := A_Temp . "\DevManView_Log.xml"
+	
+	FileDelete, %XML_file%
+	RunWait, *RunAs %DevManView% /sxml "%XML_file%"
+	if FileExist(XML_file) {
+		FileRead, XML_data, %XML_file%
+		XML := ComObjCreate("MSXML2.DOMDocument.6.0")
+		XML.loadXML(XML_data)
+		
+		static IDS, ID, Node
+
+		IDS := XML.SelectNodes("//devices_list/item/device_name")
+		ID := [] ; use this to store each item's text data
+		Loop, % IDS.length ; number of items that matched the selection
+		{
+			id[A_Index] := IDS.item(A_Index-1) ; access each item using the item() method
+			Node := id[A_Index]
+			if (Node.text = DeviceName) {
+				DeviceFound := true
+				DeviceIndex := A_Index
+				break
+			}
+		}
+		if (DeviceFound) {
+			IDS := XML.SelectNodes("//devices_list/item/disabled")
+			id := [] ; use this to store each item's text data
+			Loop, % IDS.length ; number of items that matched the selection
+			{
+				if (A_Index == DeviceIndex) {
+					id[A_Index] := IDS.item(A_Index-1) ; access each item using the item() method
+					Node := id[A_Index]
+					DeviceDisabled := Node.text
+					break
+				}
+			}
+		}
+	}
+	
+	FileDelete, %XML_file%
+
+	if (DeviceDisabled = "Yes") {
+		return "Disabled"
+	}
+	if (DeviceDisabled = "No") {
+		return "Enabled"
+	}
+	
+	return "ERROR"
+}
+
+CheckGeForce610mStatus:
+{
+	GeForce610mStatus := GetDeviceStatus(GeForce610M)
+	GuiControl, Enable, GeForce610mDisable
+	GuiControl, Enable, GeForce610mEnable
+	if (GeForce610mStatus = "ERROR") {
+		GuiControl, Disable, GeForce610mDisable
+		GuiControl, Disable, GeForce610mEnable
+	} else if (GeForce610mStatus = "Enabled") {
+		GuiControl, Disable, GeForce610mEnable
+	} else if (GeForce610mStatus = "Disabled") {
+		GuiControl, Disable, GeForce610mDisable
+	}
+	return
+}
+
+GetServiceStatus(ServiceName)
+{
+	static ServiceStatus
+	ServiceStatus := ""
+	
+	static CmdStdOut
+	; CmdStdOut := ComObjCreate("WScript.Shell").Exec("cmd.exe /q /c sc query """ . ServiceName . """ | find ""RUNNING""").StdOut.ReadAll()
+	CmdStdOut := ComObjCreate("WScript.Shell").Exec("cmd.exe /q /c chcp 437 & sc query """ . ServiceName . """").StdOut.ReadAll()
+	
+	static Match, Match1
+	if RegExMatch(CmdStdOut, " STATE[\t ]+:[\t ]+\d+[\t ]+(.*)", Match) {
+		return Trim(Match1)
+	}
+	return "ERROR"
+}
+
+CheckWinUpdatesStatus:
+{
+	WinUpdatesStatus := GetServiceStatus(WinUpdateService)
+	; MsgBox, %WinUpdatesStatus%
+	GuiControl, Enable, WinUpdatesDisable
+	GuiControl, Enable, WinUpdatesEnable
+	if (WinUpdatesStatus = "ERROR") {
+		GuiControl, Disable, WinUpdatesDisable
+		GuiControl, Disable, WinUpdatesEnable
+	} else if (WinUpdatesStatus = "RUNNING") {
+		GuiControl, Disable, WinUpdatesEnable
+	} else {
+		GuiControl, Disable, WinUpdatesDisable
+	}
+	return
+}
+
 
 #Include D:\Google Диск\AutoHotkey\Includes\CLASS_Script.ahk

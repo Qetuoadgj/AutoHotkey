@@ -60,6 +60,8 @@
 	{ ; функция получения аргументов коммандной строки в виде текста
 		static ret
 		ret := ""
+		
+		static n, param
 		for n, param in A_Args
 		{
 			ret .= " " param
@@ -67,5 +69,17 @@
 		ret := Trim(ret)
 		return ret
 	}
+	
+	InArgs(Arg)
+	{ ; функция получения аргументов коммандной строки в виде текста
+		static n, param
+		for n, param in A_Args
+		{
+			param := Trim(param)
+			if (param = Arg) {
+				return n
+			}
+		}
+		return
+	}
 }
-

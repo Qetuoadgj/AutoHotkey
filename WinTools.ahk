@@ -373,7 +373,6 @@ WinReBoot(Mode := "Normal", CP := "CP866")
 			`)
 
 			bcdedit /set safeboot minimal
-			timeout /t 2
 			shutdown -r -f -t 0
 
 			:theEnd
@@ -404,7 +403,6 @@ WinReBoot(Mode := "Normal", CP := "CP866")
 			`)
 
 			bcdedit /set safeboot network
-			timeout /t 2
 			shutdown -r -f -t 0
 
 			:theEnd
@@ -435,7 +433,6 @@ WinReBoot(Mode := "Normal", CP := "CP866")
 			`)
 
 			bcdedit /deletevalue safeboot
-			timeout /t 2
 			shutdown -r -f -t 0
 
 			:theEnd
@@ -737,4 +734,4 @@ CheckWinUpdatesStatus:
 }
 
 
-#Include D:\Google Диск\AutoHotkey\Includes\CLASS_Script.ahk
+#Include CLASS_Script.ahk

@@ -166,10 +166,28 @@ ClearPrinterQueue(CP := "CP866")
 	Command =
 	( LTrim RTrim Join`r`n
 		@echo off
+
+		call :isAdmin
+		if `%ErrorLevel`% == 0 `(
+		echo.Running with admin rights.
+		echo.
+		`) else `(
+		echo.Error: You must run this script as an Administrator!
+		echo.
+		pause
+		goto :theEnd
+		`)
+
 		net stop spooler
 		del "`%systemroot`%\System32\spool\PRINTERS\*" /Q /F /S
 		net start spooler
+
+		:theEnd
 		exit
+
+		:isAdmin
+		fsutil dirty query `%systemdrive`% >nul
+		exit /b
 	)
 	FileDelete, %BatFile%
 	FileAppend, %Command%, %BatFile%, %CP%
@@ -191,21 +209,34 @@ ClearEventsLog(CP := "CP866")
 	Command =
 	( LTrim RTrim Join`r`n
 		@echo off
-		for /F "tokens=1,2*" `%`%V in ('bcdedit') do set adminTest=`%`%V
-		if (`%adminTest`%)==(Access) goto noAdmin
+
+		call :isAdmin
+		if `%ErrorLevel`% == 0 `(
+		echo.Running with admin rights.
+		echo.
+		`) else `(
+		echo.Error: You must run this script as an Administrator!
+		echo.
+		pause
+		goto :theEnd
+		`)
+
 		for /F "tokens=*" `%`%G in ('wevtutil.exe el') do (call :do_clear "`%`%G")
 		echo.
-		echo Event Logs have been cleared!
-		goto theEnd
+		echo.Event Logs have been cleared!
+		goto :theEnd
+
 		:do_clear
-		echo clearing `%1
+		echo.clearing `%1
 		wevtutil.exe cl `%1
-		goto :eof
-		:noAdmin
-		echo You must run this script as an Administrator!
-		echo.
+		exit /b
+
 		:theEnd
 		exit
+
+		:isAdmin
+		fsutil dirty query `%systemdrive`% >nul
+		exit /b
 	)
 	FileDelete, %BatFile%
 	FileAppend, %Command%, %BatFile%, %CP%
@@ -235,9 +266,21 @@ FixDesktopIcons(CP := "CP866")
 	CmdCommand =
 	( LTrim RTrim Join`r`n
 		@echo off
+
+		call :isAdmin
+		if `%ErrorLevel`% == 0 `(
+		echo.Running with admin rights.
+		echo.
+		`) else `(
+		echo.Error: You must run this script as an Administrator!
+		echo.
+		pause
+		goto :theEnd
+		`)
+
 		tasklist | find /i "explorer.exe" || start "" "explorer.exe"
 		ie4uinit.exe -ClearIconCache
-		tasklist | find /i "explorer.exe" && taskkill /im explorer.exe /F || echo process "explorer.exe" not running.
+		tasklist | find /i "explorer.exe" && taskkill /im explorer.exe /F || echo.process "explorer.exe" not running.
 		del "`%LocalAppData`%\IconCache.db" /A
 		del "`%LocalAppData`%\Microsoft\Windows\Explorer\iconcache*" /A
 		set "apppath=explorer.exe"
@@ -245,7 +288,13 @@ FixDesktopIcons(CP := "CP866")
 		schtasks /create /SC ONCE /ST 23:59 /TN "`%taskname`%" /TR "`%apppath`%" /F
 		schtasks /run /tn "`%taskname`%"
 		schtasks /delete /tn "`%taskname`%" /F
+
+		:theEnd
 		exit
+
+		:isAdmin
+		fsutil dirty query `%systemdrive`% >nul
+		exit /b
 	)
 	FileDelete, %BatFile%
 	FileAppend, %CmdCommand%, %BatFile%, %CP%
@@ -291,9 +340,27 @@ WinReBoot(Mode := "Normal", CP := "CP866")
 		Command =
 		( LTrim RTrim Join`r`n
 			@echo off
+
+			call :isAdmin
+			if `%ErrorLevel`% == 0 `(
+			echo.Running with admin rights.
+			echo.
+			`) else `(
+			echo.Error: You must run this script as an Administrator!
+			echo.
+			pause
+			goto :theEnd
+			`)
+
 			bcdedit /set safeboot minimal
 			shutdown -r -f -t 0
+
+			:theEnd
 			exit
+
+			:isAdmin
+			fsutil dirty query `%systemdrive`% >nul
+			exit /b
 		)
 		Go := 1
 		ModeName := l_win_safe_mode_minimal ;"Safe Minimal"
@@ -303,9 +370,27 @@ WinReBoot(Mode := "Normal", CP := "CP866")
 		Command =
 		( LTrim RTrim Join`r`n
 			@echo off
+
+			call :isAdmin
+			if `%ErrorLevel`% == 0 `(
+			echo.Running with admin rights.
+			echo.
+			`) else `(
+			echo.Error: You must run this script as an Administrator!
+			echo.
+			pause
+			goto :theEnd
+			`)
+
 			bcdedit /set safeboot network
 			shutdown -r -f -t 0
+
+			:theEnd
 			exit
+
+			:isAdmin
+			fsutil dirty query `%systemdrive`% >nul
+			exit /b
 		)
 		Go := 1
 		ModeName := l_win_safe_mode_network ;"Safe Network"
@@ -315,9 +400,27 @@ WinReBoot(Mode := "Normal", CP := "CP866")
 		Command =
 		( LTrim RTrim Join`r`n
 			@echo off
+
+			call :isAdmin
+			if `%ErrorLevel`% == 0 `(
+			echo.Running with admin rights.
+			echo.
+			`) else `(
+			echo.Error: You must run this script as an Administrator!
+			echo.
+			pause
+			goto :theEnd
+			`)
+
 			bcdedit /deletevalue safeboot
 			shutdown -r -f -t 0
+
+			:theEnd
 			exit
+
+			:isAdmin
+			fsutil dirty query `%systemdrive`% >nul
+			exit /b
 		)
 		Go := 1
 		ModeName := l_win_normal_mode ;"Normal Mode"
@@ -399,13 +502,32 @@ RunNotElevated(AppPath, CP := "CP866")
 	Command =
 	( LTrim RTrim Join`r`n
 		@echo off
-		if "`%~1" == "" exit
+
+		if "`%~1" == "" goto :theEnd
+
+		call :isAdmin
+		if `%ErrorLevel`% == 0 `(
+		echo.Running with admin rights.
+		echo.
+		`) else `(
+		echo.Error: You must run this script as an Administrator!
+		echo.
+		pause
+		goto :theEnd
+		`)
+
 		set "apppath=`%~1"
 		set "taskname=Launch `%apppath`%"
 		schtasks /create /SC ONCE /ST 23:59 /TN "`%taskname`%" /TR "`%apppath`%" /F
 		schtasks /run /tn "`%taskname`%"
 		schtasks /delete /tn "`%taskname`%" /F
+
+		:theEnd
 		exit
+
+		:isAdmin
+		fsutil dirty query `%systemdrive`% >nul
+		exit /b
 	)
 	FileDelete, %BatFile%
 	FileAppend, %Command%, %BatFile%, %CP%

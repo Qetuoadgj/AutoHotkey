@@ -734,4 +734,4 @@ CheckWinUpdatesStatus:
 }
 
 
-#Include CLASS_Script.ahk
+#Include D:\Google Диск\AutoHotkey\Includes\CLASS_Script.ahk

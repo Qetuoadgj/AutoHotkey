@@ -136,22 +136,22 @@ InitGUI:
 {
 	gosub, CREATE_LOCALIZATION
 
-	global Btn_Margin := 10, Btn_X := Btn_Margin, Btn_Y := Btn_Margin, Btn_W := 160, Btn_H := 33
+	global Btn_Margin_X := 10, Btn_Margin_Y := 10/1.5, Btn_X := Btn_Margin_X, Btn_Y := Btn_Margin_Y, Btn_W := 160, Btn_H := 33
 
 	Gui, +AlwaysOnTop
 
-	Gui, Add, Button, % " x" Btn_Margin " y" Btn_Margin " w" . Btn_W . " h" . Btn_H . " g" . "ClearPrinterQueue", %l_clear_printer_queue%
+	Gui, Add, Button, % " x" Btn_Margin_X " y" Btn_Margin_Y " w" . Btn_W . " h" . Btn_H . " g" . "ClearPrinterQueue", %l_clear_printer_queue%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "ClearEventsLog", %l_clear_events_log%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "FixDesktopIcons", %l_fix_desktop_icons_bug%
 
-	Gui, Add, Button, % " x+" Btn_Margin " y" Btn_Margin " w" Btn_W " h" Btn_H " g" "WinReBootSafeMin", %l_win_safe_mode_minimal%
+	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "WinReBootSafeMin", %l_win_safe_mode_minimal%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinReBootSafeNet", %l_win_safe_mode_network%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinReBootNormal", %l_win_normal_mode%
 
-	Gui, Add, Button, % " x+" Btn_Margin " y" Btn_Margin " w" Btn_W " h" Btn_H " g" "WinUpdatesDisable", %l_win_updates_disable%
+	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "WinUpdatesDisable", %l_win_updates_disable%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "WinUpdatesEnable", %l_win_updates_enable%
 
-	Gui, Add, Button, % " x+" Btn_Margin " y" Btn_Margin " w" Btn_W " h" Btn_H " g" "GeForce610mDisable", %l_geforce610m_disable%
+	Gui, Add, Button, % " x+" Btn_Margin_X " y" Btn_Margin_Y " w" Btn_W " h" Btn_H " g" "GeForce610mDisable", %l_geforce610m_disable%
 	Gui, Add, Button, % " w" Btn_W " h" Btn_H " g" "GeForce610mEnable", %l_geforce610m_enable%
 
 	Gui, Show,, % Script_Name

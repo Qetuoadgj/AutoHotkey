@@ -4,7 +4,7 @@
 	Force_Single_Instance(File_Names := false)
 	{ ; функция автоматического завершения всех копий текущего скрипта (одновременно для .exe и .ahk)
 		static Detect_Hidden_Windows_Tmp
-		static File_Types, Index, File_Type
+		static File_Name, Index
 		static Script_Name, App_Full_Path
 		;
 		Detect_Hidden_Windows_Tmp := A_DetectHiddenWindows

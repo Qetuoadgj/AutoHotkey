@@ -29,9 +29,13 @@ Exit
 Init_GUI:
 {
 	Gui, PROMPT_GUI_: Add, Edit, % " y" . 10 . " w" . (358) . " h" . (21) . " vGUI_FILE_NAME", %TIME_STAMP%
-	Gui, PROMPT_GUI_: Add, Checkbox, % " x" . 10 . " y" . (10+21+10) . " h" . (24) . " vGUI_CONVERT_TO_GRAYSCALE", % "Convert to grayscale"
-	Gui, PROMPT_GUI_: Add, Checkbox, % " x+" . 10 . " y" . (10+21+10) . " h" . (24) . " vGUI_AUTO_CROP", % "Auto Crop"
-	Gui, PROMPT_GUI_: Add, Button, % " x" . (358 - 80 + 10) . " y" . (10+21+10) . " w" . (80) . " h" . (24) . " gPressed_Ok_Button", % "&OK"
+	Gui, PROMPT_GUI_: Add, Text, % " x" . 10 . " y" . (10+21+10+2) . " h" . (24), % "Margins: X"
+	Gui, PROMPT_GUI_: Add, Edit, % " x+" . 10 . " y" . (10+21+10) . " w" . (30) . " h" . (18) . " vGUI_MARGINS_X", 0
+	Gui, PROMPT_GUI_: Add, Text, % " x+" . 10 . " y" . (10+21+10+2) . " h" . (24), % "Y"
+	Gui, PROMPT_GUI_: Add, Edit, % " x+" . 10 . " y" . (10+21+10) . " w" . (30) . " h" . (18) . " vGUI_MARGINS_Y", 0
+	Gui, PROMPT_GUI_: Add, Checkbox, % " x" . 10 . " y" . (10+21+10+21) . " h" . (24) . " vGUI_CONVERT_TO_GRAYSCALE", % "Convert to grayscale"
+	Gui, PROMPT_GUI_: Add, Checkbox, % " x+" . 10 . " y" . (10+21+10+21) . " h" . (24) . " vGUI_AUTO_CROP", % "Auto Crop"
+	Gui, PROMPT_GUI_: Add, Button, % " x" . (358 - 80 + 10) . " y" . (10+21+10+21) . " w" . (80) . " h" . (24) . " gPressed_Ok_Button", % "&OK"
 	Gui, PROMPT_GUI_: Show, AutoSize, %Script_Name%
 
 	return
@@ -52,6 +56,12 @@ Pressed_OK_Button:
 	GuiControlGet, combined_file_name,, GUI_FILE_NAME
 	GuiControlGet, convert_to_grayscale,, GUI_CONVERT_TO_GRAYSCALE
 	GuiControlGet, auto_crop,, GUI_AUTO_CROP
+	GuiControlGet, margins_x,, GUI_MARGINS_X
+	GuiControlGet, margins_y,, GUI_MARGINS_Y
+	
+	margins_x := margins_x ? margins_x : 0
+	margins_y := margins_y ? margins_y : 0
+
 	; MsgBox, combined_file_name: %combined_file_name%`nconvert_to_grayscale: %convert_to_grayscale%`nauto_crop: %auto_crop%
 
 	combined_file_name := Trim(combined_file_name)
@@ -120,7 +130,7 @@ Trim_Files:
 				input_file := input_file_long_path
 				if (auto_crop) {
 					trimmed_file := input_file_directory . "\" . input_file_name_no_extension . ".trimmed." . input_file_extension
-					gswin32c_pdf_trim(input_file, trimmed_file)
+					gswin32c_pdf_trim(input_file, trimmed_file, margins_x, margins_y)
 					if FileExist(trimmed_file) {
 						TRIMMED_FILES_LIST .= "`n" . trimmed_file
 					}

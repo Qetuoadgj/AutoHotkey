@@ -186,11 +186,11 @@ SET_DEFAULTS:
 	Defaults.dictionary_russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
 	Defaults.dictionary_english := "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
 	Defaults.dictionary_ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
-	
+
 	; Modules
 	Defaults.module_magnifier := "modules\magnifier\magnifier_" . (A_Is64bitOS ? "x64" : "x32") . ".exe"
 	; Defaults.module_magnifier := "modules\magnifier\magnifier_x32.exe"
-	
+
 	; Magnifier
 	Defaults.magnifier_processing_mode := 3 ;(OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
 	;
@@ -201,7 +201,7 @@ SET_DEFAULTS:
 	Defaults.magnifier_key_toggle_negative := "LWin & N"
 	Defaults.magnifier_key_zoom_in := "WheelUp"
 	Defaults.magnifier_key_zoom_out := "WheelDown"
-	
+
 	return
 }
 
@@ -280,12 +280,12 @@ READ_CONFIG_FILE:
 	IniRead, dictionary_english, %Config_File%, Dictionaries, dictionary_english, % Defaults.dictionary_english
 	IniRead, dictionary_russian, %Config_File%, Dictionaries, dictionary_russian, % Defaults.dictionary_russian
 	IniRead, dictionary_ukrainian, %Config_File%, Dictionaries, dictionary_ukrainian, % Defaults.dictionary_ukrainian
-	
+
 	; Modules
 	IniRead, module_magnifier, %Config_File%, Modules, module_magnifier, % Defaults.module_magnifier
 	module_magnifier_long_path := FileGetLongPath(module_magnifier)
-	
-	; Magnifier	
+
+	; Magnifier
 	if FileExist(module_magnifier_long_path) {
 		SplitPath, module_magnifier_long_path, module_magnifier_file_name, module_magnifier_file_dir, module_magnifier_file_extension, module_magnifier_file_name_no_ext, module_magnifier_file_drive
 		;
@@ -299,7 +299,7 @@ READ_CONFIG_FILE:
 		IniRead, magnifier_key_zoom_in, %Config_File%, Magnifier, magnifier_key_zoom_in, % Defaults.magnifier_key_zoom_in ; WheelUp
 		IniRead, magnifier_key_zoom_out, %Config_File%, Magnifier, magnifier_key_zoom_out, % Defaults.magnifier_key_zoom_out ; WheelDown
 		; запись настроек, полученных из общего Config_File в файл настроек модуля
-		module_magnifier_config_file := module_magnifier_file_dir . "\Magnifier.ini"		
+		module_magnifier_config_file := module_magnifier_file_dir . "\Magnifier.ini"
 		IniWrite("processing_mode", module_magnifier_config_file, "Params", magnifier_processing_mode)
 		;
 		IniWrite("key_close_app", module_magnifier_config_file, "HotKeys", magnifier_key_close_app) ; Escape
@@ -414,10 +414,10 @@ SAVE_CONFIG_FILE:
 	IniWrite("dictionary_english", Config_File, "Dictionaries", dictionary_english)
 	IniWrite("dictionary_russian", Config_File, "Dictionaries", dictionary_russian)
 	IniWrite("dictionary_ukrainian", Config_File, "Dictionaries", dictionary_ukrainian)
-	
+
 	; Modules
 	IniWrite("module_magnifier", Config_File, "Modules", module_magnifier)
-	
+
 	; Magnifier
 	if FileExist(module_magnifier_long_path) {
 		IniWrite("magnifier_processing_mode", Config_File, "Magnifier", magnifier_processing_mode)
@@ -436,25 +436,25 @@ SAVE_CONFIG_FILE:
 
 SWITCH_KEYBOARD_LAYOUT:
 {
+	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
+		SoundPlay, %sound_switch_keyboard_layout%
+	}
 	if WinActive("ahk_id " Windows.Tray_ID) {
 		WinActivate, % "ahk_id " Windows.Desktop_ID
 	}
 	Layout.Next("A", system_switch_layouts_by_send)
 	Layout_HKL := Layout.Get_HKL("A")
 	ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
-	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
-		SoundPlay, %sound_switch_keyboard_layout%
-	}
 	Sleep, 50
 	return
 }
 
 TOGGLE_CURSOR:
 {
-	SystemCursor("Toggle")
 	if (sound_enable and FileExist(sound_toggle_cursor)) {
 		SoundPlay, %sound_toggle_cursor%
 	}
+	SystemCursor("Toggle")
 	Sleep, 50
 	return
 }
@@ -503,11 +503,11 @@ SWITCH_TEXT_CASE:
 	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
 	if (Selected_Text := Edit_Text.Select()) {
-		Converted_Text := Edit_Text.Convert_Case(Selected_Text, false)
-		Edit_Text.Paste(Converted_Text)
 		if (sound_enable and FileExist(sound_switch_text_case)) {
 			SoundPlay, %sound_switch_text_case%
 		}
+		Converted_Text := Edit_Text.Convert_Case(Selected_Text, false)
+		Edit_Text.Paste(Converted_Text)
 	}
 	Sleep, 50
 	Clipboard := "" ; Null
@@ -521,11 +521,11 @@ SWITCH_TEXT_WHITESPACE:
 	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
 	if (Selected_Text := Edit_Text.Select()) {
-		Converted_Text := Edit_Text.Convert_Whitespace(Selected_Text, text_whitespace_replacement, text_tab_size)
-		Edit_Text.Paste(Converted_Text)
 		if (sound_enable and FileExist(sound_switch_text_whitespace)) {
 			SoundPlay, %sound_switch_text_whitespace%
 		}
+		Converted_Text := Edit_Text.Convert_Whitespace(Selected_Text, text_whitespace_replacement, text_tab_size)
+		Edit_Text.Paste(Converted_Text)
 	}
 	Sleep, 50
 	Clipboard := "" ; Null
@@ -540,6 +540,9 @@ SWITCH_TEXT_LAYOUT:
 	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
 	if (Selected_Text := Edit_Text.Select()) {
+		if (sound_enable and FileExist(sound_switch_text_layout)) {
+			SoundPlay, %sound_switch_text_layout%
+		}
 		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
 		if (Selected_Text_Dictionary) {
 			Text_Layout_Index := Layout.Get_Index_By_Name(Selected_Text_Dictionary)
@@ -559,9 +562,6 @@ SWITCH_TEXT_LAYOUT:
 				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 			}
 		}
-		if (sound_enable and FileExist(sound_switch_text_layout)) {
-			SoundPlay, %sound_switch_text_layout%
-		}
 	}
 	Sleep, 50
 	Clipboard := "" ; Null
@@ -577,6 +577,9 @@ SWITCH_TEXT_LAYOUT:
 	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
 	if (Selected_Text := Edit_Text.Select()) {
+		if (sound_enable and FileExist(sound_switch_text_layout)) {
+			SoundPlay, %sound_switch_text_layout%
+		}
 		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
 		if (not Selected_Text_Dictionary) {
 			Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
@@ -602,9 +605,6 @@ SWITCH_TEXT_LAYOUT:
 			else {
 				ToolTip(Next_Dictionary_Name)
 			}
-		}
-		if (sound_enable and FileExist(sound_switch_text_layout)) {
-			SoundPlay, %sound_switch_text_layout%
 		}
 	}
 	Sleep, 50
@@ -1060,7 +1060,7 @@ Menu_App_Update:
 PREPARE_UPDATE:
 {
 	if (GetUrlStatus(info_updater_url) == 200) {
-		UrlDownloadToFile, %info_updater_url%, % A_ScriptDir . "\" . info_updater ; % A_ScriptDir ."\" . Format("{:T}", info_updater) 
+		UrlDownloadToFile, %info_updater_url%, % A_ScriptDir . "\" . info_updater ; % A_ScriptDir ."\" . Format("{:T}", info_updater)
 	}
 	return
 }

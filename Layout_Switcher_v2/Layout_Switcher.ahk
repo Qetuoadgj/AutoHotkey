@@ -444,7 +444,9 @@ SWITCH_KEYBOARD_LAYOUT:
 		WinActivate, % "ahk_id " Windows.Desktop_ID
 	}
 	Layout.Next("A", system_switch_layouts_by_send)
+	Sleep, 10
 	Layout_HKL := Layout.Get_HKL("A")
+	Sleep, 10
 	ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
 	Sleep, 50
 	return

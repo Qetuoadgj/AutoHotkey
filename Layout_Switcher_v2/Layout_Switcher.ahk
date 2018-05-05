@@ -7,6 +7,7 @@ SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 ListLines, Off	; Disable them as they're only useful for debugging purposes.
 #KeyHistory, 0	; ListLines and #KeyHistory are functions used to "log your keys".
+SetBatchLines, -1
 
 DetectHiddenWindows, On
 

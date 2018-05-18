@@ -13,6 +13,7 @@ TimeStamp = yyyy.MM.dd
 ; CreateNewArchives = 1
 NewArchiveNumeration = 0.2d
 ; AddSuffix = 1
+; MakeReadOnly = 1
 ;
 ; 7Zip = %ProgramFiles%\7-Zip\7z.exe
 ; 7Zip_Params = U -up1q0r2x1y2z1w2 -r0 -spf2 -slp -mx -myx -ms=on -scrcBLAKE2sp
@@ -22,6 +23,7 @@ NewArchiveNumeration = 0.2d
 ; WinRAR_LockArchive = 1
 ; WinRAR_WriteComment = 1
 ;
+Timeout = 2
 ; Debug = 1
 
 [IncludeList]

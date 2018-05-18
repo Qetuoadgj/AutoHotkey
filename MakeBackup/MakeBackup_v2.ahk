@@ -313,7 +313,7 @@ WinRAR_Compress:
 	WinRAR_Archive := Archive ; A_WorkingDir . "\" . Name
 	;
 	Loop, Files, %WinRAR_Binary%, F
-	{ ; получаем полный путь к файлус параметрами архивации
+	{ ; получаем полный путь к файлу с параметрами архивации
 		WinRAR_Binary := A_LoopFileLongPath
 	}
 	SplitPath, WinRAR_Binary, WinRAR_Binary_FileName, WinRAR_Binary_Dir, WinRAR_Binary_Extension, WinRAR_Binary_NameNoExt, WinRAR_Binary_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
@@ -396,7 +396,7 @@ WinRAR_Compress:
 			MsgBox, %WinRAR_Command%
 		}
 		;
-		; ¬ыполнение команды в коммандной строке Windows
+		; ¬ыполнение команды в командной строке Windows
 		RunWait, "%ComSpec%" /k %WinRAR_Command%
 	}
 	;
@@ -426,7 +426,7 @@ WinRAR_Compress:
 	7Zip_Archive := Archive ; A_WorkingDir . "\" . Name
 	;
 	Loop, Files, %7Zip_Binary%, F
-	{ ; получаем полный путь к файлус параметрами архивации
+	{ ; получаем полный путь к файлу с параметрами архивации
 		7Zip_Binary := A_LoopFileLongPath
 	}
 	SplitPath, 7Zip_Binary, 7Zip_Binary_FileName, 7Zip_Binary_Dir, 7Zip_Binary_Extension, 7Zip_Binary_NameNoExt, 7Zip_Binary_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
@@ -478,7 +478,7 @@ WinRAR_Compress:
 			MsgBox, %7Zip_Command%
 		}
 		;
-		; ¬ыполнение команды в коммандной строке Windows
+		; ¬ыполнение команды в командной строке Windows
 		RunWait, "%ComSpec%" /k %7Zip_Command%
 		; Run notepad "%Include_List_File%"
 	}

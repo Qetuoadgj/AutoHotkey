@@ -18,6 +18,8 @@ ConfigFile := A_ScriptDir . "\" . A_ScriptNameNoExt . ".ini"
 
 global G_KEYS_TO_PROCESS := 0, G_KEYS_PROCESSED := 0, G_PROGRESS_BAR := "Progress_Bar_1", G_PROGRESS_TEXT := "Progress_Text_1"
 
+Gui_Hwnd := 0
+
 gosub Read_Config_File
 gosub Create_GUI
 gosub Set_GUI_Settings
@@ -66,16 +68,17 @@ Create_GUI:
 	Gui, -Resize +MaximizeBox
 	;
 	Gui, Add, GroupBox, x5 y0 w450 h90, % "Files"
+	
 	Gui, Add, Text, x10 y15 w60 h20, % "Copy From"
-	Gui, Add, Edit, x65 y15 w310 h20 vIni_File_1, % Ini_File_1
+	Gui, Add, Edit, x65 y15 w310 h20 vIni_File_1 ReadOnly, % Ini_File_1
 	Gui, Add, Button, x380 y15 w70 h20 gBrowseOpen v1, % "Browse"
 	;
 	Gui, Add, Text, x10 y40 w60 h20, % "Copy To"
-	Gui, Add, Edit, x65 y40 w310 h20 vIni_File_2, % Ini_File_2
+	Gui, Add, Edit, x65 y40 w310 h20 vIni_File_2 ReadOnly, % Ini_File_2
 	Gui, Add, Button, x380 y40 w70 h20 gBrowseOpen v2, Browse
 	;
 	Gui, Add, Text, x10 y65 w60 h20, % "Output File"
-	Gui, Add, Edit, x65 y65 w310 h20 vIni_File_3, % Ini_File_3
+	Gui, Add, Edit, x65 y65 w310 h20 vIni_File_3 ReadOnly, % Ini_File_3
 	Gui, Add, Button, x380 y65 w70 h20 gBrowseSave v3, % "Browse"
 	;
 	Gui, Add, GroupBox, x460 y0 w80 h90, % "Encoding"
@@ -86,15 +89,16 @@ Create_GUI:
 	Gui, Add, Text, x10 y115 w40 h20, % "Method"
 	Gui, Add, DropDownList, x50 y110 w140 vMethod gWrite_Config_File
 	; GuiControl, +AltSubmit, Method ; возвращает выбранную позицию (начиная с 1) в списке вместо текста
-	Gui, Add, CheckBox, x205 y110 w80 h20 vOverwriteOutputFile gWrite_Config_File Disabled, % "Owerwrite"
+	Gui, Add, CheckBox, x205 y110 w80 h20 vOverwriteOutputFile gWrite_Config_File Disabled Hidden, % "Owerwrite"
+	Gui, Add, CheckBox, x205 y110 w80 h20 vSawpFiles gWrite_Config_File, % "Swap Files"
 	Gui, Add, CheckBox, x285 y110 w80 h20 vShowResult gWrite_Config_File Disabled, % "Show Result"
 	;
 	Gui, Add, Button, x380 y103 w70 h30, % "Exit"
 	Gui, Add, Button, x465 y103 w70 h30 gMerge, % "Merge"
 	Gui, Show, h145 w545, %Script_Win_Title%
 	;
-	Gui, +LastFound
-	Gui_Hwnd := WinExist()
+	Gui, +LastFound +HwndGui_Hwnd
+	Gui_Hwnd := Gui_Hwnd ? Gui_Hwnd : WinExist("A")
 	;
 	Gui, Add, Edit, Multi ReadOnly x5 y150 w0 h0 vIni_File_1_Text, %A_Space%
 	Gui, Add, Edit, Multi ReadOnly x5 y150 w0 h0 vIni_File_2_Text, %A_Space%
@@ -292,6 +296,7 @@ INI_READ_TO_FILE(Input_Ini_File_Path, Output_Ini_File_Path)
 				{
 					if (Section_Line := A_LoopField) {
 						if RegExMatch(Section_Line, "^(.*?)=(.*)$", Key_Data_) {				
+						; if RegExMatch(Section_Line, "^([^\s]+)=(.*)$", Key_Data_) {				
 							if (Key_Name := Trim(Key_Data_1)) {
 								Key_Value := Trim(Key_Data_2)
 								IniWrite, %Key_Value%, %Output_Ini_File_Path%, %Section_Name%, %Key_Name%
@@ -324,6 +329,7 @@ INI_READ_DIFFS_TO_FILE(Ini_File_1_Path, Ini_File_2_Path, Output_Ini_File)
 			{
 				if (Ini_File_2_Section_Line := A_LoopField) {
 					if RegExMatch(Ini_File_2_Section_Line, "^(.*?)=(.*)$", Key_Data_) {
+					; if RegExMatch(Ini_File_2_Section_Line, "^([^\s]+)=(.*)$", Key_Data_) {
 						if (Key_Name := Trim(Key_Data_1)) {
 							Ini_File_2_Key_Value := Trim(Key_Data_2)
 							IniRead, Ini_File_1_Key_Value, %Ini_File_1_Path%, %Section_Name%, %Key_Name%, % "{#-#-#-NOT-EXISTS-#-#-#}"
@@ -354,9 +360,17 @@ FILE_CLEAN_UP(File_Path)
 	return File_Path
 }
 
-INI_MERGE(Ini_File_1, Ini_File_2, Ini_File_3, Method_ID)
+INI_MERGE(Ini_File_1, Ini_File_2, Ini_File_3, Method_ID, Swap_Files := False)
 {
 	global G_KEYS_TO_PROCESS, G_KEYS_PROCESSED
+	;
+	if (Swap_Files) {
+		static tmp1, tmp2
+		tmp1 := Ini_File_1
+		tmp2 := Ini_File_2
+		Ini_File_1 := tmp2
+		Ini_File_2 := tmp1
+	}
 	;
 	Ini_File_1 := INI_PREPARE(Ini_File_1, "__tmp_ini_file_1.ini")
 	Ini_File_2 := INI_PREPARE(Ini_File_2, "__tmp_ini_file_2.ini")
@@ -394,6 +408,7 @@ Merge:
 	GuiControl, +AltSubmit, Method ; возвращает выбранную позицию (начиная с 1) в списке вместо текста
 	Gui, Submit, NoHide
 	Method_ID := Method
+	Swap_Files := SawpFiles
 	GuiControl, -AltSubmit, Method ; возвращает выбранный в списке текст
 	; /*
 	if (OverwriteOutputFile && (Ini_File_3 != Ini_File_1 && Ini_File_1 != Ini_File_2)) {
@@ -402,7 +417,7 @@ Merge:
 	}
 	; */
 	GuiControl,, Ini_File_3_Text, %A_Space%
-	Result := INI_MERGE(Ini_File_1, Ini_File_2, Ini_File_3, Method_ID)
+	Result := INI_MERGE(Ini_File_1, Ini_File_2, Ini_File_3, Method_ID, Swap_Files)
 	GuiControl,, Ini_File_3_Text, %Result%
 	return
 }

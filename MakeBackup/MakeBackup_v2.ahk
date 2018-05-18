@@ -40,7 +40,7 @@ Set_Params:
 		else { ; скрипт запущен с указанием аргументов
 			INI_File := A_Args[1] ; 1й аргумент - файл с параметрами архивации
 		}
-
+		
 		Loop, Files, %INI_File%, F
 		{ ; получаем полный путь к файлу с параметрами архивации
 			INI_File := A_LoopFileLongPath
@@ -49,9 +49,9 @@ Set_Params:
 	else {
 		INI_File := ""
 	}
-
+	
 	SplitPath, INI_File, INI_File_FileName, INI_File_Dir, INI_File_Extension, INI_File_NameNoExt, INI_File_Drive ; получаем путь к папке, в которой находится файл с параметрами архивации
-
+	
 	WinRAR_Params := ""
 	. " A"				; Команда A — добавить в архив
 	. " -u"				; Ключ -U — обновить файлы
@@ -65,7 +65,7 @@ Set_Params:
 	. " -mc4a+"			; Сжатие аудиоданных, дельта-сжатие
 	. " -mcc+"			; Сжатие графических данных true color (RGB)
 	. " -htb"			; Ключ -HT[B|C] — выбрать тип хеша [BLAKE2|CRC32] для контрольных сумм
-
+	
 	7Zip_Sync := "p1q0r2x1y2z1w2" ; Набор ключей для синхронизации файлов внутри архива, аналог ключа -AS в WinRAR
 	7Zip_Params := ""
 	. " U"				; u (Update) command
@@ -77,7 +77,7 @@ Set_Params:
 	. " -myx"			; Sets level of file analysis.
 	. " -ms=on"			; Sets solid mode.
 	. " -scrcBLAKE2sp"	; -scrc (Set hash function) switch
-
+	
 	IniRead, Name, %INI_File%, % "Description", % "Name", %INI_File_NameNoExt%
 	IniRead, RootDir, %INI_File%, % "Description", % "RootDir", %INI_File_Dir%
 	IniRead, WorkingDir, %INI_File%, % "Description", % "WorkingDir", 0
@@ -93,30 +93,30 @@ Set_Params:
 	IniRead, NewArchiveNumeration, %INI_File%, % "Description", % "NewArchiveNumeration", % "0.2d"
 	IniRead, WinRAR_Params, %INI_File%, % "Description", % "WinRAR_Params", %WinRAR_Params%
 	WinRAR_Params := Trim(WinRAR_Params)
-
+	
 	IniRead, 7Zip, %INI_File%, % "Description", % "7Zip", % A_ProgramFiles . "\7-Zip\7z.exe"
 	IniRead, 7Zip_Params, %INI_File%, % "Description", % "7Zip_Params", %7Zip_Params%
 	7Zip_Params := Trim(7Zip_Params)
-
+	
 	RootDir := ExpandEnvironmentVariables(RootDir)
 	WorkingDir := ExpandEnvironmentVariables(WorkingDir)
 	WinRAR := ExpandEnvironmentVariables(WinRAR)
 	7Zip := ExpandEnvironmentVariables(7Zip)
-
+	
 	IniRead, Timeout, %INI_File%, % "Description", % "Timeout", 2
 	IniRead, Debug, %INI_File%, % "Description", % "Debug", 0
-
+	
 	IniRead, TimeStamp, %INI_File%, % "Description", % "TimeStamp", 0 ;% "yyyy.MM.dd"
 	FormatTime, Date,, %TimeStamp% ; Получение текущей даты (2015.11.29)
 	Name .= (Date ? " (" . Date . ")" : "")
 	; Name .= ".rar"
-
+	
 	; ArchiveType := "rar"
 	IniRead, ArchiveType, %INI_File%, % "Description", % "ArchiveType", % "rar"
-
+	
 	ArchiveName := Name
 	Archive := INI_File_Dir . "\" . ArchiveName ; задаем изначальный путь к архиву
-
+	
 	if (CreateNewArchives) {
 		ArchiveCount := 0
 		Loop, Files, % Archive . "*" . ArchiveType, F
@@ -129,24 +129,24 @@ Set_Params:
 		ArchiveCount := Format("{1:" . NewArchiveNumeration . "}", ArchiveCount) ; Format("{1:0.3d}",ArchiveCount)
 		ArchiveName := Name . " - " . ArchiveCount
 	}
-
+	
 	If (AddSuffix) {
 		InputBox, ArchiveSuffix, % ArchiveName . "." . ArchiveType,,,, 100
 		If (StrLen(ArchiveSuffix) > 0) {
 			ArchiveName .= " [" ArchiveSuffix "]"
 		}
 	}
-
+	
 	Archive := INI_File_Dir . "\" . ArchiveName ; обновляем путь к архиву
 	Archive .= "." . ArchiveType
-
+	
 	Prefix := "DHFWEF90WE89_" ; префикс для имён файлов-списков и файла-комментария
 	Include_List_Text := SplitINIFile(INI_File, "IncludeList") ; создаем список включений из секции [IncludeList]
 	Exclude_List_Text := SplitINIFile(INI_File, "ExcludeList") ; создаем список исключений из секции [ExcludeList]
-
+	
 	; Sort, Include_List_Text, U ; удаление дубликатов из списка
 	; Sort, Exclude_List_Text, U ; удаление дубликатов из списка
-
+	
 	if (NoExec) {
 		return
 	}
@@ -509,221 +509,221 @@ Include_INI_File:
 		}
 		7Zip_Command .= " -i!" . q(INI_File_FileName)	; Включить указанный файл или папку в обработку
 		WinRAR_Command .= " " . q(INI_File_FileName)	; Включить указанный файл или папку в обработку
-		}
-		return
 	}
+	return
+}
 
-	Clean_UP:
-	{
-		if (IncludeThisFile && INI_Needs_To_Be_Copied) {
-			if (Exist_Old_INI) {
-				if (Made_INI_Safe_Copy) {
-					FileMove, %Temp_INI_File%, %Target_INI_File%, 1
-					if (ErrorLevel) {
-						MsgBox, % "Old INI has not been restored."
-					}
-				}
-			}
-			else {
-				FileDelete, %Target_INI_File%
+Clean_UP:
+{
+	if (IncludeThisFile && INI_Needs_To_Be_Copied) {
+		if (Exist_Old_INI) {
+			if (Made_INI_Safe_Copy) {
+				FileMove, %Temp_INI_File%, %Target_INI_File%, 1
 				if (ErrorLevel) {
-					MsgBox, % "Target INI has not been deleted."
-				}
-			}
-		}
-		return
-	}
-
-	SafeCopy(ByRef FileToCopyPath, ByRef TargetFilePath, ByRef TmpFilePath)
-	{
-		static MadeSafeCopy, RenamedOldFile, CopiedNewFile
-		MadeSafeCopy := 0, RenamedOldFile = 0, CopiedNewFile = 0
-		if FileExist(TargetFilePath) {
-			FileMove, %TargetFilePath%, %TmpFilePath%, 0
-			if (not ErrorLevel) {
-				RenamedOldFile := 1
-				FileCopy, %FileToCopyPath%, %TargetFilePath%, 0
-				if (not ErrorLevel) {
-					CopiedNewFile := 1
-					MadeSafeCopy := RenamedOldFile * CopiedNewFile
+					MsgBox, % "Old INI has not been restored."
 				}
 			}
 		}
 		else {
+			FileDelete, %Target_INI_File%
+			if (ErrorLevel) {
+				MsgBox, % "Target INI has not been deleted."
+			}
+		}
+	}
+	return
+}
+
+SafeCopy(ByRef FileToCopyPath, ByRef TargetFilePath, ByRef TmpFilePath)
+{
+	static MadeSafeCopy, RenamedOldFile, CopiedNewFile
+	MadeSafeCopy := 0, RenamedOldFile = 0, CopiedNewFile = 0
+	if FileExist(TargetFilePath) {
+		FileMove, %TargetFilePath%, %TmpFilePath%, 0
+		if (not ErrorLevel) {
+			RenamedOldFile := 1
 			FileCopy, %FileToCopyPath%, %TargetFilePath%, 0
-			MadeSafeCopy := not ErrorLevel
-		}
-		return MadeSafeCopy ? TargetFilePath : 0
-	}
-
-	GetAbsolutePath(Path, RootPath := "")
-	{
-		RootPath := RootPath ? RootPath : A_WorkingDir
-		StringReplace, Path, Path, % "..\", % "..\", UseErrorLevel
-		Loop, %ErrorLevel%
-		{
-			RootPath := RegExReplace(RootPath, "^(.*)\\.*$", "$1",, 1)
-		}
-		Path := RegExReplace(Path, "(\.\.\\)+", RootPath . "\")
-		return Path
-	}
-
-	ParseList(List, RootPath := "")
-	{
-		static Line, Ret
-		Ret := ""
-		Loop, Parse, List, `n, `r
-		{
-			Line := ExpandEnvironmentVariables(A_LoopField)
-			if RegExMatch(Line, "\.\.\\") { ; обработка относительных путей типа "..\..\Путь"
-				Line := GetAbsolutePath(Line, A_WorkingDir)
+			if (not ErrorLevel) {
+				CopiedNewFile := 1
+				MadeSafeCopy := RenamedOldFile * CopiedNewFile
 			}
-			if (not RegExMatch(Line, "^\w+:\\")) {
-				Line := A_WorkingDir . "\" . Line
-			}
-			Ret .= Line . "`n"
-			; MsgBox, 4,, File number %A_Index% is %Line%.`n`nContinue?
-			; IfMsgBox, No, break
 		}
-		if (RootPath) {
-			Ret := StrReplace(Ret, RootPath . "\", "")
-		}
-		Sort, Ret, U ; удаление дубликатов из списка
-		return Ret
 	}
-
-	Escape(String)
-	{ ; функция преобразования String в RegExp
-		static Escape := ["\", ".", "*", "?", "+", "[", "]", "{", "}", "|", "(", ")", "^", "$"]
-		for Index, Char in Escape
-		{
-			String := StrReplace(String, Char, "\" . Char)
-		}
-		return String
+	else {
+		FileCopy, %FileToCopyPath%, %TargetFilePath%, 0
+		MadeSafeCopy := not ErrorLevel
 	}
+	return MadeSafeCopy ? TargetFilePath : 0
+}
 
-	Make_Help_File:
+GetAbsolutePath(Path, RootPath := "")
+{
+	RootPath := RootPath ? RootPath : A_WorkingDir
+	StringReplace, Path, Path, % "..\", % "..\", UseErrorLevel
+	Loop, %ErrorLevel%
 	{
-		MsgText =
-		( LTrim RTrim Join`r`n
-		[Description]
-		; Name = __0003
-		; RootDir = %A_WorkingDir%
-		; WorkingDir = %A_WorkingDir%
-		ArchiveType = 7z
-		; ArchiveType = rar
-		; Password = 567576
-		; Encrypt = 0
-		; TimeStamp = yyyy.MM.dd
-		; IncludeThisFile = 0
-		; CreateNewArchives = 1
-		; NewArchiveNumeration = 0.2d
-		; AddSuffix = 1
-		; MakeReadOnly = 1
-		;
-		; 7Zip = `%ProgramFiles`%\7-Zip\7z.exe
-		; 7Zip_Params =%7Zip_Params%
-		;
-		; WinRAR = `%ProgramFiles`%\WinRAR\Rar.exe
-		; WinRAR_Params =%WinRAR_Params%
-		; WinRAR_LockArchive = 1
-		; WinRAR_WriteComment = 1
-		;
-		; Timeout = 2
-		; Debug = 1
-
-		[IncludeList]
-		; Маски файлов для архивирования
-
-		[ExcludeList]
-		; Маски файлов, исключаемых из обработки файлы
-
-		; Свойства папок
-		*Thumbs.db
-		*desktop.ini
-
-		; Ярлыки
-		*.lnk
-
-		; Архивы
-		*.rar
-		*.7z
-		*.zip
-
-		; [Comments]
-		; Комментарий, который будет добавлен в свойства архива (только для WinRAR)
-
-		)
-		PasteToNotepad(MsgText)
-		return
+		RootPath := RegExReplace(RootPath, "^(.*)\\.*$", "$1",, 1)
 	}
+	Path := RegExReplace(Path, "(\.\.\\)+", RootPath . "\")
+	return Path
+}
 
-	Get_Recursive_Files_List:
+ParseList(List, RootPath := "")
+{
+	static Line, Ret
+	Ret := ""
+	Loop, Parse, List, `n, `r
 	{
-		FileList := ""
-
-		TargetPath = %Get_File_List_Folder% ;1
-		TargetPath := InStr(FileExist(TargetPath), "D") ? (TargetPath . "\*") : TargetPath
-
-		Loop, Files, %TargetPath%, FR ; ; Loop Files, 1\*, FR
-		{
-			File := A_LoopFileLongPath
-			SplitPath, File, FileName, FileDir ;, FileExtension, FileNameNoExt, FileDrive ; получаем путь к папке, в которой находится файл с параметрами архивации
-			FileList .= File . "|" . FileDir "`n"
+		Line := ExpandEnvironmentVariables(A_LoopField)
+		if RegExMatch(Line, "\.\.\\") { ; обработка относительных путей типа "..\..\Путь"
+			Line := GetAbsolutePath(Line, A_WorkingDir)
 		}
+		if (not RegExMatch(Line, "^\w+:\\")) {
+			Line := A_WorkingDir . "\" . Line
+		}
+		Ret .= Line . "`n"
+		; MsgBox, 4,, File number %A_Index% is %Line%.`n`nContinue?
+		; IfMsgBox, No, break
+	}
+	if (RootPath) {
+		Ret := StrReplace(Ret, RootPath . "\", "")
+	}
+	Sort, Ret, U ; удаление дубликатов из списка
+	return Ret
+}
 
-		if (FileList) {
-			MsgBox, 36, Recursive Files List, Sort list?
-			IfMsgBox, Yes
-			{
-				Sort, FileList, \ ;R
+Escape(String)
+{ ; функция преобразования String в RegExp
+	static Escape := ["\", ".", "*", "?", "+", "[", "]", "{", "}", "|", "(", ")", "^", "$"]
+	for Index, Char in Escape
+	{
+		String := StrReplace(String, Char, "\" . Char)
+	}
+	return String
+}
+
+Make_Help_File:
+{
+	MsgText =
+	( LTrim RTrim Join`r`n
+	[Description]
+	; Name = __0003
+	; RootDir = %A_WorkingDir%
+	; WorkingDir = %A_WorkingDir%
+	ArchiveType = 7z
+	; ArchiveType = rar
+	; Password = 567576
+	; Encrypt = 0
+	; TimeStamp = yyyy.MM.dd
+	; IncludeThisFile = 0
+	; CreateNewArchives = 1
+	; NewArchiveNumeration = 0.2d
+	; AddSuffix = 1
+	; MakeReadOnly = 1
+	;
+	; 7Zip = `%ProgramFiles`%\7-Zip\7z.exe
+	; 7Zip_Params =%7Zip_Params%
+	;
+	; WinRAR = `%ProgramFiles`%\WinRAR\Rar.exe
+	; WinRAR_Params =%WinRAR_Params%
+	; WinRAR_LockArchive = 1
+	; WinRAR_WriteComment = 1
+	;
+	; Timeout = 2
+	; Debug = 1
+	
+	[IncludeList]
+	; Маски файлов для архивирования
+	
+	[ExcludeList]
+	; Маски файлов, исключаемых из обработки файлы
+	
+	; Свойства папок
+	*Thumbs.db
+	*desktop.ini
+	
+	; Ярлыки
+	*.lnk
+	
+	; Архивы
+	*.rar
+	*.7z
+	*.zip
+	
+	; [Comments]
+	; Комментарий, который будет добавлен в свойства архива (только для WinRAR)
+	
+	)
+	PasteToNotepad(MsgText)
+	return
+}
+
+Get_Recursive_Files_List:
+{
+	FileList := ""
+	
+	TargetPath = %Get_File_List_Folder% ;1
+	TargetPath := InStr(FileExist(TargetPath), "D") ? (TargetPath . "\*") : TargetPath
+	
+	Loop, Files, %TargetPath%, FR ; ; Loop Files, 1\*, FR
+	{
+		File := A_LoopFileLongPath
+		SplitPath, File, FileName, FileDir ;, FileExtension, FileNameNoExt, FileDrive ; получаем путь к папке, в которой находится файл с параметрами архивации
+		FileList .= File . "|" . FileDir "`n"
+	}
+	
+	if (FileList) {
+		MsgBox, 36, Recursive Files List, Sort list?
+		IfMsgBox, Yes
+		{
+			Sort, FileList, \ ;R
+		}
+		
+		PreviousDir := ""
+		Output := ""
+		Loop, parse, FileList, `n, `r
+		{
+			if (A_LoopField == "") { ; Ignore the blank item at the end of the list.
+				Output .= ";"
+				continue
 			}
-
-			PreviousDir := ""
-			Output := ""
-			Loop, parse, FileList, `n, `r
-			{
-				if (A_LoopField == "") { ; Ignore the blank item at the end of the list.
-					Output .= ";"
-					continue
+			FileData := StrSplit(A_LoopField, "|")
+			File := FileData[1]
+			FileDir := FileData[2]
+			if (not FileDir == PreviousDir) {
+				if (A_Index != 1) {
+					Output .= ";`r`n"
 				}
-				FileData := StrSplit(A_LoopField, "|")
-				File := FileData[1]
-				FileDir := FileData[2]
-				if (not FileDir == PreviousDir) {
-					if (A_Index != 1) {
-						Output .= ";`r`n"
-					}
-					Output .=  "; " . FileDir . "\`r`n"
-				}
-				Output .= "`t" . File . "`r`n"
-				PreviousDir := FileDir
+				Output .=  "; " . FileDir . "\`r`n"
 			}
-
-			/*
-			Clipboard := "" ; Empty the clipboard.
-			Clipboard := Output
-			ClipWait ;2.0
-			MsgBox, 0,, %Clipboard%, 1.5
-			*/
-
-			PasteToNotepad(Output)
+			Output .= "`t" . File . "`r`n"
+			PreviousDir := FileDir
 		}
-		return
+		
+		/*
+		Clipboard := "" ; Empty the clipboard.
+		Clipboard := Output
+		ClipWait ;2.0
+		MsgBox, 0,, %Clipboard%, 1.5
+		*/
+		
+		PasteToNotepad(Output)
 	}
+	return
+}
 
-	q(ByRef Str)
-	{
-		return """" . Str . """"
-	}
+q(ByRef Str)
+{
+	return """" . Str . """"
+}
 
-	PasteToNotepad(ByRef MsgText)
+PasteToNotepad(ByRef MsgText)
+{
+	Run, % "notepad.exe",,, Notepad_PID
+	WinWait, ahk_pid %Notepad_PID%,, 3
+	IfWinExist, ahk_pid %Notepad_PID%
 	{
-		Run, % "notepad.exe",,, Notepad_PID
-		WinWait, ahk_pid %Notepad_PID%,, 3
-		IfWinExist, ahk_pid %Notepad_PID%
-		{
-			WinActivate, ahk_pid %Notepad_PID%
-			ControlSetText, % "Edit1", %MsgText%, ahk_pid %Notepad_PID%
-		}
+		WinActivate, ahk_pid %Notepad_PID%
+		ControlSetText, % "Edit1", %MsgText%, ahk_pid %Notepad_PID%
 	}
+}

@@ -103,7 +103,7 @@ Set_Params:
 	WinRAR := ExpandEnvironmentVariables(WinRAR)
 	7Zip := ExpandEnvironmentVariables(7Zip)
 	
-	IniRead, Timeout, %INI_File%, % "Description", % "Timeout", 2
+	IniRead, Timeout, %INI_File%, % "Description", % "Timeout", %A_Space% ; 2
 	IniRead, Debug, %INI_File%, % "Description", % "Debug", 0
 	
 	IniRead, TimeStamp, %INI_File%, % "Description", % "TimeStamp", 0 ;% "yyyy.MM.dd"

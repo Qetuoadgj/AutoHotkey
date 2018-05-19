@@ -210,8 +210,8 @@ Message := ""
 . "NewArchiveNumeration = " . NewArchiveNumeration . "`n"
 : "")
 . "AddSuffix = " . AddSuffix . "`n"
-. "`n"
 . (Password ? ""
+. "`n"
 . "Password = " . Password . "`n"
 . "Encrypt = " . Encrypt . "`n"
 : "")

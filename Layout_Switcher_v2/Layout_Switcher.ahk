@@ -46,7 +46,7 @@ Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
 
-Clipboard_Tmp := "" ; Null
+; Clipboard_Tmp := "" ; Null
 
 Magnifier_Win_PID := 0
 
@@ -501,10 +501,25 @@ TOGGLE_FULLSCREEN:
 	return
 }
 */
-SWITCH_TEXT_CASE:
+
+CLIPBOARD_SAVE:
 {
 	Clipboard_Tmp := "" ; Null
 	Clipboard_Tmp := Clipboard
+	return
+}
+
+CLIPBOARD_RESTORE:
+{
+	Clipboard := "" ; Null
+	Clipboard := Clipboard_Tmp
+	ClipWait, 0.05
+	return
+}
+
+SWITCH_TEXT_CASE:
+{
+	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		if (sound_enable and FileExist(sound_switch_text_case)) {
 			SoundPlay, %sound_switch_text_case%
@@ -513,16 +528,13 @@ SWITCH_TEXT_CASE:
 		Edit_Text.Paste(Converted_Text)
 	}
 	Sleep, 50
-	Clipboard := "" ; Null
-	Clipboard := Clipboard_Tmp
-	ClipWait, 0.05
+	gosub, CLIPBOARD_RESTORE
 	return
 }
 
 SWITCH_TEXT_WHITESPACE:
 {
-	Clipboard_Tmp := "" ; Null
-	Clipboard_Tmp := Clipboard
+	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		if (sound_enable and FileExist(sound_switch_text_whitespace)) {
 			SoundPlay, %sound_switch_text_whitespace%
@@ -531,17 +543,14 @@ SWITCH_TEXT_WHITESPACE:
 		Edit_Text.Paste(Converted_Text)
 	}
 	Sleep, 50
-	Clipboard := "" ; Null
-	Clipboard := Clipboard_Tmp
-	ClipWait, 0.05
+	gosub, CLIPBOARD_RESTORE
 	return
 }
 
 ; /*
 SWITCH_TEXT_LAYOUT:
 {
-	Clipboard_Tmp := "" ; Null
-	Clipboard_Tmp := Clipboard
+	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		if (sound_enable and FileExist(sound_switch_text_layout)) {
 			SoundPlay, %sound_switch_text_layout%
@@ -567,9 +576,7 @@ SWITCH_TEXT_LAYOUT:
 		}
 	}
 	Sleep, 50
-	Clipboard := "" ; Null
-	Clipboard := Clipboard_Tmp
-	ClipWait, 0.05
+	gosub, CLIPBOARD_RESTORE
 	return
 }
 ; */

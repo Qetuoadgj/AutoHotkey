@@ -15,7 +15,7 @@ TimeStamp = yyyy.MM.dd
 ; NewArchiveNumeration = 0.2d
 ; AddSuffix = 1
 ;
-; MakeReadOnly = 1
+; MakeArchiveReadOnly = 1
 ; Password = 567576
 ; Encrypt = 0
 ;
@@ -34,37 +34,35 @@ TimeStamp = yyyy.MM.dd
 ;
 ; IncludeThisFile = 0
 ;
-; CMD_Timeout = 2
+; CmdTimeout = 2
 ; Debug = 1
 
 [IncludeList]
 ; Маски файлов для архивирования
-MakeBackup\*.bat
-MakeBackup\*.exe
-MakeBackup\*.ahk
-MakeBackup\*.ico
-MakeBackup\*.url
+	MakeBackup\*.bat
+	MakeBackup\*.exe
+	MakeBackup\*.ahk
+	MakeBackup\*.ico
+	MakeBackup\*.url
 
 [ExcludeList]
 ; Маски файлов, исключаемых из обработки файлы
+	; Свойства папок
+		*Thumbs.db
+		*desktop.ini
 
-; Свойства папок
-*Thumbs.db
-*desktop.ini
+	; Ярлыки
+		*.lnk
 
-; Ярлыки
-*.lnk
+	; Архивы
+		*.rar
+		*.7z
+		*.zip
 
-; Архивы
-*.rar
-*.7z
-*.zip
-
-; Мусор
-*.backup
-*tmp
-
-_*.*
+	; Мусор
+		*.backup
+		*tmp
+		_*.*
 
 ; [Comments]
-; Комментарий, который будет добавлен в свойства архива (только для WinRAR)
+	; Комментарий, который будет добавлен в свойства архива (только для WinRAR)

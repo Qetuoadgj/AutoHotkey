@@ -115,7 +115,7 @@ Set_Params:
 	IniRead, Password, %INI_File%, % "Description", % "Password", 0
 	IniRead, Encrypt, %INI_File%, % "Description", % "Encrypt", 1
 	IniRead, AddSuffix, %INI_File%, % "Description", % "AddSuffix", 0
-	IniRead, MakeReadOnly, %INI_File%, % "Description", % "MakeReadOnly", 0
+	IniRead, MakeArchiveReadOnly, %INI_File%, % "Description", % "MakeArchiveReadOnly", 0
 	IniRead, CreateNewArchives, %INI_File%, % "Description", % "CreateNewArchives", 0
 	IniRead, NewArchiveNumeration, %INI_File%, % "Description", % "NewArchiveNumeration", % "0.2d"
 	IniRead, WinRAR_RAR_Params, %INI_File%, % "Description", % "WinRAR_RAR_Params", %WinRAR_RAR_Params%
@@ -131,7 +131,7 @@ Set_Params:
 	WinRAR_UI := ExpandEnvironmentVariables(WinRAR_UI)
 	7Zip := ExpandEnvironmentVariables(7Zip)
 	
-	IniRead, CMD_Timeout, %INI_File%, % "Description", % "CMD_Timeout", %A_Space% ; 2
+	IniRead, CmdTimeout, %INI_File%, % "Description", % "CmdTimeout", %A_Space% ; 2
 	IniRead, Debug, %INI_File%, % "Description", % "Debug", 0
 	
 	IniRead, TimeStamp, %INI_File%, % "Description", % "TimeStamp", 0 ;% "yyyy.MM.dd"
@@ -198,54 +198,50 @@ if (WinRAR_WriteComment) {
 }
 
 Message := ""
+. "ArchiveType = " . ArchiveType . "`n"
 . "Name = " . Name . "`n"
+. "`n"
+. "RootDir = " . RootDir . "`n"
+. "WorkingDir = " . WorkingDir . "`n"
+. "`n"
 . "TimeStamp = " . TimeStamp . "`n"
 . (CreateNewArchives ? ""
 . "CreateNewArchives = " . CreateNewArchives . "`n"
 . "NewArchiveNumeration = " . NewArchiveNumeration . "`n"
 : "")
 . "AddSuffix = " . AddSuffix . "`n"
-
-. "RootDir = " . RootDir . "`n"
-. "WorkingDir = " . WorkingDir . "`n"
-
+. "`n"
 . (Password ? ""
 . "Password = " . Password . "`n"
 . "Encrypt = " . Encrypt . "`n"
 : "")
-
-. "IncludeThisFile = " . IncludeThisFile . "`n"
-. "MakeReadOnly = " . MakeReadOnly . "`n"
-
-. (CMD_Timeout ? ""
-. "CMD_Timeout = " . CMD_Timeout . "`n"
-: "")
-
-. (Debug ? ""
-. "Debug = " . Debug . "`n"
-: "")
-
-. "`nArchiveType = " . ArchiveType . "`n"
-. "Archiver = " . Archiver . "`n"
-
-. (Archiver = "7Zip" ? ""
 . "`n"
+. "Archiver = " . Archiver . "`n"
+. (Archiver = "7Zip" ? ""
+; . "`n"
 . "7Zip = " . 7Zip . "`n"
 . "7Zip_Params = " . 7Zip_Params . "`n"
 : "")
-
 . (Archiver = "WinRAR" ? ""
-. "`n"
+; . "`n"
 . (ArchiveType = "zip" ? "WinRAR_UI = " . WinRAR_UI : "WinRAR = " . WinRAR) . "`n"
 . "WinRAR_Params = " . WinRAR_Params . "`n"
 . "WinRAR_WriteComment = " . WinRAR_WriteComment . "`n"
 . (ArchiveType = "zip" ? "" : "WinRAR_RAR_LockArchive = " . WinRAR_RAR_LockArchive . "`n")
 : "")
-
 . "`n"
-
 . "ArchiveName: " . ArchiveName . "`n"
 . "Archive: " . Archive . "`n"
+. "`n"
+. "IncludeThisFile = " . IncludeThisFile . "`n"
+. "MakeArchiveReadOnly = " . MakeArchiveReadOnly . "`n"
+. (CmdTimeout ? ""
+. "CmdTimeout = " . CmdTimeout . "`n"
+: "")
+. (Debug ? ""
+. "`n"
+. "Debug = " . Debug . "`n"
+: "")
 
 MsgBox, 1,, %Message%
 
@@ -428,7 +424,7 @@ WinRAR_Compress:
 	}
 	; Соединение всех команд в одну
 	if (WinRAR_Is_CMD) {
-		WinRAR_Command .= (CMD_Timeout != "") ? (" & timeout " . CMD_Timeout) : " & pause"
+		WinRAR_Command .= (CmdTimeout != "") ? (" & timeout " . CmdTimeout) : " & pause"
 		WinRAR_Command .= " & exit"
 		if (Debug ) {
 			MsgBox, %WinRAR_Command%
@@ -438,7 +434,7 @@ WinRAR_Compress:
 		RunWait, "%ComSpec%" /k %WinRAR_Command%
 	}
 	;
-	if (MakeReadOnly) {
+	if (MakeArchiveReadOnly) {
 		FileSetAttrib, +R, %WinRAR_Archive%
 	}
 	;
@@ -510,7 +506,7 @@ WinRAR_Compress:
 	}
 	; Соединение всех команд в одну
 	if (7Zip_Is_CMD) {
-		7Zip_Command .= (CMD_Timeout != "") ? (" & timeout " . CMD_Timeout) : " & pause"
+		7Zip_Command .= (CmdTimeout != "") ? (" & timeout " . CmdTimeout) : " & pause"
 		7Zip_Command .= " & exit"
 		if (Debug ) {
 			MsgBox, %7Zip_Command%
@@ -521,7 +517,7 @@ WinRAR_Compress:
 		; Run notepad "%Include_List_File%"
 	}
 	;
-	if (MakeReadOnly) {
+	if (MakeArchiveReadOnly) {
 		FileSetAttrib, +R, %7Zip_Archive%
 	}
 	;
@@ -661,7 +657,7 @@ Make_Help_File:
 	; NewArchiveNumeration = 0.2d
 	; AddSuffix = 1
 	;
-	; MakeReadOnly = 1
+	; MakeArchiveReadOnly = 1
 	; Password = 567576
 	; Encrypt = 0
 	;
@@ -680,7 +676,7 @@ Make_Help_File:
 	;
 	; IncludeThisFile = 0
 	;
-	; CMD_Timeout = 2
+	; CmdTimeout = 2
 	; Debug = 1
 	
 	[IncludeList]

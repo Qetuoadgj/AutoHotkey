@@ -52,7 +52,7 @@ Set_Params:
 	
 	SplitPath, INI_File, INI_File_FileName, INI_File_Dir, INI_File_Extension, INI_File_NameNoExt, INI_File_Drive ; получаем путь к папке, в которой находитс€ файл с параметрами архивации
 	
-	WinRAR_Params := ""
+	WinRAR_RAR_Params := ""
 	. " A"				;  оманда A Ч добавить в архив
 	. " -u"				;  люч -U Ч обновить файлы
 	. " -as"			;  люч -AS Ч синхронизировать содержимое архива
@@ -66,8 +66,34 @@ Set_Params:
 	. " -mcc+"			; —жатие графических данных true color (RGB)
 	. " -htb"			;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
 	
+	WinRAR_ZIP_Params := ""
+	. " A"				;  оманда A Ч добавить в архив
+	. " -afZIP"			;  люч -AF<тип> Ч указать формат архива
+	. " -u"				;  люч -U Ч обновить файлы
+	. " -as"			;  люч -AS Ч синхронизировать содержимое архива
+	. " -s"				;  люч -S Ч создать непрерывный архив
+	. " -r0"			;  люч -R0 Ч обрабатывать вложенные папки в соответствии с шаблоном
+	. " -m5"			;  люч -M<n> Ч метод сжати€ [0=min...5=max]
+	. " -ma5"			;  люч -MA[4|5] Ч верси€ формата архивировани€
+	. " -md4m"			;  люч -MD<n>[k,m,g] Ч размер словар€
+	. " -mc63:128t+"	; —жатие текста
+	. " -mc4a+"			; —жатие аудиоданных, дельта-сжатие
+	. " -mcc+"			; —жатие графических данных true color (RGB)
+	. " -htb"			;  люч -HT[B|C] Ч выбрать тип хеша [BLAKE2|CRC32] дл€ контрольных сумм
+	
 	7Zip_Sync := "p1q0r2x1y2z1w2" ; Ќабор ключей дл€ синхронизации файлов внутри архива, аналог ключа -AS в WinRAR
-	7Zip_Params := ""
+	7Zip_7Z_Params := ""
+	. " U"				; u (Update) command
+	. " -u" . 7Zip_Sync	; -u (Update options) switch
+	. " -r0"			; -r (Recurse subdirectories) switch
+	. " -spf2"			; -spf (Use fully qualified file paths) switch
+	. " -slp"			; -slp (Set Large Pages mode) switch
+	. " -mx"			; -m (Set compression Method) switch
+	. " -myx"			; Sets level of file analysis.
+	. " -ms=on"			; Sets solid mode.
+	. " -scrcBLAKE2sp"	; -scrc (Set hash function) switch
+	
+	7Zip_ZIP_Params := ""
 	. " U"				; u (Update) command
 	. " -u" . 7Zip_Sync	; -u (Update options) switch
 	. " -r0"			; -r (Recurse subdirectories) switch
@@ -81,29 +107,31 @@ Set_Params:
 	IniRead, Name, %INI_File%, % "Description", % "Name", %INI_File_NameNoExt%
 	IniRead, RootDir, %INI_File%, % "Description", % "RootDir", %INI_File_Dir%
 	IniRead, WorkingDir, %INI_File%, % "Description", % "WorkingDir", 0
-	IniRead, WinRAR_LockArchive, %INI_File%, % "Description", % "WinRAR_LockArchive", 0
+	IniRead, WinRAR_RAR_LockArchive, %INI_File%, % "Description", % "WinRAR_RAR_LockArchive", 0
 	IniRead, WinRAR_WriteComment, %INI_File%, % "Description", % "WinRAR_WriteComment", 0
 	IniRead, IncludeThisFile, %INI_File%, % "Description", % "IncludeThisFile", 1
 	IniRead, WinRAR, %INI_File%, % "Description", % "WinRAR", % A_ProgramFiles . "\WinRAR\Rar.exe"
+	IniRead, WinRAR_UI, %INI_File%, % "Description", % "WinRAR_UI", % A_ProgramFiles . "\WinRAR\WinRar.exe"
 	IniRead, Password, %INI_File%, % "Description", % "Password", 0
 	IniRead, Encrypt, %INI_File%, % "Description", % "Encrypt", 1
 	IniRead, AddSuffix, %INI_File%, % "Description", % "AddSuffix", 0
 	IniRead, MakeReadOnly, %INI_File%, % "Description", % "MakeReadOnly", 0
 	IniRead, CreateNewArchives, %INI_File%, % "Description", % "CreateNewArchives", 0
 	IniRead, NewArchiveNumeration, %INI_File%, % "Description", % "NewArchiveNumeration", % "0.2d"
-	IniRead, WinRAR_Params, %INI_File%, % "Description", % "WinRAR_Params", %WinRAR_Params%
-	WinRAR_Params := Trim(WinRAR_Params)
+	IniRead, WinRAR_RAR_Params, %INI_File%, % "Description", % "WinRAR_RAR_Params", %WinRAR_RAR_Params%
+	IniRead, WinRAR_ZIP_Params, %INI_File%, % "Description", % "WinRAR_ZIP_Params", %WinRAR_ZIP_Params%
 	
 	IniRead, 7Zip, %INI_File%, % "Description", % "7Zip", % A_ProgramFiles . "\7-Zip\7z.exe"
-	IniRead, 7Zip_Params, %INI_File%, % "Description", % "7Zip_Params", %7Zip_Params%
-	7Zip_Params := Trim(7Zip_Params)
+	IniRead, 7Zip_7Z_Params, %INI_File%, % "Description", % "7Zip_7Z_Params", %7Zip_7Z_Params%
+	IniRead, 7Zip_ZIP_Params, %INI_File%, % "Description", % "7Zip_ZIP_Params", %7Zip_ZIP_Params%
 	
 	RootDir := ExpandEnvironmentVariables(RootDir)
 	WorkingDir := ExpandEnvironmentVariables(WorkingDir)
 	WinRAR := ExpandEnvironmentVariables(WinRAR)
+	WinRAR_UI := ExpandEnvironmentVariables(WinRAR_UI)
 	7Zip := ExpandEnvironmentVariables(7Zip)
 	
-	IniRead, Timeout, %INI_File%, % "Description", % "Timeout", %A_Space% ; 2
+	IniRead, CMD_Timeout, %INI_File%, % "Description", % "CMD_Timeout", %A_Space% ; 2
 	IniRead, Debug, %INI_File%, % "Description", % "Debug", 0
 	
 	IniRead, TimeStamp, %INI_File%, % "Description", % "TimeStamp", 0 ;% "yyyy.MM.dd"
@@ -113,6 +141,17 @@ Set_Params:
 	
 	; ArchiveType := "rar"
 	IniRead, ArchiveType, %INI_File%, % "Description", % "ArchiveType", % "rar"
+		
+	Archiver := (ArchiveType = "7z") ? "7Zip" : "WinRAR"
+	Archiver := (ArchiveType = "zip") ? (FileExist(WinRAR_UI) ? "WinRAR" : "7Zip") : Archiver
+	
+	WinRAR_Params := ArchiveType = "zip" ? WinRAR_ZIP_Params : WinRAR_RAR_Params
+	WinRAR_Params := Trim(WinRAR_Params)
+	
+	7Zip_Params := ArchiveType = "zip" ? 7Zip_ZIP_Params : 7Zip_7Z_Params
+	7Zip_Params := Trim(7Zip_Params)
+	
+	; WinRAR := ArchiveType = "zip" ? (WinRAR_UI or RegExReplace(WinRAR, "i)\\Rar.exe$", "\WinRar.exe")) : WinRAR
 	
 	ArchiveName := Name
 	Archive := INI_File_Dir . "\" . ArchiveName ; задаем изначальный путь к архиву
@@ -160,48 +199,47 @@ if (WinRAR_WriteComment) {
 
 Message := ""
 . "Name = " . Name . "`n"
+. "TimeStamp = " . TimeStamp . "`n"
+. (CreateNewArchives ? ""
+. "CreateNewArchives = " . CreateNewArchives . "`n"
+. "NewArchiveNumeration = " . NewArchiveNumeration . "`n"
+: "")
+. "AddSuffix = " . AddSuffix . "`n"
 
 . "RootDir = " . RootDir . "`n"
 . "WorkingDir = " . WorkingDir . "`n"
-
-. "ArchiveType = " . ArchiveType . "`n"
 
 . (Password ? ""
 . "Password = " . Password . "`n"
 . "Encrypt = " . Encrypt . "`n"
 : "")
 
-. "TimeStamp = " . TimeStamp . "`n"
 . "IncludeThisFile = " . IncludeThisFile . "`n"
-
-. (CreateNewArchives ? ""
-. "CreateNewArchives = " . CreateNewArchives . "`n"
-. "NewArchiveNumeration = " . NewArchiveNumeration . "`n"
-: "")
-
-. "AddSuffix = " . AddSuffix . "`n"
 . "MakeReadOnly = " . MakeReadOnly . "`n"
 
-. (Timeout ? ""
-. "Timeout = " . Timeout . "`n"
+. (CMD_Timeout ? ""
+. "CMD_Timeout = " . CMD_Timeout . "`n"
 : "")
 
 . (Debug ? ""
 . "Debug = " . Debug . "`n"
 : "")
 
-. (ArchiveType = "7z" ? ""
+. "`nArchiveType = " . ArchiveType . "`n"
+. "Archiver = " . Archiver . "`n"
+
+. (Archiver = "7Zip" ? ""
 . "`n"
 . "7Zip = " . 7Zip . "`n"
 . "7Zip_Params = " . 7Zip_Params . "`n"
 : "")
 
-. (ArchiveType = "rar" ? ""
+. (Archiver = "WinRAR" ? ""
 . "`n"
-. "WinRAR = " . WinRAR . "`n"
-. "WinRAR_LockArchive = " . WinRAR_LockArchive . "`n"
-. "WinRAR_WriteComment = " . WinRAR_WriteComment . "`n"
+. (ArchiveType = "zip" ? "WinRAR_UI = " . WinRAR_UI : "WinRAR = " . WinRAR) . "`n"
 . "WinRAR_Params = " . WinRAR_Params . "`n"
+. "WinRAR_WriteComment = " . WinRAR_WriteComment . "`n"
+. (ArchiveType = "zip" ? "" : "WinRAR_RAR_LockArchive = " . WinRAR_RAR_LockArchive . "`n")
 : "")
 
 . "`n"
@@ -217,10 +255,10 @@ IfMsgBox, Ok
 	if (WorkingDir && InStr(FileExist(WorkingDir), "D")) {
 		SetWorkingDir, %WorkingDir%
 	}
-	if (ArchiveType = "rar") {
+	if (Archiver = "WinRAR") {
 		gosub, WinRAR_Compress
 	}
-	if (ArchiveType = "7z") {
+	if (Archiver = "7Zip") {
 		gosub, 7Zip_Compress
 	}
 }
@@ -309,7 +347,7 @@ WinRAR_Compress:
 	;
 	; WinRAR_Binary := A_ProgramFiles . "\WinRAR\Rar.exe"
 	; WinRAR_Binary := A_ProgramFiles . "\WinRAR\WinRAR.exe"
-	WinRAR_Binary := WinRAR
+	WinRAR_Binary := (ArchiveType = "zip") ? WinRAR_UI : WinRAR
 	WinRAR_Archive := Archive ; A_WorkingDir . "\" . Name
 	;
 	Loop, Files, %WinRAR_Binary%, F
@@ -378,7 +416,7 @@ WinRAR_Compress:
 		RunWait, %WinRAR_Command%
 	}
 	;  оманда блокировани€ архива от перезаписи
-	if WinRAR_LockArchive {
+	if WinRAR_RAR_LockArchive {
 		WinRAR_Command := (WinRAR_Is_CMD ? (WinRAR_Command . " & ") : "")
 		. q(WinRAR_Binary)
 		. " k"									;  оманда K Ч заблокировать архив
@@ -390,7 +428,7 @@ WinRAR_Compress:
 	}
 	; —оединение всех команд в одну
 	if (WinRAR_Is_CMD) {
-		WinRAR_Command .= (Timeout != "") ? (" & timeout " . Timeout) : " & pause"
+		WinRAR_Command .= (CMD_Timeout != "") ? (" & timeout " . CMD_Timeout) : " & pause"
 		WinRAR_Command .= " & exit"
 		if (Debug ) {
 			MsgBox, %WinRAR_Command%
@@ -472,7 +510,7 @@ WinRAR_Compress:
 	}
 	; —оединение всех команд в одну
 	if (7Zip_Is_CMD) {
-		7Zip_Command .= (Timeout != "") ? (" & timeout " . Timeout) : " & pause"
+		7Zip_Command .= (CMD_Timeout != "") ? (" & timeout " . CMD_Timeout) : " & pause"
 		7Zip_Command .= " & exit"
 		if (Debug ) {
 			MsgBox, %7Zip_Command%
@@ -606,30 +644,43 @@ Make_Help_File:
 {
 	MsgText =
 	( LTrim RTrim Join`r`n
+	; ƒЋя ѕ–ј¬»Ћ№Ќќ√ќ „“≈Ќ»я —»ћ¬ќЋќ¬  ќƒ»–ќ¬ ј Ё“ќ√ќ ‘ј…Ћј ќЅя«ј“≈Ћ№Ќќ ƒќЋ∆Ќј Ѕџ“№: WIN-1251 | CP1251
+	
 	[Description]
 	; Name = __0003
+	;
 	; RootDir = %A_WorkingDir%
 	; WorkingDir = %A_WorkingDir%
+	;
 	ArchiveType = 7z
 	; ArchiveType = rar
-	; Password = 567576
-	; Encrypt = 0
-	; TimeStamp = yyyy.MM.dd
-	; IncludeThisFile = 0
+	; ArchiveType = zip
+	;
+	TimeStamp = yyyy.MM.dd
 	; CreateNewArchives = 1
 	; NewArchiveNumeration = 0.2d
 	; AddSuffix = 1
+	;
 	; MakeReadOnly = 1
+	; Password = 567576
+	; Encrypt = 0
 	;
 	; 7Zip = `%ProgramFiles`%\7-Zip\7z.exe
-	; 7Zip_Params =%7Zip_Params%
+	; 7Zip_7Z_Params =%7Zip_7Z_Params%
+	; 7Zip_ZIP_Params =%7Zip_ZIP_Params%
 	;
 	; WinRAR = `%ProgramFiles`%\WinRAR\Rar.exe
-	; WinRAR_Params =%WinRAR_Params%
-	; WinRAR_LockArchive = 1
+	; WinRAR_RAR_Params =%WinRAR_RAR_Params%
+	; WinRAR_RAR_LockArchive = 1
+	;
+	; WinRAR_UI = `%ProgramFiles`%\WinRAR\WinRar.exe
+	; WinRAR_ZIP_Params =%WinRAR_ZIP_Params%
+	;
 	; WinRAR_WriteComment = 1
 	;
-	; Timeout = 2
+	; IncludeThisFile = 0
+	;
+	; CMD_Timeout = 2
 	; Debug = 1
 	
 	[IncludeList]

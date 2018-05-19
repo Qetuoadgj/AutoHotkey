@@ -2,32 +2,43 @@
 
 [Description]
 ; Name = __0003
+;
 RootDir = D:\Google Диск\AutoHotkey
 WorkingDir = D:\Google Диск\AutoHotkey
+;
 ArchiveType = 7z
 ; ArchiveType = rar
+; ArchiveType = zip
+;
+TimeStamp = yyyy.MM.dd
+; CreateNewArchives = 1
+; NewArchiveNumeration = 0.2d
+; AddSuffix = 1
+;
+; MakeReadOnly = 1
 ; Password = 567576
 ; Encrypt = 0
-TimeStamp = yyyy.MM.dd
-; IncludeThisFile = 0
-; CreateNewArchives = 1
-NewArchiveNumeration = 0.2d
-; AddSuffix = 1
-; MakeReadOnly = 1
 ;
 ; 7Zip = %ProgramFiles%\7-Zip\7z.exe
-; 7Zip_Params = U -up1q0r2x1y2z1w2 -r0 -spf2 -slp -mx -myx -ms=on -scrcBLAKE2sp
+; 7Zip_7Z_Params = U -up1q0r2x1y2z1w2 -r0 -spf2 -slp -mx -myx -ms=on -scrcBLAKE2sp
+; 7Zip_ZIP_Params = U -up1q0r2x1y2z1w2 -r0 -spf2 -slp -mx -myx -ms=on -scrcBLAKE2sp
 ;
 ; WinRAR = %ProgramFiles%\WinRAR\Rar.exe
-; WinRAR_Params = A -u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
-; WinRAR_LockArchive = 1
+; WinRAR_RAR_Params = A -u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+; WinRAR_RAR_LockArchive = 1
+;
+; WinRAR_UI = %ProgramFiles%\WinRAR\WinRar.exe
+; WinRAR_ZIP_Params = A -afZIP -u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+;
 ; WinRAR_WriteComment = 1
 ;
-Timeout = 2
+; IncludeThisFile = 0
+;
+; CMD_Timeout = 2
 ; Debug = 1
 
 [IncludeList]
-; Все файлы
+; Маски файлов для архивирования
 MakeBackup\*.bat
 MakeBackup\*.exe
 MakeBackup\*.ahk
@@ -35,10 +46,16 @@ MakeBackup\*.ico
 MakeBackup\*.url
 
 [ExcludeList]
+; Маски файлов, исключаемых из обработки файлы
+
 ; Свойства папок
 *Thumbs.db
 *desktop.ini
 
+; Ярлыки
+*.lnk
+
+; Архивы
 *.rar
 *.7z
 *.zip
@@ -48,3 +65,6 @@ MakeBackup\*.url
 *tmp
 
 _*.*
+
+; [Comments]
+; Комментарий, который будет добавлен в свойства архива (только для WinRAR)

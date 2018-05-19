@@ -1,0 +1,56 @@
+; ДЛЯ ПРАВИЛЬНОГО ЧТЕНИЯ СИМВОЛОВ КОДИРОВКА ЭТОГО ФАЙЛА ОБЯЗАТЕЛЬНО ДОЛЖНА БЫТЬ: WIN-1251 | CP1251
+
+[Description]
+; Name = __0003
+RootDir = D:\Google Диск\AutoHotkey
+WorkingDir = D:\Google Диск\AutoHotkey
+ArchiveType = 7z
+; ArchiveType = rar
+; Password = 567576
+; Encrypt = 0
+TimeStamp = yyyy.MM.dd
+; IncludeThisFile = 0
+; CreateNewArchives = 1
+; NewArchiveNumeration = 0.2d
+; AddSuffix = 1
+; MakeReadOnly = 1
+;
+; 7Zip = %ProgramFiles%\7-Zip\7z.exe
+; 7Zip_Params =U -up1q0r2x1y2z1w2 -r0 -spf2 -slp -mx -myx -ms=on -scrcBLAKE2sp
+;
+; WinRAR = %ProgramFiles%\WinRAR\Rar.exe
+; WinRAR_Params =A -u -as -s -r0 -m5 -ma5 -md4m -mc63:128t+ -mc4a+ -mcc+ -htb
+; WinRAR_LockArchive = 1
+; WinRAR_WriteComment = 1
+;
+; Timeout = 2
+; Debug = 1
+
+[IncludeList]
+; Маски файлов для архивирования
+Layout_Switcher_v2\*
+Includes\*.ahk
+D:\Google Диск\Новая папка\*
+
+[ExcludeList]
+; Маски файлов, исключаемых из обработки файлы
+_*.*
+
+Layout_Switcher_v2\*.backup
+Layout_Switcher_v2\backup\
+*tmp
+
+; Свойства папок
+*Thumbs.db
+*desktop.ini
+
+; Ярлыки
+*.lnk
+
+; Архивы
+*.rar
+*.7z
+*.zip
+
+; [Comments]
+; Комментарий, который будет добавлен в свойства архива (только для WinRAR)

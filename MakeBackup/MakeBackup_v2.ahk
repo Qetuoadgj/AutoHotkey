@@ -186,6 +186,20 @@ Set_Params:
 	; Sort, Include_List_Text, U ; удаление дубликатов из списка
 	; Sort, Exclude_List_Text, U ; удаление дубликатов из списка
 	
+	IniRead, ComSpecParamsInit, %INI_File%, % "ComSpecParams",, %A_Space%
+	; ComSpecParamsInit := (ComSpecParamsInit == "") ? ("mode con: cols=100 lines=25") : (ComSpecParamsInit)
+	ComSpecParams := ""
+	Loop, Parse, ComSpecParamsInit, `n, `r
+	{
+		ComSpecLine := Trim(A_LoopField)
+		if (ComSpecLine == "" or RegExMatch(ComSpecLine, "i)^[;#]|\bREM\b")) {
+			continue
+		}
+		ComSpecParams .= A_LoopField . "`n"
+	}
+	ComSpecParams := Trim(ComSpecParams, "`r`n`t ")
+	ComSpecParams := RegExReplace(ComSpecParams, "[\r\n]+", " & ")
+	
 	if (NoExec) {
 		return
 	}
@@ -237,6 +251,10 @@ Message := ""
 . "MakeArchiveReadOnly = " . MakeArchiveReadOnly . "`n"
 . (CmdTimeout ? ""
 . "CmdTimeout = " . CmdTimeout . "`n"
+: "")
+. (ComSpecParams != "" ? ""
+. "`n"
+. "[ComSpecParams]`n" . ComSpecParams . "`n"
 : "")
 . (Debug ? ""
 . "`n"
@@ -352,13 +370,14 @@ WinRAR_Compress:
 	}
 	SplitPath, WinRAR_Binary, WinRAR_Binary_FileName, WinRAR_Binary_Dir, WinRAR_Binary_Extension, WinRAR_Binary_NameNoExt, WinRAR_Binary_Drive ; получаем путь к папке, в которой находится файл с параметрами архивации
 	WinRAR_Is_CMD := WinRAR_Binary_FileName = "Rar.exe" ? 1 : 0
+	ComSpecParams := WinRAR_Is_CMD ? ComSpecParams : "" 
 	;
 	WinRAR_Error_Log := INI_File_Dir . "\Backup_Errors.txt"	; файл журнала ошибок
 	WinRAR_Backup_Log := INI_File_Dir . "\Backup_Log.txt"	; файл журнала обработки
 	; удаление предыдущего журнала ошибок
 	FileDelete, %WinRAR_Error_Log%
 	; Создание архива WinRAR
-	WinRAR_Command := (WinRAR_Is_CMD ? ("cd /d " . q(RootDir) . " & ") : "")
+	WinRAR_Command := (WinRAR_Is_CMD ? ("cd /d " . q(RootDir) . " & " . (ComSpecParams ? ComSpecParams . " & " : "")) : "")
 	. q(WinRAR_Binary)					; Исполняемый файл Rar.exe
 	/*
 	; Параметры сжатия
@@ -465,13 +484,14 @@ WinRAR_Compress:
 	}
 	SplitPath, 7Zip_Binary, 7Zip_Binary_FileName, 7Zip_Binary_Dir, 7Zip_Binary_Extension, 7Zip_Binary_NameNoExt, 7Zip_Binary_Drive ; получаем путь к папке, в которой находится файл с параметрами архивации
 	7Zip_Is_CMD := 7Zip_Binary_FileName = "7z.exe" ? 1 : 0
+	ComSpecParams := 7Zip_Is_CMD ? ComSpecParams : "" 
 	;
 	7Zip_Error_Log := INI_File_Dir . "\Backup_Errors.txt"	; файл журнала ошибок
 	7Zip_Backup_Log := INI_File_Dir . "\Backup_Log.txt"	; файл журнала обработки
 	; удаление предыдущего журнала ошибок
 	FileDelete, %7Zip_Error_Log%
 	; Создание архива 7Zip
-	7Zip_Command := (7Zip_Is_CMD ? ("cd /d " . q(RootDir) . " & ") : "")
+	7Zip_Command := (7Zip_Is_CMD ? ("cd /d " . q(RootDir) . " & " . (ComSpecParams ? ComSpecParams . " & " : "")) : "")
 	. q(7Zip_Binary)					; Исполняемый файл 7z.exe
 	/*
 	; Параметры сжатия
@@ -696,6 +716,11 @@ Make_Help_File:
 	*.rar
 	*.7z
 	*.zip
+	
+	; [ComSpecParams]
+	color 1f
+	mode con: cols=100 lines=25
+	; powershell -command "& {$H=get-host; $W=$H.ui.rawui; $B=$W.buffersize; $B.width=100; $B.height=9999; $W.buffersize=$B;}"
 	
 	; [Comments]
 	; Комментарий, который будет добавлен в свойства архива (только для WinRAR)

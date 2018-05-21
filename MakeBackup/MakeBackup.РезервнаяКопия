@@ -64,5 +64,10 @@ TimeStamp = yyyy.MM.dd
 		*tmp
 		_*.*
 
+[ComSpecParams]
+	color 1f
+	mode con: cols=100 lines=25
+	; powershell -command "& {$H=get-host; $W=$H.ui.rawui; $B=$W.buffersize; $B.width=100; $B.height=9999; $W.buffersize=$B;}"
+
 ; [Comments]
 	; Комментарий, который будет добавлен в свойства архива (только для WinRAR)

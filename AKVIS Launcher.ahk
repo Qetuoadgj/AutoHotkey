@@ -138,12 +138,11 @@ MyListViewEvents:
 		is_AKVIS := InStr(LnkTarget, "\AKVIS\")
 		if (is_AKVIS) {
 			gosub, AKVIS_Trial_Reset
-		}
-		;
-		Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID 
-		;
-		if (is_AKVIS) {
+			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID 
 			gosub, AKVIS_Skip_Trial_Dialogue
+		}
+		else {
+			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID 
 		}
 	}
 	return

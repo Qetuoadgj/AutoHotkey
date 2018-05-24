@@ -11,7 +11,7 @@ Script_Init:
 	Script_Name := Script.Name()
 	Script_Args := Script.Args()
 	Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
-	Script.Run_As_Admin(Script_Args)
+	; Script.Run_As_Admin(Script_Args)
 	OnExit, CloseApp
 }
 ;
@@ -23,6 +23,8 @@ gosub, GeForce610mDisable
 ;
 gosub, GUI_Init
 gosub, GUI_AutoResize
+;
+Trial_Reset := 0
 ;
 Exit
 ;
@@ -138,11 +140,14 @@ MyListViewEvents:
 		is_AKVIS := InStr(LnkTarget, "\AKVIS\")
 		if (is_AKVIS) {
 			gosub, AKVIS_Trial_Reset
-			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID 
+			if (AbortExecution) {
+				return
+			}
+			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID
 			gosub, AKVIS_Skip_Trial_Dialogue
 		}
 		else {
-			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID 
+			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID
 		}
 	}
 	return
@@ -150,20 +155,35 @@ MyListViewEvents:
 ;
 AKVIS_Trial_Reset:
 {
-	AKVIS_Trial_Reset := A_ScriptDir . "\AKVIS TrialReset.vbs"
-	if FileExist(AKVIS_Trial_Reset) {
-		RunWait, %AKVIS_Trial_Reset% -S,, Hide
+	if (not Trial_Reset) {
+		AbortExecution := 0
+		if (A_IsAdmin) {
+			MsgBox, 262160, ОШИБКА сброса пробного периода AKVIS., Программа запущена с правами Администратора.`nПерезапустите %Script_Name% в обычном режиме.
+			AbortExecution := 1
+			return
+		}
+		AKVIS_Trial_Reset := A_ScriptDir . "\AKVIS TrialReset.vbs"
+		if FileExist(AKVIS_Trial_Reset) {
+			RunWait, cscript.exe "%AKVIS_Trial_Reset%" -S,, Hide
+		}
+		Trial_Reset := 1
 	}
 	return
 }
 ;
 AKVIS_Skip_Trial_Dialogue:
 {
-	LnkTargetID := WinWait("ahk_pid " . LnkTargetPID, 30*1000)
+	TargetWinTitles := []
+	;
+	TargetWinTitles.Push("ahk_pid " . LnkTargetPID . " ahk_exe " . LnkTargetFullName)
+	TargetWinTitles.Push("ahk_class Qt5QWindow" . " ahk_exe " . LnkTargetFullName)
+	TargetWinTitles.Push("ahk_class QWidget" . " ahk_exe " . LnkTargetFullName)
+	;
+	LnkTargetID := WinWait(TargetWinTitles, 30*1000)
 	if (LnkTargetID) {
 		CoordMode, Mouse, Screen
 		MouseGetPos, PosX, PosY
-		;			
+		;
 		WinTitle = ahk_id %LnkTargetID%
 		WinActivate, %WinTitle%
 		WinWaitActive, %WinTitle%
@@ -175,6 +195,7 @@ AKVIS_Skip_Trial_Dialogue:
 			MsgBox, 262160, % "ОШИБКА", % "Не удалось обнаружить " . ImagePath . " на экране.", 1
 			return
 		}
+		Sleep, 1000
 		MouseClick, Left, %ButtonX%, %ButtonY%, 1, 0
 		CoordMode, Mouse, Screen
 		MouseMove, %PosX%, %PosY%, 0

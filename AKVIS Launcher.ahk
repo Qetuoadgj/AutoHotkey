@@ -11,7 +11,11 @@ Script_Init:
 	Script_Name := Script.Name()
 	Script_Args := Script.Args()
 	Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
-	; Script.Run_As_Admin(Script_Args)
+	for index, argument in A_Args {
+		if (argument = "/RunAs*") {
+			Script.Run_As_Admin(Script_Args)
+		}
+	}
 	OnExit, CloseApp
 }
 ;
@@ -19,7 +23,8 @@ Script_Init:
 ;
 global DevManView := A_Is64bitOS ? A_ScriptDir . "\DevManView\DevManView_x64.exe" : A_ScriptDir . "\DevManView\DevManView_x32.exe"
 global GeForce610M := "NVIDIA GeForce 610M" ;"VideoMate TV Capture" ;"NVIDIA GeForce 610M"
-gosub, GeForce610mDisable
+global GeForce610mIsDisabled := 0
+; gosub, GeForce610mDisable
 ;
 gosub, GUI_Init
 gosub, GUI_AutoResize
@@ -32,20 +37,24 @@ GUI_Init:
 {
 	; ------------------------------------
 	Gui, Margin, 0, 0
-	Gui, Add, ListView, r20 w600 gMyListViewEvents vMyListView, % "Ярлык|Приложение|Аргументы"
+	Gui, Add, ListView, r20 w600 gMyListViewEvents vMyListView, % "Ярлык|Приложение|Аргументы|Папка"
 	;
 	ImageList_1 := IL_Create(100) ; будущий список иконок
 	LV_SetImageList(ImageList_1) ; инициализация списка иконок
 	; ------------------------------------
 	TargetDir := A_WorkingDir
+	is_AKVIS := 0
 	Loop, Files, %TargetDir%\*.lnk, F
 	{ ; наполнение ListView
-		LnkTarget := ""
+		LnkTarget := "", LnkDir := ""
 		FileGetShortcut, %A_LoopFileFullPath%, LnkTarget, LnkDir, LnkArgs, LnkDescription, LnkIcon, LnkIconNum, LnkRunState ; получение информации из ярлыка
 		if (not LnkTarget) {
 			LnkTarget := A_LoopFileFullPath
 		}
-		SplitPath, LnkTarget, LnkTargetFullName, LnkTargetDrive, LnkTargetExt, LnkTargetName, LnkTargetDrive
+		SplitPath, LnkTarget, LnkTargetFullName, LnkTargetDir, LnkTargetExt, LnkTargetName, LnkTargetDrive
+		if (not LnkDir) {
+			LnkDir := LnkTargetDir
+		}
 		LnkIcon := LnkIcon ? LnkIcon : LnkTarget ; перестраховка на случай, если в ярлыке не указан значок (вместо значка LnkIcon бирем значок из LnkTarget)
 		ImageList_1_Index := IL_Add(ImageList_1, LnkIcon, LnkIconNum)
 		if (not ImageList_1_Index) {
@@ -59,10 +68,14 @@ GUI_Init:
 		}
 		if (ImageList_1_Index) {
 			LnkName := StrReplace(A_LoopFileName, ".lnk", "")
-			LV_Add("Icon" . ImageList_1_Index, LnkName, LnkTarget, LnkArgs) ; добавляем готовый элемент (пункт) в ListView
+			LV_Add("Icon" . ImageList_1_Index, LnkName, LnkTarget, LnkArgs, LnkDir) ; добавляем готовый элемент (пункт) в ListView
+			is_AKVIS := is_AKVIS or InStr(LnkTarget, "\AKVIS\")
 		}
 		;
 		LV_ModifyCol() ; автоподбор ширины колонок ListView
+	}
+	if (is_AKVIS) {
+		gosub, GeForce610mDisable
 	}
 	Gui, Show ; инициализация окна GUI
 	; ------------------------------------
@@ -115,16 +128,34 @@ CloseApp:
 GeForce610mDisable:
 {
 	if FileExist(DevManView) {
-		RunWait, *RunAs %DevManView% /disable "%GeForce610M%"
+		try {
+			RunWait, *RunAs %DevManView% /disable "%GeForce610M%"
+		}
+		catch {
+			MsgBox, 262160, % "ОШИБКА", % "Не удалось остановить устройство """ . GeForce610M . """.`nВозможно, приложение devmanview.exe было запущено без прав Администратора." ;, 2
+			ExitApp
+			return
+		}
 		; gosub, CheckGeForce610mStatus
+		GeForce610mIsDisabled := 1
 	}
 	return
 }
 ;
 GeForce610mEnable:
 {
+	if (not GeForce610mIsDisabled) {
+		return
+	}
 	if FileExist(DevManView) {
-		RunWait, *RunAs %DevManView% /enable "%GeForce610M%"
+		try {
+			RunWait, *RunAs %DevManView% /enable "%GeForce610M%"
+		}
+		catch {
+			MsgBox, 262160, % "ОШИБКА", % "Не удалось запустить устройство """ . GeForce610M . """.`nВозможно, приложение devmanview.exe было запущено без прав Администратора." ;, 2
+			ExitApp
+			return
+		}
 		; gosub, CheckGeForce610mStatus
 	}
 	return
@@ -135,19 +166,32 @@ MyListViewEvents:
 	if (A_GuiEvent = "DoubleClick") {
 		LV_GetText(LnkTarget, A_EventInfo, 2)
 		LV_GetText(LnkArgs, A_EventInfo, 3)
-		SplitPath, LnkTarget, LnkTargetFullName, LnkTargetDrive, LnkTargetExt, LnkTargetName, LnkTargetDrive
+		SplitPath, LnkTarget, LnkTargetFullName, LnkTargetDir, LnkTargetExt, LnkTargetName, LnkTargetDrive
 		;
+		LnkTargetPID := 0
 		is_AKVIS := InStr(LnkTarget, "\AKVIS\")
 		if (is_AKVIS) {
 			gosub, AKVIS_Trial_Reset
 			if (AbortExecution) {
 				return
 			}
-			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID
+			if (A_IsAdmin) {
+				; ShellRun(LnkTarget, LnkArgs,,, Show := 1)
+				ShellRun(LnkTarget, LnkArgs, LnkDir,, Show := 1)
+			}
+			else {
+				Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID
+			}
 			gosub, AKVIS_Skip_Trial_Dialogue
 		}
 		else {
-			Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID
+			if (A_IsAdmin) {
+				; ShellRun(LnkTarget, LnkArgs,,, Show := 1)
+				ShellRun(LnkTarget, LnkArgs, LnkDir,, Show := 1)
+			}
+			else {
+				Run, "%LnkTarget%" %LnkArgs%,,, LnkTargetPID
+			}
 		}
 	}
 	return
@@ -157,14 +201,25 @@ AKVIS_Trial_Reset:
 {
 	if (not Trial_Reset) {
 		AbortExecution := 0
+		/*
 		if (A_IsAdmin) {
 			MsgBox, 262160, ОШИБКА сброса пробного периода AKVIS., Программа запущена с правами Администратора.`nПерезапустите %Script_Name% в обычном режиме.
 			AbortExecution := 1
 			return
 		}
+		*/
 		AKVIS_Trial_Reset := A_ScriptDir . "\AKVIS TrialReset.vbs"
 		if FileExist(AKVIS_Trial_Reset) {
-			RunWait, cscript.exe "%AKVIS_Trial_Reset%" -S,, Hide
+			if (A_IsAdmin) {
+				MyCommand = cscript.exe "%AKVIS_Trial_Reset%" -S
+				ShellRun("cmd.exe", "/K TITLE Z1" . " & " . MyCommand . " & EXIT",,, Show := 1)
+				CmdTitle := "Z1 ahk_class ConsoleWindowClass ahk_exe cmd.exe"
+				WinWait, %CmdTitle%
+				WinWaitClose, %CmdTitle%
+			}
+			else {
+				RunWait, cscript.exe "%AKVIS_Trial_Reset%" -S ;,, Hide
+			}
 		}
 		Trial_Reset := 1
 	}
@@ -181,22 +236,25 @@ AKVIS_Skip_Trial_Dialogue:
 	;
 	LnkTargetID := WinWait(TargetWinTitles, 30*1000)
 	if (LnkTargetID) {
-		CoordMode, Mouse, Screen
-		MouseGetPos, PosX, PosY
-		;
 		WinTitle = ahk_id %LnkTargetID%
 		WinActivate, %WinTitle%
 		WinWaitActive, %WinTitle%
 		;
 		CoordMode, Mouse, Client
 		WinGetPos,,, ActiveWinWidth, ActiveWinHeight, ahk_id %LnkTargetID% ; A
-		CloseButtonOptions := "*40"
+		CloseButtonOptions := "*50"
 		if (not SearchImage(ButtonX, ButtonY, ImagePath := A_ScriptDir . "\ButtonClose.bmp", 0, 0, ActiveWinWidth, ActiveWinHeight, CloseButtonOptions, 24/2, 24/2)) {
 			MsgBox, 262160, % "ОШИБКА", % "Не удалось обнаружить " . ImagePath . " на экране.", 1
 			return
 		}
 		Sleep, 1000
+		;
+		CoordMode, Mouse, Screen
+		MouseGetPos, PosX, PosY
+		;
+		CoordMode, Mouse, Client
 		MouseClick, Left, %ButtonX%, %ButtonY%, 1, 0
+		;
 		CoordMode, Mouse, Screen
 		MouseMove, %PosX%, %PosY%, 0
 	}
@@ -241,4 +299,5 @@ getExtIcon(Ext) {
 #include <CLASS_Script>
 #Include <FUNC_WinWait>
 #Include <FUNC_SearchImage>
+#Include <FUNC_ShellRun>
 ;

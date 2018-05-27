@@ -37,7 +37,7 @@ GUI_Init:
 {
 	; ------------------------------------
 	Gui, Margin, 0, 0
-	Gui, Add, ListView, r20 w600 gMyListViewEvents vMyListView, % "Ярлык|Приложение|Аргументы|Папка"
+	Gui, Add, ListView, r20 w600 gMyListViewEvents vMyListView, % "Ярлык|Приложение|Аргументы|Рабочая папка"
 	;
 	ImageList_1 := IL_Create(100) ; будущий список иконок
 	LV_SetImageList(ImageList_1) ; инициализация списка иконок
@@ -53,7 +53,7 @@ GUI_Init:
 		}
 		SplitPath, LnkTarget, LnkTargetFullName, LnkTargetDir, LnkTargetExt, LnkTargetName, LnkTargetDrive
 		if (not LnkDir) {
-			LnkDir := LnkTargetDir
+			LnkDir := A_LoopFileDir ; LnkTargetDir
 		}
 		LnkIcon := LnkIcon ? LnkIcon : LnkTarget ; перестраховка на случай, если в ярлыке не указан значок (вместо значка LnkIcon бирем значок из LnkTarget)
 		ImageList_1_Index := IL_Add(ImageList_1, LnkIcon, LnkIconNum)

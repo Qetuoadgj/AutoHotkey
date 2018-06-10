@@ -75,8 +75,8 @@ gosub, FLAG_Customize_Menus
 gosub, FLAG_Add_Picture
 
 Last_Layout_Full_Name := ""
-; SetTimer, FLAG_Update, % system_check_layout_change_interval
-gosub, FLAG_Update
+SetTimer, FLAG_Update, % system_check_layout_change_interval
+; gosub, FLAG_Update
 
 gosub, SAVE_CONFIG_FILE
 
@@ -447,8 +447,22 @@ SWITCH_KEYBOARD_LAYOUT:
 	Sleep, 10
 	Layout_HKL := Layout.Get_HKL("A")
 	Sleep, 10
-	ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
+	; ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
+	gosub, FLAG_Update
+	ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	Sleep, 50
+	return
+}
+
+~Shift & ~Ctrl Up::
+~Shift & ~Alt Up::
+~LWin & ~Space Up::
+{
+	Sleep, 50
+	Layout_HKL := Layout.Get_HKL("A")
+	Sleep, 10
+	ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
+	gosub, FLAG_Update
 	return
 }
 
@@ -575,6 +589,7 @@ SWITCH_TEXT_LAYOUT:
 			}
 		}
 	}
+	gosub, FLAG_Update
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
 	return
@@ -764,7 +779,8 @@ FLAG_Update:
 	if (not Current_Layout_HKL) {
 		return
 	}
-	Current_Layout_Full_Name := Layout.Language_Name(Current_Layout_HKL, True)
+	; Current_Layout_Full_Name := Layout.Language_Name(Current_Layout_HKL, True)
+	Current_Layout_Full_Name := Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name	
 	if (Current_Layout_Full_Name = Last_Layout_Full_Name) {
 		return
 	}
@@ -773,7 +789,7 @@ FLAG_Update:
 		gosub, FLAG_Update_Tray_Icon
 	}
 	Last_Layout_Full_Name := Current_Layout_Full_Name
-	SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
+	; SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
 	return
 }
 

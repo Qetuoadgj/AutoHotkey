@@ -454,9 +454,9 @@ SWITCH_KEYBOARD_LAYOUT:
 	return
 }
 
-~Shift & ~Ctrl Up::
+; ~Shift & ~Ctrl Up::
 ~Shift & ~Alt Up::
-~LWin & ~Space Up::
+; ~LWin & ~Space Up::
 {
 	Sleep, 50
 	Layout_HKL := Layout.Get_HKL("A")

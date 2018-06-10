@@ -9,6 +9,7 @@ class Layout
 	static INPUTLANGCHANGE_BACKWARD := 0x0004
 	;
 	static Layouts_List := Layout.Get_Layouts_List()
+	static Layouts_List_By_HKL := Layout.Get_Layouts_List_By_HKL()
 	;
 	static Switch_Layout_Combo := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
 	;
@@ -33,6 +34,31 @@ class Layout
 			Layouts_List[A_Index].Name := Layout_Name
 			Layouts_List[A_Index].Full_Name := Layout_Full_Name
 			Layouts_List[A_Index].Display_Name := Layout_Display_Name
+		}
+		return Layouts_List
+	}
+	
+	Get_Layouts_List_By_HKL()
+	{ ; функция создания базы данных для текущих раскладок
+		static Layouts_List, Layouts_List_Size
+		static Layout_HKL, Layout_KLID, Layout_Name, Layout_Full_Name, Layout_Display_Name
+		;
+		VarSetCapacity(List, A_PtrSize * 5)
+		Layouts_List_Size := DllCall("GetKeyboardLayoutList", Int, 5, Str, List)
+		Layouts_List := {}
+		Loop, % Layouts_List_Size
+		{
+			Layout_HKL := NumGet(List, A_PtrSize * (A_Index - 1)) ; & 0xFFFF
+			Layout_KLID := This.Get_KLID(Layout_HKL)
+			Layout_Name := This.Language_Name(Layout_HKL, false)
+			Layout_Full_Name := This.Language_Name(Layout_HKL, true)
+			Layout_Display_Name := This.Display_Name(Layout_HKL)
+			Layouts_List[Layout_HKL] := {}
+			Layouts_List[Layout_HKL].HKL := Layout_HKL
+			Layouts_List[Layout_HKL].KLID := Layout_KLID
+			Layouts_List[Layout_HKL].Name := Layout_Name
+			Layouts_List[Layout_HKL].Full_Name := Layout_Full_Name
+			Layouts_List[Layout_HKL].Display_Name := Layout_Display_Name
 		}
 		return Layouts_List
 	}

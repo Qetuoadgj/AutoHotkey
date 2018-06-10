@@ -112,6 +112,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
 	IniRead, l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
 	IniRead, l_flag_hide_in_fullscreen_mode, %Translation_File%, Flag, flag_hide_in_fullscreen_mode, % "Hide In Fullscreen Mode"
+	IniRead, l_flag_show_splash_image, %Translation_File%, Flag, flag_show_splash_image, % "Show Splash Image"
 
 	; Sound
 	IniRead, l_sound_enable, %Translation_File%, Sound, sound_enable, % "Enable Sounds"
@@ -155,6 +156,7 @@ SET_DEFAULTS:
 	Defaults.flag_always_on_top := 1
 	Defaults.flag_fixed_position := 0
 	Defaults.flag_hide_in_fullscreen_mode := 1
+	Defaults.flag_show_splash_image := 1
 
 	; Sound
 	Defaults.sound_enable := 1
@@ -238,6 +240,7 @@ READ_CONFIG_FILE:
 	IniRead, flag_always_on_top, %Config_File%, Flag, flag_always_on_top, % Defaults.flag_always_on_top
 	IniRead, flag_fixed_position, %Config_File%, Flag, flag_fixed_position, % Defaults.flag_fixed_position
 	IniRead, flag_hide_in_fullscreen_mode, %Config_File%, Flag, flag_hide_in_fullscreen_mode, % Defaults.flag_hide_in_fullscreen_mode
+	IniRead, flag_show_splash_image, %Config_File%, Flag, flag_show_splash_image, % Defaults.flag_show_splash_image
 
 	Normalize("flag_width", Defaults.flag_width)
 	Normalize("flag_height", Defaults.flag_height)
@@ -383,6 +386,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("flag_always_on_top", Config_File, "Flag", flag_always_on_top)
 	IniWrite("flag_fixed_position", Config_File, "Flag", flag_fixed_position)
 	IniWrite("flag_hide_in_fullscreen_mode", Config_File, "Flag", flag_hide_in_fullscreen_mode)
+	IniWrite("flag_show_splash_image", Config_File, "Flag", flag_show_splash_image)
 
 	; Sound
 	IniWrite("sound_enable", Config_File, "Sound", sound_enable)
@@ -454,6 +458,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	return
 }
 
+; /*
 ; ~Shift & ~Ctrl Up::
 ~Shift & ~Alt Up::
 ; ~LWin & ~Space Up::
@@ -463,8 +468,12 @@ SWITCH_KEYBOARD_LAYOUT:
 	Sleep, 10
 	ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	gosub, FLAG_Update
+	if (flag_show_splash_image) {
+		gosub, FLAG_Show_SplashPicture
+	}
 	return
 }
+; */
 
 TOGGLE_CURSOR:
 {
@@ -789,6 +798,8 @@ FLAG_Update:
 		gosub, FLAG_Update_Tray_Icon
 	}
 	Last_Layout_Full_Name := Current_Layout_Full_Name
+	; Splash(Current_Layout_Png, 0, 0, flag_width*2, flag_height*2, 1000)
+	; gosub, FLAG_Show_SplashPicture
 	; SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
 	return
 }
@@ -797,8 +808,33 @@ FLAG_Update_Picture:
 {
 	Current_Layout_Png := A_WorkingDir "\images\" Current_Layout_Full_Name ".png"
 	GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%flag_width% *h%flag_height% %Current_Layout_Png%
+	; ToolTip(Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name)
 	return
 }
+
+; /*
+FLAG_Show_SplashPicture:
+{
+	splash_width := flag_width*2
+	splash_height := flag_height*2
+	Gui, SPLASH_: Destroy
+	Gui, SPLASH_: Margin, 0,0
+	Gui, SPLASH_: +HWNDsplash_win_id
+	Gui, SPLASH_: -Caption +AlwaysOnTop +Border
+	Gui, SPLASH_: Add, Picture, x0 y0 w%splash_width% h%splash_height%, %A_WorkingDir%\images\%Current_Layout_Full_Name%.png
+	Gui, SPLASH_: Show, AutoSize NA
+	SetTimer, Clear_Splash, 800
+	return
+}
+; */
+
+Clear_Splash:
+{ ; рутина очистки подсказок и отключения связанных с ней таймеров
+	Gui, SPLASH_: Destroy
+	SetTimer, %A_ThisLabel%, Off
+	return
+}
+
 
 FLAG_Update_Tray_Icon:
 {
@@ -890,7 +926,12 @@ FLAG_Customize_Menus:
 	if (flag_hide_in_fullscreen_mode) {
 		Menu, Tray, Check, %l_flag_hide_in_fullscreen_mode%
 	}
-
+	
+	Menu, Tray, Add, %l_flag_show_splash_image%, Menu_Toggle_Show_Splash_Image
+	if (flag_show_splash_image) {
+		Menu, Tray, Check, %l_flag_show_splash_image%
+	}
+	
 	Menu, Tray, Add
 
 	Menu, Tray, Add, %l_info_app_site%, Menu_App_Site
@@ -1024,6 +1065,14 @@ Menu_Toggle_Show_Borders:
 		Gui, FLAG_: -Border
 	}
 	Gui, FLAG_: Show, w%flag_width% h%flag_height%
+	return
+}
+
+Menu_Toggle_Show_Splash_Image:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	flag_show_splash_image := not flag_show_splash_image
+	IniWrite("flag_show_splash_image", Config_File, "Flag", flag_show_splash_image)
 	return
 }
 

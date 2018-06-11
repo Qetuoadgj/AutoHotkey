@@ -50,6 +50,8 @@ Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
 
 Magnifier_Win_PID := 0
 G_IsFullscreen := 0
+G_cursor_state := ""
+G_Splash_Text := ""
 
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
@@ -81,7 +83,7 @@ SetTimer, FLAG_Update, % system_check_layout_change_interval
 
 gosub, SAVE_CONFIG_FILE
 
-SystemCursor("On")
+G_cursor_state := SystemCursor("On")
 
 OnExit, App_Close
 
@@ -123,6 +125,10 @@ CREATE_LOCALIZATION:
 	IniRead, l_app_exit, %Translation_File%, App, app_exit, % "Close App"
 	IniRead, l_app_options, %Translation_File%, App, app_options, % "Open Settings"
 	IniRead, l_app_generate_dictionaries, %Translation_File%, App, app_generate_dictionaries, % "Generate Dictionaries"
+	
+	; Msg
+	IniRead, l_msg_cursor_on, %Translation_File%, Msg, msg_cursor_on, % "Cursor: On"
+	IniRead, l_msg_cursor_off, %Translation_File%, Msg, msg_cursor_off, % "Cursor: Off"
 
 	return
 }
@@ -458,7 +464,10 @@ SWITCH_KEYBOARD_LAYOUT:
 	gosub, FLAG_Update
 	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
 		if (flag_show_splash) {
-			gosub, FLAG_Show_Splash
+			if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
+				G_Splash_Text := Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name
+				gosub, FLAG_Show_Splash
+			}
 		}
 		else {
 			ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
@@ -471,6 +480,7 @@ SWITCH_KEYBOARD_LAYOUT:
 ; /*
 ; ~Shift & ~Ctrl Up::
 ~Shift & ~Alt Up::
+~Alt & ~Shift Up::
 ; ~LWin & ~Space Up::
 {
 	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
@@ -481,7 +491,10 @@ SWITCH_KEYBOARD_LAYOUT:
 	Sleep, 10
 	gosub, FLAG_Update
 	if (flag_show_splash) {
-		gosub, FLAG_Show_Splash
+		if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
+			G_Splash_Text := Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name
+			gosub, FLAG_Show_Splash
+		}
 	}
 	else {
 		ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
@@ -495,7 +508,16 @@ TOGGLE_CURSOR:
 	if (sound_enable and FileExist(sound_toggle_cursor)) {
 		SoundPlay, %sound_toggle_cursor%
 	}
-	SystemCursor("Toggle")
+	G_cursor_state := SystemCursor("Toggle")
+	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
+		if (flag_show_splash) {
+			G_Splash_Text := G_cursor_state ? l_msg_cursor_on : l_msg_cursor_off
+			gosub, FLAG_Show_Splash
+		}
+		else {
+			ToolTip(G_cursor_state ? l_msg_cursor_on : l_msg_cursor_off)
+		}
+	}
 	Sleep, 50
 	return
 }
@@ -613,7 +635,10 @@ SWITCH_TEXT_LAYOUT:
 				gosub, FLAG_Update
 				if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
 					if (flag_show_splash) {
-						gosub, FLAG_Show_Splash
+						if (Next_Layout_Full_Name) {
+							G_Splash_Text := Next_Layout_Full_Name . " - " . Next_Layout_Display_Name
+							gosub, FLAG_Show_Splash
+						}
 					}
 					else {
 						ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
@@ -839,18 +864,22 @@ FLAG_Update_Picture:
 ; /*
 FLAG_Show_Splash:
 {
+	/*
 	if (not Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name) {
 		return
 	}
-	splash_width := flag_width*5
-	splash_height := flag_height*5
+	*/
+	; splash_width := flag_width*5
+	; splash_height := flag_height*5
 	Gui, SPLASH_: Destroy
 	Gui, SPLASH_: Margin, 16, 16
 	Gui, SPLASH_: +HWNDsplash_win_id
 	Gui, SPLASH_: -Caption +AlwaysOnTop +Border +E0x20
 	; Gui, SPLASH_: Add, Picture, x0 y0 w%splash_width% h%splash_height%, %A_WorkingDir%\images\%Current_Layout_Full_Name%.png
 	Gui, SPLASH_: Font, s26 w600 
-	Gui, SPLASH_: Add, Text, cTeal, % Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name
+	; Gui, SPLASH_: Add, Text, cTeal, % Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name
+	Gui, SPLASH_: Add, Text, cTeal, %G_Splash_Text%
+	G_Splash_Text := ""
 	WinSet, Transparent, 255, ahk_id %splash_win_id%
 	Gui, SPLASH_: Show, AutoSize NA
 	SetTimer, Clear_Splash, 800
@@ -1297,7 +1326,7 @@ Magnifier_Close:
 App_Close:
 {
 	gosub, Magnifier_Close
-	SystemCursor("On")
+	G_cursor_state := SystemCursor("On")
 	ExitApp
 	return
 }

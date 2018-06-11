@@ -19,15 +19,19 @@ SystemCursor(OnOff=1) ; INIT = "I","Init"; OFF = 0,"Off"; TOGGLE = -1,"T","Toggl
 			b%A_Index% := DllCall( "CreateCursor", "Ptr",0, "Int",0, "Int",0, "Int",32, "Int",32, "Ptr",&AndMask, "Ptr",&XorMask )
 		}
 	}
+	static state
 	if (OnOff = 0 or OnOff = "Off" or $ = "h" and (OnOff < 0 or OnOff = "Toggle" or OnOff = "T")) {
 		$ = b  ; use blank cursors
+		state := 0
 	}
 	else {
 		$ = h  ; use the saved cursors
+		state := 1
 	}
 	Loop %c0%
 	{
 		h_cursor := DllCall( "CopyImage", "Ptr",%$%%A_Index%, "UInt",2, "Int",0, "Int",0, "UInt",0 )
 		DllCall( "SetSystemCursor", "Ptr",h_cursor, "UInt",c%A_Index% )
 	}
+	return state
 }

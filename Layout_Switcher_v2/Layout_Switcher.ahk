@@ -1305,6 +1305,7 @@ PREPARE_UPDATE:
 Menu_Generate_Dictionaries:
 {
 	Generate_Dictionaries("dictionary_")
+	Reload
 	return
 }
 

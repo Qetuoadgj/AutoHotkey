@@ -492,7 +492,8 @@ SWITCH_KEYBOARD_LAYOUT:
 ; ~Shift & ~Ctrl Up::
 ~Shift & ~Alt Up::
 ~Alt & ~Shift Up::
-; ~LWin & ~Space Up::
+~LWin & ~Space Up::
+~Space & ~LWin Up::
 {
 	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 		return

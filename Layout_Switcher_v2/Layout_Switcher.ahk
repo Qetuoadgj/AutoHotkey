@@ -7,9 +7,14 @@ SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 ListLines, Off	; Disable them as they're only useful for debugging purposes.
 #KeyHistory, 0	; ListLines and #KeyHistory are functions used to "log your keys".
-SetBatchLines, -1
+; SetBatchLines, -1
+SetBatchLines, 20ms
 
 DetectHiddenWindows, On
+
+#MaxThreads, 2
+#MaxThreadsPerHotkey, 1
+#MaxThreadsBuffer, Off
 
 /* Generic optimizations 			; https://autohotkey.com/boards/viewtopic.php?f=6&t=6413
 #NoEnv								; #NoEnv is recommended for all scripts, it disables environment variables.
@@ -52,6 +57,7 @@ Magnifier_Win_PID := 0
 G_IsFullscreen := 0
 G_cursor_state := ""
 G_Splash_Text := ""
+G_Last_Win_ID := 0
 
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
@@ -109,6 +115,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_system_skip_unused_dictionaries, %Translation_File%, System, system_skip_unused_dictionaries, % "Skip Unavailable Languages"
 	IniRead, l_system_fix_config_file_encoding, %Translation_File%, System, system_fix_config_file_encoding, % "Fix Config File Encoding"
 	IniRead, l_system_switch_layouts_by_send, %Translation_File%, System, system_switch_layouts_by_send, % "Use Alternative Layout Switch"
+	IniRead, l_system_minimize_check_cycles_frequency, %Translation_File%, System, system_minimize_check_cycles_frequency, % "Minimize Check Cycles Frequency"
 
 	; Flag
 	IniRead, l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
@@ -147,6 +154,7 @@ SET_DEFAULTS:
 	Defaults.system_start_with_admin_rights := 1 ;0
 	Defaults.system_run_with_high_priority := 1
 	Defaults.system_check_layout_change_interval := "On" ; 250
+	Defaults.system_minimize_check_cycles_frequency := 1
 	Defaults.system_detect_dictionary := 1
 	; Defaults.system_encoding_compatibility_mode := 0
 	Defaults.system_show_tray_icon := 1
@@ -231,6 +239,7 @@ READ_CONFIG_FILE:
 	IniRead, system_start_with_admin_rights, %Config_File%, System, system_start_with_admin_rights, % Defaults.system_start_with_admin_rights
 	IniRead, system_run_with_high_priority, %Config_File%, System, system_run_with_high_priority, % Defaults.system_run_with_high_priority
 	IniRead, system_check_layout_change_interval, %Config_File%, System, system_check_layout_change_interval, % Defaults.system_check_layout_change_interval
+	IniRead, system_minimize_check_cycles_frequency, %Config_File%, System, system_minimize_check_cycles_frequency, % Defaults.system_minimize_check_cycles_frequency
 	IniRead, system_detect_dictionary, %Config_File%, System, system_detect_dictionary, % Defaults.system_detect_dictionary
 	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, % Defaults.system_encoding_compatibility_mode
 	IniRead, system_show_tray_icon, %Config_File%, System, system_show_tray_icon, % Defaults.system_show_tray_icon
@@ -377,6 +386,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("system_start_with_admin_rights", Config_File, "System", system_start_with_admin_rights)
 	IniWrite("system_run_with_high_priority", Config_File, "System", system_run_with_high_priority)
 	IniWrite("system_check_layout_change_interval", Config_File, "System", system_check_layout_change_interval)
+	IniWrite("system_minimize_check_cycles_frequency", Config_File, "System", system_minimize_check_cycles_frequency)
 	IniWrite("system_detect_dictionary", Config_File, "System", system_detect_dictionary)
 	; IniWrite("system_encoding_compatibility_mode", Config_File, "System", system_encoding_compatibility_mode)
 	IniWrite("system_show_tray_icon", Config_File, "System", system_show_tray_icon)
@@ -474,6 +484,7 @@ SWITCH_KEYBOARD_LAYOUT:
 		}
 	}
 	Sleep, 50
+	G_Last_Win_ID := 0
 	return
 }
 
@@ -499,6 +510,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	else {
 		ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	}
+	G_Last_Win_ID := 0
 	return
 }
 ; */
@@ -650,6 +662,7 @@ SWITCH_TEXT_LAYOUT:
 	; gosub, FLAG_Update
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
+	G_Last_Win_ID := 0
 	return
 }
 ; */
@@ -824,6 +837,14 @@ FLAG_Add_Picture:
 
 FLAG_Update:
 {
+	if (system_minimize_check_cycles_frequency) {
+		G_Cur_Win_ID := WinExist("A")
+		if (G_Cur_Win_ID = G_Last_Win_ID) {
+			return
+		}
+		G_Last_Win_ID := G_Cur_Win_ID
+	}
+	; ToolTip, %A_TickCount%
 	if (flag_always_on_top) {
 		if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 			; Gui, FLAG_: -AlwaysOnTop
@@ -962,6 +983,13 @@ FLAG_Customize_Menus:
 	Menu, Tray, Add, %l_system_switch_layouts_by_send%, Menu_Toggle_Switch_Layouts_By_Send
 	if (system_switch_layouts_by_send) {
 		Menu, Tray, Check, %l_system_switch_layouts_by_send%
+	}
+
+	Menu, Tray, Add
+	
+	Menu, Tray, Add, %l_system_minimize_check_cycles_frequency%, Menu_Toggle_Minimize_Check_Cycles_Frequency
+	if (system_minimize_check_cycles_frequency) {
+		Menu, Tray, Check, %l_system_minimize_check_cycles_frequency%
 	}
 
 	Menu, Tray, Add
@@ -1109,6 +1137,14 @@ Menu_Toggle_Switch_Layouts_By_Send:
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	system_switch_layouts_by_send := not system_switch_layouts_by_send
 	IniWrite("system_switch_layouts_by_send", Config_File, "System", system_switch_layouts_by_send)
+	return
+}
+
+Menu_Toggle_Minimize_Check_Cycles_Frequency:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	system_minimize_check_cycles_frequency := not system_minimize_check_cycles_frequency
+	IniWrite("system_minimize_check_cycles_frequency", Config_File, "System", system_minimize_check_cycles_frequency)
 	return
 }
 

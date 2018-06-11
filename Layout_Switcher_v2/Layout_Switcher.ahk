@@ -492,8 +492,7 @@ SWITCH_KEYBOARD_LAYOUT:
 ; ~Shift & ~Ctrl Up::
 ~Shift & ~Alt Up::
 ~Alt & ~Shift Up::
-~LWin & ~Space Up::
-~Space & ~LWin Up::
+~LWin & ~Space::
 {
 	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 		return
@@ -840,8 +839,8 @@ FLAG_Update:
 {
 	if (system_minimize_check_cycles_frequency) {
 		G_Cur_Win_ID := WinExist("A")
-		LWin_IsDown := GetKeyState("LWin", "P")
-		if (!LWin_IsDown and G_Cur_Win_ID = G_Last_Win_ID) {
+		; if (!GetKeyState("LWin", "P") and G_Cur_Win_ID = G_Last_Win_ID) {
+		if (G_Cur_Win_ID = G_Last_Win_ID) {
 			return
 		}
 		G_Last_Win_ID := G_Cur_Win_ID

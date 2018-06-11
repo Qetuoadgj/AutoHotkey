@@ -104,7 +104,7 @@ START_UPDATE:
 		Sounds\switch_keyboard_layout.wav
 		Sounds\switch_text_case.wav
 		Sounds\switch_text_layout.wav
-		Sounds\toggle_cursor.mp3
+		Sounds\toggle_cursor.wav
 		; TRANSLATIONS
 		Translations\Russian.ini
 		; MAGNIFIER

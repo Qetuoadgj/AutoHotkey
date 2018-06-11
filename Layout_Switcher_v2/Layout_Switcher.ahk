@@ -46,7 +46,9 @@ SendMode, Input						; SendInput is the fastest send method. SendEvent (the defa
 ; OS_BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF        ; 10532
 
 Script_Name := Script.Name()
+Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
+; Script.Run_As_Admin(Script_Args)
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -59,14 +61,17 @@ G_cursor_state := ""
 G_Splash_Text := ""
 G_Last_Win_ID := 0
 G_Force_Update_Cycle := 1
+G_Need_Restart := 0
 
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
 gosub, READ_CONFIG_FILE
 
 if (system_start_with_admin_rights) {
-	Script.Run_As_Admin(%0%)
+	Script.Run_As_Admin(Script_Args)
 }
+
+gosub, PRELOAD_RESOURCES
 
 if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
 	Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
@@ -93,6 +98,10 @@ gosub, SAVE_CONFIG_FILE
 G_cursor_state := SystemCursor("On")
 
 OnExit, App_Close
+
+if (G_Need_Restart == 1) {
+	Reload
+}
 
 Exit
 
@@ -166,11 +175,11 @@ SET_DEFAULTS:
 	; Flag
 	Defaults.flag_width := 32
 	Defaults.flag_height := 22
-	Defaults.flag_position_x := "Center"
-	Defaults.flag_position_y := "Center"
+	Defaults.flag_position_x := A_ScreenWidth - Defaults.flag_width - 156 ;"Center"
+	Defaults.flag_position_y := 1 ;"Center"
 	Defaults.flag_show_borders := 1
 	Defaults.flag_always_on_top := 1
-	Defaults.flag_fixed_position := 0
+	Defaults.flag_fixed_position := 1 ;0
 	Defaults.flag_hide_in_fullscreen_mode := 1
 	Defaults.flag_show_splash := 1
 
@@ -180,7 +189,7 @@ SET_DEFAULTS:
 	Defaults.sound_switch_text_case := "sounds\switch_text_case.wav"
 	Defaults.sound_switch_text_whitespace := "sounds\switch_text_case.wav"
 	Defaults.sound_switch_text_layout := "sounds\switch_text_layout.wav"
-	Defaults.sound_toggle_cursor := "sounds\toggle_cursor.mp3"
+	Defaults.sound_toggle_cursor := "sounds\toggle_cursor.wav"
 	; Defaults.sound_toggle_fullscreen := "sounds\toggle_fullscreen.mp3"
 
 	; HotKeys
@@ -226,6 +235,10 @@ SET_DEFAULTS:
 
 READ_CONFIG_FILE:
 {
+	if (not FileExist(Config_File)) {
+		G_Need_Restart := 1
+	}
+	
 	; Info
 	IniRead, info_app_site, %Config_File%, Info, info_app_site, % Defaults.info_app_site
 	IniRead, info_updater_url, %Config_File%, Info, info_updater_url, % Defaults.info_updater_url
@@ -351,8 +364,8 @@ READ_CONFIG_FILE:
 
 	if (system_fix_config_file_encoding) {
 		ini := FileOpen(Config_File, "r")
-		app_ecoding := "CP1251" ;A_FileEncoding ? A_FileEncoding : "CP1251"
-		if (ini.Encoding != app_ecoding) {
+		app_ecoding := "CP1251" ; A_FileEncoding ? A_FileEncoding : "CP1251"
+		if (ini.Encoding != app_ecoding and ini.Encoding != "UTF-16") {
 			ini_data := ini.Read()
 			if (ini_data) {
 				; ini.Close()
@@ -457,10 +470,32 @@ SAVE_CONFIG_FILE:
 	return
 }
 
+PRELOAD_RESOURCES:
+{
+	sound_switch_keyboard_layout_data := 0
+	sound_switch_text_case_data := 0
+	sound_switch_text_layout_data := 0
+	sound_toggle_cursor_data := 0
+	sound_switch_text_whitespace_data := 0
+	;
+	FileRead, sound_switch_keyboard_layout_data, *c %sound_switch_keyboard_layout%
+	FileRead, sound_switch_text_case_data, *c %sound_switch_text_case%
+	FileRead, sound_switch_text_layout_data, *c %sound_switch_text_layout%
+	FileRead, sound_toggle_cursor_data, *c %sound_toggle_cursor%
+	FileRead, sound_switch_text_whitespace_data, *c %sound_switch_text_whitespace%
+	;
+	return
+}
+
 SWITCH_KEYBOARD_LAYOUT:
 {
+	/*
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
 		SoundPlay, %sound_switch_keyboard_layout%
+	}
+	*/
+	if (sound_enable and sound_switch_keyboard_layout_data) {
+		PlaySound(sound_switch_keyboard_layout_data)
 	}
 	if WinActive("ahk_id " Windows.Tray_ID) {
 		WinActivate, % "ahk_id " Windows.Desktop_ID
@@ -526,8 +561,13 @@ SWITCH_KEYBOARD_LAYOUT:
 
 TOGGLE_CURSOR:
 {
+	/*
 	if (sound_enable and FileExist(sound_toggle_cursor)) {
 		SoundPlay, %sound_toggle_cursor%
+	}
+	*/
+	if (sound_enable and sound_toggle_cursor_data) {
+		PlaySound(sound_toggle_cursor_data)
 	}
 	G_cursor_state := SystemCursor("Toggle")
 	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
@@ -602,8 +642,13 @@ SWITCH_TEXT_CASE:
 {
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
+		/*
 		if (sound_enable and FileExist(sound_switch_text_case)) {
 			SoundPlay, %sound_switch_text_case%
+		}
+		*/
+		if (sound_enable and sound_switch_text_case_data) {
+			PlaySound(sound_switch_text_case_data)
 		}
 		Converted_Text := Edit_Text.Convert_Case(Selected_Text, false)
 		Edit_Text.Paste(Converted_Text)
@@ -617,8 +662,13 @@ SWITCH_TEXT_WHITESPACE:
 {
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
+		/*
 		if (sound_enable and FileExist(sound_switch_text_whitespace)) {
 			SoundPlay, %sound_switch_text_whitespace%
+		}
+		*/
+		if (sound_enable and sound_switch_text_whitespace_data) {
+			PlaySound(sound_switch_text_whitespace_data)
 		}
 		Converted_Text := Edit_Text.Convert_Whitespace(Selected_Text, text_whitespace_replacement, text_tab_size)
 		Edit_Text.Paste(Converted_Text)
@@ -633,8 +683,13 @@ SWITCH_TEXT_LAYOUT:
 {
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
+		/*
 		if (sound_enable and FileExist(sound_switch_text_layout)) {
 			SoundPlay, %sound_switch_text_layout%
+		}
+		*/
+		if (sound_enable and sound_switch_text_layout_data) {
+			PlaySound(sound_switch_text_layout_data)
 		}
 		Selected_Text_Dictionary := Edit_Text.Dictionary(Selected_Text)
 		if (Selected_Text_Dictionary) {
@@ -1378,6 +1433,8 @@ App_Close:
 	ExitApp
 	return
 }
+
+#Include ..\Includes\FUNC_PlaySound.ahk
 
 #Include ..\Includes\FUNC_Normalize.ahk
 #Include ..\Includes\FUNC_IniWrite.ahk

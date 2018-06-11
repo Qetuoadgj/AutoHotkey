@@ -133,7 +133,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_app_exit, %Translation_File%, App, app_exit, % "Close App"
 	IniRead, l_app_options, %Translation_File%, App, app_options, % "Open Settings"
 	IniRead, l_app_generate_dictionaries, %Translation_File%, App, app_generate_dictionaries, % "Generate Dictionaries"
-	
+
 	; Msg
 	IniRead, l_msg_cursor_on, %Translation_File%, Msg, msg_cursor_on, % "Cursor: On"
 	IniRead, l_msg_cursor_off, %Translation_File%, Msg, msg_cursor_off, % "Cursor: Off"
@@ -459,7 +459,6 @@ SAVE_CONFIG_FILE:
 
 SWITCH_KEYBOARD_LAYOUT:
 {
-	G_Force_Update_Cycle := 1
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
 		SoundPlay, %sound_switch_keyboard_layout%
 	}
@@ -486,6 +485,7 @@ SWITCH_KEYBOARD_LAYOUT:
 		}
 	}
 	Sleep, 50
+	G_Force_Update_Cycle := 1
 	return
 }
 
@@ -495,7 +495,6 @@ SWITCH_KEYBOARD_LAYOUT:
 ~Alt & ~Shift Up::
 ~Alt & ~Shift::
 {
-	G_Force_Update_Cycle := 1
 	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 		return
 	}
@@ -504,8 +503,8 @@ SWITCH_KEYBOARD_LAYOUT:
 	Sleep, 10
 	gosub, FLAG_Update
 	if (flag_show_splash) {
-		ToolTip, Layout_HKL: %Layout_HKL%
-		MsgBox, Layout_HKL: %Layout_HKL%
+		; ToolTip, Layout_HKL: %Layout_HKL%
+		; MsgBox, Layout_HKL: %Layout_HKL%
 		if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
 			G_Splash_Text := Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name
 			gosub, FLAG_Show_Splash
@@ -514,13 +513,13 @@ SWITCH_KEYBOARD_LAYOUT:
 	else {
 		ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	}
+	G_Force_Update_Cycle := 1
 	return
 }
 ~LWin Up::
 {
 	Sleep, 50
 	G_Force_Update_Cycle := 1
-	; gosub, FLAG_Update
 	return
 }
 ; */
@@ -632,7 +631,6 @@ SWITCH_TEXT_WHITESPACE:
 ; /*
 SWITCH_TEXT_LAYOUT:
 {
-	G_Force_Update_Cycle := 1
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		if (sound_enable and FileExist(sound_switch_text_layout)) {
@@ -673,6 +671,7 @@ SWITCH_TEXT_LAYOUT:
 	; gosub, FLAG_Update
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
+	G_Force_Update_Cycle := 1
 	return
 }
 ; */
@@ -871,7 +870,7 @@ FLAG_Update:
 		return
 	}
 	; Current_Layout_Full_Name := Layout.Language_Name(Current_Layout_HKL, True)
-	Current_Layout_Full_Name := Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name	
+	Current_Layout_Full_Name := Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name
 	if (Current_Layout_Full_Name = Last_Layout_Full_Name) {
 		return
 	}
@@ -897,7 +896,7 @@ FLAG_Update_Picture:
 ; /*
 FLAG_Show_Splash:
 {
-	MsgBox, FLAG_Show_Splash
+	; MsgBox, FLAG_Show_Splash
 	/*
 	if (not Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name) {
 		return
@@ -910,7 +909,7 @@ FLAG_Show_Splash:
 	Gui, SPLASH_: +HWNDsplash_win_id
 	Gui, SPLASH_: -Caption +AlwaysOnTop +Border +E0x20
 	; Gui, SPLASH_: Add, Picture, x0 y0 w%splash_width% h%splash_height%, %A_WorkingDir%\images\%Current_Layout_Full_Name%.png
-	Gui, SPLASH_: Font, s26 w600 
+	Gui, SPLASH_: Font, s26 w600
 	; Gui, SPLASH_: Add, Text, cTeal, % Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name
 	Gui, SPLASH_: Add, Text, cTeal, %G_Splash_Text%
 	G_Splash_Text := ""
@@ -999,7 +998,7 @@ FLAG_Customize_Menus:
 	}
 
 	Menu, Tray, Add
-	
+
 	Menu, Tray, Add, %l_system_minimize_check_cycles_frequency%, Menu_Toggle_Minimize_Check_Cycles_Frequency
 	if (system_minimize_check_cycles_frequency) {
 		Menu, Tray, Check, %l_system_minimize_check_cycles_frequency%
@@ -1026,12 +1025,12 @@ FLAG_Customize_Menus:
 	if (flag_hide_in_fullscreen_mode) {
 		Menu, Tray, Check, %l_flag_hide_in_fullscreen_mode%
 	}
-	
+
 	Menu, Tray, Add, %l_flag_show_splash%, Menu_Toggle_Show_Splash
 	if (flag_show_splash) {
 		Menu, Tray, Check, %l_flag_show_splash%
 	}
-	
+
 	Menu, Tray, Add
 
 	Menu, Tray, Add, %l_info_app_site%, Menu_App_Site

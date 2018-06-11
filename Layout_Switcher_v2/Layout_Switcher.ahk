@@ -493,7 +493,9 @@ SWITCH_KEYBOARD_LAYOUT:
 ; ~Shift & ~Ctrl Up::
 ~Shift & ~Alt Up::
 ~Alt & ~Shift Up::
+~Alt & ~Shift::
 {
+	G_Force_Update_Cycle := 1
 	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 		return
 	}
@@ -502,6 +504,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	Sleep, 10
 	gosub, FLAG_Update
 	if (flag_show_splash) {
+		ToolTip, Layout_HKL: %Layout_HKL%
 		if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
 			G_Splash_Text := Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name
 			gosub, FLAG_Show_Splash

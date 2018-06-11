@@ -58,6 +58,7 @@ G_IsFullscreen := 0
 G_cursor_state := ""
 G_Splash_Text := ""
 G_Last_Win_ID := 0
+G_Force_Update_Cycle := 1
 
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
@@ -458,6 +459,7 @@ SAVE_CONFIG_FILE:
 
 SWITCH_KEYBOARD_LAYOUT:
 {
+	G_Force_Update_Cycle := 1
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
 		SoundPlay, %sound_switch_keyboard_layout%
 	}
@@ -484,7 +486,6 @@ SWITCH_KEYBOARD_LAYOUT:
 		}
 	}
 	Sleep, 50
-	G_Last_Win_ID := 0
 	return
 }
 
@@ -494,6 +495,7 @@ SWITCH_KEYBOARD_LAYOUT:
 ~Alt & ~Shift Up::
 ~LWin & ~Space::
 {
+	G_Force_Update_Cycle := 1
 	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 		return
 	}
@@ -510,7 +512,6 @@ SWITCH_KEYBOARD_LAYOUT:
 	else {
 		ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	}
-	G_Last_Win_ID := 0
 	return
 }
 ; */
@@ -622,6 +623,7 @@ SWITCH_TEXT_WHITESPACE:
 ; /*
 SWITCH_TEXT_LAYOUT:
 {
+	G_Force_Update_Cycle := 1
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		if (sound_enable and FileExist(sound_switch_text_layout)) {
@@ -662,7 +664,6 @@ SWITCH_TEXT_LAYOUT:
 	; gosub, FLAG_Update
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
-	G_Last_Win_ID := 0
 	return
 }
 ; */
@@ -840,10 +841,11 @@ FLAG_Update:
 	if (system_minimize_check_cycles_frequency) {
 		G_Cur_Win_ID := WinExist("A")
 		; if (!GetKeyState("LWin", "P") and G_Cur_Win_ID = G_Last_Win_ID) {
-		if (G_Cur_Win_ID = G_Last_Win_ID) {
+		if (!G_Force_Update_Cycle and (G_Cur_Win_ID = G_Last_Win_ID)) {
 			return
 		}
 		G_Last_Win_ID := G_Cur_Win_ID
+		G_Force_Update_Cycle := 0
 	}
 	; ToolTip, %A_TickCount%
 	if (flag_always_on_top) {

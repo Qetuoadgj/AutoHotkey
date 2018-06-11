@@ -505,6 +505,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	gosub, FLAG_Update
 	if (flag_show_splash) {
 		ToolTip, Layout_HKL: %Layout_HKL%
+		MsgBox, Layout_HKL: %Layout_HKL%
 		if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
 			G_Splash_Text := Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name
 			gosub, FLAG_Show_Splash
@@ -896,6 +897,7 @@ FLAG_Update_Picture:
 ; /*
 FLAG_Show_Splash:
 {
+	MsgBox, FLAG_Show_Splash
 	/*
 	if (not Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name) {
 		return

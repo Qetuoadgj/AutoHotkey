@@ -493,9 +493,7 @@ SWITCH_KEYBOARD_LAYOUT:
 ; ~Shift & ~Ctrl Up::
 ~Shift & ~Alt Up::
 ~Alt & ~Shift Up::
-~LWin & ~Space::
 {
-	G_Force_Update_Cycle := 1
 	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 		return
 	}
@@ -512,6 +510,13 @@ SWITCH_KEYBOARD_LAYOUT:
 	else {
 		ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	}
+	return
+}
+~LWin Up::
+{
+	Sleep, 50
+	G_Force_Update_Cycle := 1
+	; gosub, FLAG_Update
 	return
 }
 ; */

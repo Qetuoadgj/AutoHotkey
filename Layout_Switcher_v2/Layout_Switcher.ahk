@@ -840,7 +840,8 @@ FLAG_Update:
 {
 	if (system_minimize_check_cycles_frequency) {
 		G_Cur_Win_ID := WinExist("A")
-		if (G_Cur_Win_ID = G_Last_Win_ID) {
+		LWin_IsDown := GetKeyState("LWin", "P")
+		if (!LWin_IsDown and G_Cur_Win_ID = G_Last_Win_ID) {
 			return
 		}
 		G_Last_Win_ID := G_Cur_Win_ID

@@ -49,6 +49,7 @@ Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
 ; Clipboard_Tmp := "" ; Null
 
 Magnifier_Win_PID := 0
+G_IsFullscreen := 0
 
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
@@ -112,7 +113,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
 	IniRead, l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
 	IniRead, l_flag_hide_in_fullscreen_mode, %Translation_File%, Flag, flag_hide_in_fullscreen_mode, % "Hide In Fullscreen Mode"
-	IniRead, l_flag_show_splash_image, %Translation_File%, Flag, flag_show_splash_image, % "Show Splash Image"
+	IniRead, l_flag_show_splash, %Translation_File%, Flag, flag_show_splash, % "Show Language On Layout Change (Shift + Alt)"
 
 	; Sound
 	IniRead, l_sound_enable, %Translation_File%, Sound, sound_enable, % "Enable Sounds"
@@ -156,7 +157,7 @@ SET_DEFAULTS:
 	Defaults.flag_always_on_top := 1
 	Defaults.flag_fixed_position := 0
 	Defaults.flag_hide_in_fullscreen_mode := 1
-	Defaults.flag_show_splash_image := 1
+	Defaults.flag_show_splash := 1
 
 	; Sound
 	Defaults.sound_enable := 1
@@ -240,7 +241,7 @@ READ_CONFIG_FILE:
 	IniRead, flag_always_on_top, %Config_File%, Flag, flag_always_on_top, % Defaults.flag_always_on_top
 	IniRead, flag_fixed_position, %Config_File%, Flag, flag_fixed_position, % Defaults.flag_fixed_position
 	IniRead, flag_hide_in_fullscreen_mode, %Config_File%, Flag, flag_hide_in_fullscreen_mode, % Defaults.flag_hide_in_fullscreen_mode
-	IniRead, flag_show_splash_image, %Config_File%, Flag, flag_show_splash_image, % Defaults.flag_show_splash_image
+	IniRead, flag_show_splash, %Config_File%, Flag, flag_show_splash, % Defaults.flag_show_splash
 
 	Normalize("flag_width", Defaults.flag_width)
 	Normalize("flag_height", Defaults.flag_height)
@@ -386,7 +387,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("flag_always_on_top", Config_File, "Flag", flag_always_on_top)
 	IniWrite("flag_fixed_position", Config_File, "Flag", flag_fixed_position)
 	IniWrite("flag_hide_in_fullscreen_mode", Config_File, "Flag", flag_hide_in_fullscreen_mode)
-	IniWrite("flag_show_splash_image", Config_File, "Flag", flag_show_splash_image)
+	IniWrite("flag_show_splash", Config_File, "Flag", flag_show_splash)
 
 	; Sound
 	IniWrite("sound_enable", Config_File, "Sound", sound_enable)
@@ -452,8 +453,17 @@ SWITCH_KEYBOARD_LAYOUT:
 	Layout_HKL := Layout.Get_HKL("A")
 	Sleep, 10
 	; ToolTip(Layout.Language_Name(Layout_HKL, true) " - " Layout.Display_Name(Layout_HKL))
+	; gosub, FLAG_Update
+	; ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	gosub, FLAG_Update
-	ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
+	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
+		if (flag_show_splash) {
+			gosub, FLAG_Show_Splash
+		}
+		else {
+			ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
+		}
+	}
 	Sleep, 50
 	return
 }
@@ -463,13 +473,18 @@ SWITCH_KEYBOARD_LAYOUT:
 ~Shift & ~Alt Up::
 ; ~LWin & ~Space Up::
 {
+	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
+		return
+	}
 	Sleep, 50
 	Layout_HKL := Layout.Get_HKL("A")
 	Sleep, 10
-	ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	gosub, FLAG_Update
-	if (flag_show_splash_image) {
-		gosub, FLAG_Show_SplashPicture
+	if (flag_show_splash) {
+		gosub, FLAG_Show_Splash
+	}
+	else {
+		ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	}
 	return
 }
@@ -594,11 +609,20 @@ SWITCH_TEXT_LAYOUT:
 			if (Next_Layout_HKL := Layout.Layouts_List[Next_Layout_Index].HKL) {
 				Layout.Change(Next_Layout_HKL,,system_switch_layouts_by_send)
 				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
-				ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
+				; ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
+				gosub, FLAG_Update
+				if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
+					if (flag_show_splash) {
+						gosub, FLAG_Show_Splash
+					}
+					else {
+						ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
+					}
+				}
 			}
 		}
 	}
-	gosub, FLAG_Update
+	; gosub, FLAG_Update
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
 	return
@@ -776,7 +800,7 @@ FLAG_Add_Picture:
 FLAG_Update:
 {
 	if (flag_always_on_top) {
-		if (flag_hide_in_fullscreen_mode and Window.Is_Full_Screen("A")) {
+		if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 			; Gui, FLAG_: -AlwaysOnTop
 			WinSet, Bottom,, ahk_id %flag_win_id%
 		}
@@ -799,7 +823,7 @@ FLAG_Update:
 	}
 	Last_Layout_Full_Name := Current_Layout_Full_Name
 	; Splash(Current_Layout_Png, 0, 0, flag_width*2, flag_height*2, 1000)
-	; gosub, FLAG_Show_SplashPicture
+	; gosub, FLAG_Show_Splash
 	; SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
 	return
 }
@@ -813,15 +837,21 @@ FLAG_Update_Picture:
 }
 
 ; /*
-FLAG_Show_SplashPicture:
+FLAG_Show_Splash:
 {
-	splash_width := flag_width*2
-	splash_height := flag_height*2
+	if (not Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name) {
+		return
+	}
+	splash_width := flag_width*5
+	splash_height := flag_height*5
 	Gui, SPLASH_: Destroy
-	Gui, SPLASH_: Margin, 0,0
+	Gui, SPLASH_: Margin, 16, 16
 	Gui, SPLASH_: +HWNDsplash_win_id
-	Gui, SPLASH_: -Caption +AlwaysOnTop +Border
-	Gui, SPLASH_: Add, Picture, x0 y0 w%splash_width% h%splash_height%, %A_WorkingDir%\images\%Current_Layout_Full_Name%.png
+	Gui, SPLASH_: -Caption +AlwaysOnTop +Border +E0x20
+	; Gui, SPLASH_: Add, Picture, x0 y0 w%splash_width% h%splash_height%, %A_WorkingDir%\images\%Current_Layout_Full_Name%.png
+	Gui, SPLASH_: Font, s26 w600 
+	Gui, SPLASH_: Add, Text, cTeal, % Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name
+	WinSet, Transparent, 255, ahk_id %splash_win_id%
 	Gui, SPLASH_: Show, AutoSize NA
 	SetTimer, Clear_Splash, 800
 	return
@@ -927,9 +957,9 @@ FLAG_Customize_Menus:
 		Menu, Tray, Check, %l_flag_hide_in_fullscreen_mode%
 	}
 	
-	Menu, Tray, Add, %l_flag_show_splash_image%, Menu_Toggle_Show_Splash_Image
-	if (flag_show_splash_image) {
-		Menu, Tray, Check, %l_flag_show_splash_image%
+	Menu, Tray, Add, %l_flag_show_splash%, Menu_Toggle_Show_Splash
+	if (flag_show_splash) {
+		Menu, Tray, Check, %l_flag_show_splash%
 	}
 	
 	Menu, Tray, Add
@@ -1068,11 +1098,11 @@ Menu_Toggle_Show_Borders:
 	return
 }
 
-Menu_Toggle_Show_Splash_Image:
+Menu_Toggle_Show_Splash:
 {
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
-	flag_show_splash_image := not flag_show_splash_image
-	IniWrite("flag_show_splash_image", Config_File, "Flag", flag_show_splash_image)
+	flag_show_splash := not flag_show_splash
+	IniWrite("flag_show_splash", Config_File, "Flag", flag_show_splash)
 	return
 }
 

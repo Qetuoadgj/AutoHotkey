@@ -15,10 +15,8 @@
 	{ ; функция получения ID рабочего стола Windows
 		static ID
 		;
-		ID := WinExist("ahk_class Progman ahk_exe Explorer.EXE") ;
-		if (not ID) {
-			ID := WinExist("ahk_class WorkerW ahk_exe Explorer.EXE")
-		}
+		ID := WinExist("ahk_class WorkerW ahk_exe Explorer.EXE") ; Win 10
+		ID := ID ? ID : WinExist("ahk_class Progman ahk_exe Explorer.EXE") ; Win 7
 		return ID
 	}
 }

@@ -28,25 +28,25 @@
 		; Выделение текста / получение уже выделенного, назначение переменной "Selected_Text"
 		; -----------------------------------------------------------------------------------
 		Clipboard := "" ; Null
-		SendInput, % "{Ctrl Down}"
+		SendInput, % "{Blind}{Ctrl Down}"
 		; Sleep 1
 		SendInput, % "{vk43}"
 		Sleep, 1
-		SendInput, % "{Ctrl Up}"
+		SendInput, % "{Blind}{Ctrl Up}"
 		ClipWait, 0.05
 		Selected_Text := Clipboard
 		if (StrLen(Selected_Text) = 0) {
 			Loop, 100 {
 				Clipboard := "" ; Null
-				SendInput, % "{Ctrl Down}{Shift Down}"
+				SendInput, % "{Blind}{Ctrl Down}{Shift Down}"
 				; Sleep 1
 				SendInput, % "{Left}"
 				; Sleep 1
-				SendInput, % "{Shift Up}"
+				SendInput, % "{Blind}{Shift Up}"
 				Sleep, 1
 				SendInput, % "{vk43}"
 				Sleep, 1
-				SendInput, % "{Ctrl Up}"
+				SendInput, % "{Blind}{Ctrl Up}"
 				ClipWait, 0.5
 				if (StrLen(Clipboard) = 0) { ; перестраховка на случай, если текст вообще невозможно скопировать в буфер
 					return
@@ -62,43 +62,43 @@
 					Clipboard := "" ; Null
 					SendInput, % "{Left}"
 					; Sleep 1
-					SendInput, % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Blind}{Ctrl Down}{Shift Down}"
 					; Sleep 1
 					SendInput, % "{Right}"
 					; Sleep 1
-					SendInput, % "{Shift Up}"
+					SendInput, % "{Blind}{Shift Up}"
 					Sleep, 1
 					SendInput, % "{vk43}"
 					Sleep, 1
-					SendInput, % "{Ctrl Up}"
+					SendInput, % "{Blind}{Ctrl Up}"
 					ClipWait, 0.5
 					Break
 				}
 				if RegExMatch(Clipboard, "^[^\s]+\s+[^\s]+") { ; в выделение попал пробел или перенос на новую строку
 					Clipboard := "" ; Null
-					SendInput, % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Blind}{Ctrl Down}{Shift Down}"
 					; Sleep 1
 					SendInput, % "{Right 2}{Left}"
 					; Sleep 1
-					SendInput, % "{Shift Up}"
+					SendInput, % "{Blind}{Shift Up}"
 					Sleep, 1
 					SendInput, % "{vk43}"
 					Sleep, 1
-					SendInput, % "{Ctrl Up}"
+					SendInput, % "{Blind}{Ctrl Up}"
 					ClipWait, 0.5
 					Break
 				}
 				if RegExMatch(Clipboard, "\s") { ; в выделение попал пробел, который находится в самом начале области редактирования
 					Clipboard := "" ; Null
-					SendInput, % "{Ctrl Down}{Shift Down}"
+					SendInput, % "{Blind}{Ctrl Down}{Shift Down}"
 					; Sleep 1
 					SendInput, % "{Right}{Left}"
 					; Sleep 1
-					SendInput, % "{Shift Up}"
+					SendInput, % "{Blind}{Shift Up}"
 					Sleep, 1
 					SendInput, % "{vk43}"
 					Sleep, 1
-					SendInput, % "{Ctrl Up}"
+					SendInput, % "{Blind}{Ctrl Up}"
 					ClipWait, 0.5
 					Break
 				}
@@ -246,11 +246,11 @@
 		Clipboard := "" ; Null
 		Clipboard := Converted_Text
 		ClipWait, 1.0
-		SendInput, % "{Ctrl Down}"
+		SendInput, % "{Blind}{Ctrl Down}"
 		Sleep, 1
 		SendInput, % "{vk56}"
 		Sleep, 1
-		SendInput, % "{Ctrl Up}"
+		SendInput, % "{Blind}{Ctrl Up}"
 		; -----------------------------------------------------------------------------------
 		return Clipboard
 	}

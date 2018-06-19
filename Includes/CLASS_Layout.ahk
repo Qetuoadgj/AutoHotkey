@@ -11,7 +11,7 @@ class Layout
 	static Layouts_List := Layout.Get_Layouts_List()
 	static Layouts_List_By_HKL := Layout.Get_Layouts_List_By_HKL()
 	;
-	static Switch_Layout_Combo := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
+	static Switch_Layout_Combo := "{Blind}{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
 	;
 	Get_Layouts_List()
 	{ ; функция создания базы данных для текущих раскладок

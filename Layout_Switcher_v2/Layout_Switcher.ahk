@@ -201,7 +201,7 @@ SET_DEFAULTS:
 	; Defaults.key_toggle_fullscreen := "LWin & LButton"
 
 	; KeyCombos
-	Defaults.combo_switch_layout := "{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
+	Defaults.combo_switch_layout := "{Blind}{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
 
 	; Text
 	Defaults.text_title_case_symbols := "(\_+|\-+|\.+|\[+|\(+|\{+|\\+|\/+|\<+|\>+|\=+|\++|\-+|\*+|\%+)"
@@ -238,7 +238,7 @@ READ_CONFIG_FILE:
 	if (not FileExist(Config_File)) {
 		G_Need_Restart := 1
 	}
-	
+
 	; Info
 	IniRead, info_app_site, %Config_File%, Info, info_app_site, % Defaults.info_app_site
 	IniRead, info_updater_url, %Config_File%, Info, info_updater_url, % Defaults.info_updater_url
@@ -962,7 +962,7 @@ FLAG_Show_Splash:
 	Gui, SPLASH_: Destroy
 	Gui, SPLASH_: Margin, 16, 16
 	Gui, SPLASH_: +HWNDsplash_win_id
-	Gui, SPLASH_: -Caption +AlwaysOnTop +Border +E0x20
+	Gui, SPLASH_: -Caption +AlwaysOnTop +Border +E0x20 +ToolWindow ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
 	; Gui, SPLASH_: Add, Picture, x0 y0 w%splash_width% h%splash_height%, %A_WorkingDir%\images\%Current_Layout_Full_Name%.png
 	Gui, SPLASH_: Font, s26 w600
 	; Gui, SPLASH_: Add, Text, cTeal, % Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name
@@ -1386,12 +1386,12 @@ Generate_Dictionaries(Prefix := "")
 				StringLower, Dictionary_Name, Dictionary_Name
 				ControlSendRaw,, %Dictionary_Name%=, %Edit1_Title%
 				for k, v in Keys {
-					ControlSend,, {%v%}, %Edit1_Title%
+					ControlSend,, {Blind}{%v%}, %Edit1_Title%
 					Sleep, 1
 				}
-				ControlSend,, {SC039}, %Edit1_Title%
+				ControlSend,, {Blind}{SC039}, %Edit1_Title%
 				for k, v in Keys {
-					ControlSend,, {RShift Down}{%v%}{RShift Up}, %Edit1_Title%
+					ControlSend,, {Blind}{RShift Down}{%v%}{RShift Up}, %Edit1_Title%
 					Sleep, 1
 				}
 				ControlSendRaw,, % "`n", %Edit1_Title%

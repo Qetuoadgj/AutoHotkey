@@ -193,11 +193,11 @@ SET_DEFAULTS:
 	; Defaults.sound_toggle_fullscreen := "sounds\toggle_fullscreen.mp3"
 
 	; HotKeys
-	Defaults.key_switch_keyboard_layout := "NumPad1" ;"CapsLock"
-	Defaults.key_switch_text_case := "NumPad0" ;"$~!Break"
+	Defaults.key_switch_keyboard_layout := "$*NumPad1" ;"CapsLock"
+	Defaults.key_switch_text_case := "$*NumPad0" ;"$~!Break"
 	Defaults.key_switch_text_whitespace := "LWin & S"
-	Defaults.key_switch_text_layout := "NumPad2" ;"$~Break"
-	Defaults.key_toggle_cursor := "RWin" ;"#c"
+	Defaults.key_switch_text_layout := "$*NumPad2" ;"$~Break"
+	Defaults.key_toggle_cursor := "$RWin" ;"#c"
 	; Defaults.key_toggle_fullscreen := "LWin & LButton"
 
 	; KeyCombos
@@ -696,7 +696,9 @@ SWITCH_TEXT_LAYOUT:
 			Text_Layout_Index := Layout.Get_Index_By_Name(Selected_Text_Dictionary)
 		}
 		else {
-			Text_Layout_Index := Layout.Get_Index(Layout.Get_HKL("A"))
+			Current_Layout_HKL := Layout.Get_HKL("A")
+			Sleep, 10
+			Text_Layout_Index := Layout.Get_Index(Current_Layout_HKL)
 			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
 		}
 		if (Text_Layout_Index) {
@@ -921,6 +923,7 @@ FLAG_Update:
 		}
 	}
 	Current_Layout_HKL := Layout.Get_HKL("A")
+	Sleep, 10
 	if (not Current_Layout_HKL) {
 		return
 	}

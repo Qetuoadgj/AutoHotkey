@@ -641,13 +641,9 @@ CLIPBOARD_RESTORE:
 SWITCH_TO_NON_LATIN_LAYOUT:
 {
 	Current_Layout_HKL := ""
-	Sleep, 1
 	Current_Layout_HKL := Layout.Get_HKL("A")
-	Sleep, 10
 	Non_Latin_Layout_Index := Layout.Get_Index_By_Name("Russian")
-	Sleep, 1
 	Non_Latin_Layout_HKL := Layout.Layouts_List[Non_Latin_Layout_Index].HKL
-	Sleep, 1
 	Layout.Change(Non_Latin_Layout_HKL,,system_switch_layouts_by_send)
 	Sleep, 10
 	return

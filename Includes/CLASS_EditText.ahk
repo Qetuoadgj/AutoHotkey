@@ -56,7 +56,8 @@
 				}
 				if RegExMatch(Clipboard, "^\s+$") { ; строка состоит из пробелов
 					SendInput, % "{Right}"
-					Break
+					; Break
+					return
 				}
 				if RegExMatch(Clipboard, "\s+$") { ; курсор стоял перед пробелом, его нужно "перескочить"
 					Clipboard := "" ; Null

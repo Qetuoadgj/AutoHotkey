@@ -50,6 +50,8 @@ Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
+G_App_Version := "2.0.00"
+
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
 
@@ -1025,6 +1027,11 @@ FLAG_Update_Tray_Icon:
 FLAG_Customize_Menus:
 {
 	Menu, Tray, NoStandard
+	
+	Menu, Tray, Add, v%G_App_Version%, App_Close
+	Menu, Tray, Disable, v%G_App_Version%
+	
+	Menu, Tray, Add
 
 	Menu, Tray, Add, %l_system_suspend_hotkeys%, Menu_Toggle_Suspend
 	if (system_suspend_hotkeys) {
@@ -1081,6 +1088,11 @@ FLAG_Customize_Menus:
 	Menu, Tray, Add, %l_system_copy_text_in_non_latin_layout%, Menu_Toggle_Copy_Text_In_Non_Latin_Layout
 	if (system_copy_text_in_non_latin_layout) {
 		Menu, Tray, Check, %l_system_copy_text_in_non_latin_layout%
+	}
+	if (G_OSWindowsVersion >= 8) {
+		Menu, Tray, Disable, %l_system_copy_text_in_non_latin_layout%
+		system_copy_text_in_non_latin_layout := 0
+		Menu, Tray, UnCheck, %l_system_copy_text_in_non_latin_layout%
 	}
 
 	Menu, Tray, Add

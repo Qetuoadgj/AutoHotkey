@@ -638,6 +638,21 @@ CLIPBOARD_RESTORE:
 	return
 }
 
+SWITCH_TO_NON_LATIN_LAYOUT:
+{
+	Current_Layout_HKL := ""
+	Sleep, 1
+	Current_Layout_HKL := Layout.Get_HKL("A")
+	Sleep, 10
+	Non_Latin_Layout_Index := Layout.Get_Index_By_Name("Russian")
+	Sleep, 1
+	Non_Latin_Layout_HKL := Layout.Layouts_List[Non_Latin_Layout_Index].HKL
+	Sleep, 1
+	Layout.Change(Non_Latin_Layout_HKL,,system_switch_layouts_by_send)
+	Sleep, 10
+	return
+}
+
 SWITCH_TEXT_CASE:
 {
 	gosub, CLIPBOARD_SAVE
@@ -682,6 +697,7 @@ SWITCH_TEXT_WHITESPACE:
 SWITCH_TEXT_LAYOUT:
 {
 	gosub, CLIPBOARD_SAVE
+	gosub, SWITCH_TO_NON_LATIN_LAYOUT
 	if (Selected_Text := Edit_Text.Select()) {
 		/*
 		if (sound_enable and FileExist(sound_switch_text_layout)) {
@@ -696,7 +712,7 @@ SWITCH_TEXT_LAYOUT:
 			Text_Layout_Index := Layout.Get_Index_By_Name(Selected_Text_Dictionary)
 		}
 		else {
-			Current_Layout_HKL := Layout.Get_HKL("A")
+			Current_Layout_HKL := Current_Layout_HKL ? Current_Layout_HKL : Layout.Get_HKL("A")
 			Sleep, 10
 			Text_Layout_Index := Layout.Get_Index(Current_Layout_HKL)
 			Selected_Text_Dictionary := Layout.Layouts_List[Text_Layout_Index].Full_Name
@@ -923,7 +939,6 @@ FLAG_Update:
 		}
 	}
 	Current_Layout_HKL := Layout.Get_HKL("A")
-	Sleep, 10
 	if (not Current_Layout_HKL) {
 		return
 	}

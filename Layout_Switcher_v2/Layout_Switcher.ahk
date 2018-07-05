@@ -63,6 +63,8 @@ G_Last_Win_ID := 0
 G_Force_Update_Cycle := 1
 G_Need_Restart := 0
 
+G_OSWindowsVersion := SubStr(A_OSVersion, 5)
+
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
 gosub, READ_CONFIG_FILE
@@ -126,6 +128,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_system_fix_config_file_encoding, %Translation_File%, System, system_fix_config_file_encoding, % "Fix Config File Encoding"
 	IniRead, l_system_switch_layouts_by_send, %Translation_File%, System, system_switch_layouts_by_send, % "Use Alternative Layout Switch"
 	IniRead, l_system_minimize_check_cycles_frequency, %Translation_File%, System, system_minimize_check_cycles_frequency, % "Minimize Check Cycles Frequency"
+	IniRead, l_system_copy_text_in_non_latin_layout, %Translation_File%, System, system_copy_text_in_non_latin_layout, % "Improved Copying Of Non-Latin Text (OS < Win 8)"
 
 	; Flag
 	IniRead, l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
@@ -170,7 +173,9 @@ SET_DEFAULTS:
 	Defaults.system_show_tray_icon := 1
 	Defaults.system_skip_unused_dictionaries := 1
 	Defaults.system_fix_config_file_encoding := 1
-	Defaults.system_switch_layouts_by_send := 1
+	Defaults.system_switch_layouts_by_send := 0 ;1
+	Defaults.system_copy_text_in_non_latin_layout := (G_OSWindowsVersion >= 8 ? 0 : 1)
+	Defaults.system_non_latin_layout := "Russian"
 
 	; Flag
 	Defaults.flag_width := 32
@@ -260,6 +265,8 @@ READ_CONFIG_FILE:
 	IniRead, system_skip_unused_dictionaries, %Config_File%, System, system_skip_unused_dictionaries, % Defaults.system_skip_unused_dictionaries
 	IniRead, system_fix_config_file_encoding, %Config_File%, System, system_fix_config_file_encoding, % Defaults.system_fix_config_file_encoding
 	IniRead, system_switch_layouts_by_send, %Config_File%, System, system_switch_layouts_by_send, % Defaults.system_switch_layouts_by_send
+	IniRead, system_copy_text_in_non_latin_layout, %Config_File%, System, system_copy_text_in_non_latin_layout, % Defaults.system_copy_text_in_non_latin_layout
+	IniRead, system_non_latin_layout, %Config_File%, System, system_non_latin_layout, % Defaults.system_non_latin_layout
 
 	; Flag
 	IniRead, flag_width, %Config_File%, Flag, flag_width, % Defaults.flag_width
@@ -407,6 +414,8 @@ SAVE_CONFIG_FILE:
 	IniWrite("system_skip_unused_dictionaries", Config_File, "System", system_skip_unused_dictionaries)
 	IniWrite("system_fix_config_file_encoding", Config_File, "System", system_fix_config_file_encoding)
 	IniWrite("system_switch_layouts_by_send", Config_File, "System", system_switch_layouts_by_send)
+	IniWrite("system_copy_text_in_non_latin_layout", Config_File, "System", system_copy_text_in_non_latin_layout)
+	IniWrite("system_non_latin_layout", Config_File, "System", system_non_latin_layout)
 
 	; Flag
 	IniWrite("flag_width", Config_File, "Flag", flag_width)
@@ -640,12 +649,15 @@ CLIPBOARD_RESTORE:
 
 SWITCH_TO_NON_LATIN_LAYOUT:
 {
-	Current_Layout_HKL := ""
-	Current_Layout_HKL := Layout.Get_HKL("A")
-	Non_Latin_Layout_Index := Layout.Get_Index_By_Name("Russian")
-	Non_Latin_Layout_HKL := Layout.Layouts_List[Non_Latin_Layout_Index].HKL
-	Layout.Change(Non_Latin_Layout_HKL,,system_switch_layouts_by_send)
-	Sleep, 10
+	if (system_copy_text_in_non_latin_layout) {
+		Current_Layout_HKL := ""
+		Current_Layout_HKL := Layout.Get_HKL("A")
+		if (Non_Latin_Layout_Index := Layout.Get_Index_By_Name(system_non_latin_layout)) {
+			Non_Latin_Layout_HKL := Layout.Layouts_List[Non_Latin_Layout_Index].HKL
+			Layout.Change(Non_Latin_Layout_HKL,,system_switch_layouts_by_send)
+			Sleep, 10
+		}
+	}
 	return
 }
 
@@ -1065,6 +1077,11 @@ FLAG_Customize_Menus:
 	if (system_switch_layouts_by_send) {
 		Menu, Tray, Check, %l_system_switch_layouts_by_send%
 	}
+	
+	Menu, Tray, Add, %l_system_copy_text_in_non_latin_layout%, Menu_Toggle_Copy_Text_In_Non_Latin_Layout
+	if (system_copy_text_in_non_latin_layout) {
+		Menu, Tray, Check, %l_system_copy_text_in_non_latin_layout%
+	}
 
 	Menu, Tray, Add
 
@@ -1218,6 +1235,14 @@ Menu_Toggle_Switch_Layouts_By_Send:
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
 	system_switch_layouts_by_send := not system_switch_layouts_by_send
 	IniWrite("system_switch_layouts_by_send", Config_File, "System", system_switch_layouts_by_send)
+	return
+}
+
+Menu_Toggle_Copy_Text_In_Non_Latin_Layout:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	system_copy_text_in_non_latin_layout := not system_copy_text_in_non_latin_layout
+	IniWrite("system_copy_text_in_non_latin_layout", Config_File, "System", system_copy_text_in_non_latin_layout)
 	return
 }
 

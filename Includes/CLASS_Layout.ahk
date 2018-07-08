@@ -123,11 +123,26 @@ class Layout
 		}
 		return StrGet(&KLID)
 	}
-
+	/*
+	static VK_LShift := GetKeyVK("LShift"), VK_LAlt := GetKeyVK("LAlt")
+	Send_Shift_Alt()
+	{	
+		DllCall("keybd_event", int, This.VK_LShift, int, 0, int, 0, int, 0)		; Press
+		Sleep, 1
+		DllCall("keybd_event", int, This.VK_LAlt, int, 0, int, 0, int, 0)		; Press
+		Sleep, 1
+		DllCall("keybd_event", int, This.VK_LAlt, int, 0, int, 2, int, 0)		; Release
+		Sleep, 1
+		DllCall("keybd_event", int, This.VK_LShift, int, 0, int, 2, int, 0)		; Release
+		Sleep, 1
+	}
+	*/
 	Next(Window := "A", BySend := false)
 	{ ; функция смены раскладки (вперед)
 		if BySend { ; с помощью команды Send
 			SendInput, % This.Switch_Layout_Combo
+			; This.Send_Shift_Alt()
+			; SendEvent, % This.Switch_Layout_Combo
 		}
 		else { ; с помощью команды PostMessage
 			static Window_ID
@@ -157,6 +172,8 @@ class Layout
 						Break
 					}
 					SendInput, % This.Switch_Layout_Combo
+					; This.Send_Shift_Alt()
+					; SendEvent, % This.Switch_Layout_Combo
 					Sleep, 1
 				}
 			}

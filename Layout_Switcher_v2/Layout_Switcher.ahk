@@ -50,7 +50,7 @@ Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.00"
+G_App_Version := "2.0.01"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -65,7 +65,17 @@ G_Last_Win_ID := 0
 G_Force_Update_Cycle := 1
 G_Need_Restart := 0
 
-G_OSWindowsVersion := SubStr(A_OSVersion, 5)
+class OS
+{
+	static MajorVersion := DllCall("GetVersion") & 0xFF			; 10
+	static MinorVersion := DllCall("GetVersion") >> 8 & 0xFF	; 0
+	static BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF	; 10532
+}
+
+; G_OS_Version := RegExReplace(A_OSVersion, ".*?(\d+)\..*", "$1")
+G_OS_Version := (OS.MajorVersion . "." . OS.MinorVersion)
+
+; MsgBox, G_OS_Version: %G_OS_Version%
 
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
@@ -137,7 +147,9 @@ CREATE_LOCALIZATION:
 	IniRead, l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
 	IniRead, l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
 	IniRead, l_flag_hide_in_fullscreen_mode, %Translation_File%, Flag, flag_hide_in_fullscreen_mode, % "Hide In Fullscreen Mode"
-	IniRead, l_flag_show_splash, %Translation_File%, Flag, flag_show_splash, % "Show Language On Layout Change (Shift + Alt)"
+	
+	; Splash
+	IniRead, l_splash_enable, %Translation_File%, Splash, splash_enable, % "Show Splash Messages"
 
 	; Sound
 	IniRead, l_sound_enable, %Translation_File%, Sound, sound_enable, % "Enable Sounds"
@@ -176,7 +188,7 @@ SET_DEFAULTS:
 	Defaults.system_skip_unused_dictionaries := 1
 	Defaults.system_fix_config_file_encoding := 1
 	Defaults.system_switch_layouts_by_send := 0 ;1
-	Defaults.system_copy_text_in_non_latin_layout := (G_OSWindowsVersion >= 8 ? 0 : 1)
+	Defaults.system_copy_text_in_non_latin_layout := (G_OS_Version >= 6.2 ? 0 : 1) ; 6.2 = Windows 8 ; 6.1 = Windows 7
 	Defaults.system_non_latin_layout := "Russian"
 
 	; Flag
@@ -188,7 +200,11 @@ SET_DEFAULTS:
 	Defaults.flag_always_on_top := 1
 	Defaults.flag_fixed_position := 1 ;0
 	Defaults.flag_hide_in_fullscreen_mode := 1
-	Defaults.flag_show_splash := 1
+	
+	; Splash
+	Defaults.splash_enable := 1
+	Defaults.splash_text_color := "Teal"
+	Defaults.splash_scale := 0.8
 
 	; Sound
 	Defaults.sound_enable := 1
@@ -279,13 +295,20 @@ READ_CONFIG_FILE:
 	IniRead, flag_always_on_top, %Config_File%, Flag, flag_always_on_top, % Defaults.flag_always_on_top
 	IniRead, flag_fixed_position, %Config_File%, Flag, flag_fixed_position, % Defaults.flag_fixed_position
 	IniRead, flag_hide_in_fullscreen_mode, %Config_File%, Flag, flag_hide_in_fullscreen_mode, % Defaults.flag_hide_in_fullscreen_mode
-	IniRead, flag_show_splash, %Config_File%, Flag, flag_show_splash, % Defaults.flag_show_splash
 
 	Normalize("flag_width", Defaults.flag_width)
 	Normalize("flag_height", Defaults.flag_height)
 	Normalize("flag_position_x", Defaults.flag_position_x)
 	Normalize("flag_position_y", Defaults.flag_position_y)
-
+	
+	; Splash
+	IniRead, splash_enable, %Config_File%, Splash, splash_enable, % Defaults.splash_enable
+	IniRead, splash_text_color, %Config_File%, Splash, splash_text_color, % Defaults.splash_text_color
+	IniRead, splash_scale, %Config_File%, Splash, splash_scale, % Defaults.splash_scale
+	
+	Normalize("splash_text_color", Defaults.splash_text_color)
+	Normalize("splash_scale", Defaults.splash_scale)
+	
 	; Sound
 	IniRead, sound_enable, %Config_File%, Sound, sound_enable, % Defaults.sound_enable
 	IniRead, sound_switch_keyboard_layout, %Config_File%, Sound, sound_switch_keyboard_layout, % Defaults.sound_switch_keyboard_layout
@@ -428,7 +451,11 @@ SAVE_CONFIG_FILE:
 	IniWrite("flag_always_on_top", Config_File, "Flag", flag_always_on_top)
 	IniWrite("flag_fixed_position", Config_File, "Flag", flag_fixed_position)
 	IniWrite("flag_hide_in_fullscreen_mode", Config_File, "Flag", flag_hide_in_fullscreen_mode)
-	IniWrite("flag_show_splash", Config_File, "Flag", flag_show_splash)
+	
+	; Splash
+	IniWrite("splash_enable", Config_File, "Splash", splash_enable)
+	IniWrite("splash_text_color", Config_File, "Splash", splash_text_color)
+	IniWrite("splash_scale", Config_File, "Splash", splash_scale)
 
 	; Sound
 	IniWrite("sound_enable", Config_File, "Sound", sound_enable)
@@ -520,7 +547,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	; ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	gosub, FLAG_Update
 	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
-		if (flag_show_splash) {
+		if (splash_enable) {
 			if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
 				G_Splash_Text := Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name
 				gosub, FLAG_Show_Splash
@@ -548,7 +575,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	Layout_HKL := Layout.Get_HKL("A")
 	Sleep, 10
 	gosub, FLAG_Update
-	if (flag_show_splash) {
+	if (splash_enable) {
 		; ToolTip, Layout_HKL: %Layout_HKL%
 		; MsgBox, Layout_HKL: %Layout_HKL%
 		if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
@@ -582,7 +609,7 @@ TOGGLE_CURSOR:
 	}
 	G_cursor_state := SystemCursor("Toggle")
 	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
-		if (flag_show_splash) {
+		if (splash_enable) {
 			G_Splash_Text := G_cursor_state ? l_msg_cursor_on : l_msg_cursor_off
 			gosub, FLAG_Show_Splash
 		}
@@ -738,7 +765,7 @@ SWITCH_TEXT_LAYOUT:
 				; ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 				gosub, FLAG_Update
 				if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
-					if (flag_show_splash) {
+					if (splash_enable) {
 						if (Next_Layout_Full_Name) {
 							G_Splash_Text := Next_Layout_Full_Name . " - " . Next_Layout_Display_Name
 							gosub, FLAG_Show_Splash
@@ -979,22 +1006,12 @@ FLAG_Update_Picture:
 ; /*
 FLAG_Show_Splash:
 {
-	; MsgBox, FLAG_Show_Splash
-	/*
-	if (not Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name) {
-		return
-	}
-	*/
-	; splash_width := flag_width*5
-	; splash_height := flag_height*5
 	Gui, SPLASH_: Destroy
-	Gui, SPLASH_: Margin, 16, 16
+	Gui, SPLASH_: Margin, % 16 * splash_scale, % 16 * splash_scale
 	Gui, SPLASH_: +HWNDsplash_win_id
 	Gui, SPLASH_: -Caption +AlwaysOnTop +Border +E0x20 +ToolWindow ; +ToolWindow avoids a taskbar button and an alt-tab menu item.
-	; Gui, SPLASH_: Add, Picture, x0 y0 w%splash_width% h%splash_height%, %A_WorkingDir%\images\%Current_Layout_Full_Name%.png
-	Gui, SPLASH_: Font, s26 w600
-	; Gui, SPLASH_: Add, Text, cTeal, % Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name
-	Gui, SPLASH_: Add, Text, cTeal, %G_Splash_Text%
+	Gui, SPLASH_: Font, % " s" (26 * splash_scale) " w" (600 * splash_scale)
+	Gui, SPLASH_: Add, Text, c%splash_text_color%, %G_Splash_Text%
 	G_Splash_Text := ""
 	WinSet, Transparent, 255, ahk_id %splash_win_id%
 	Gui, SPLASH_: Show, AutoSize NA
@@ -1089,7 +1106,7 @@ FLAG_Customize_Menus:
 	if (system_copy_text_in_non_latin_layout) {
 		Menu, Tray, Check, %l_system_copy_text_in_non_latin_layout%
 	}
-	if (G_OSWindowsVersion >= 8) {
+	if (G_OS_Version >= 8) {
 		Menu, Tray, Disable, %l_system_copy_text_in_non_latin_layout%
 		system_copy_text_in_non_latin_layout := 0
 		Menu, Tray, UnCheck, %l_system_copy_text_in_non_latin_layout%
@@ -1124,9 +1141,9 @@ FLAG_Customize_Menus:
 		Menu, Tray, Check, %l_flag_hide_in_fullscreen_mode%
 	}
 
-	Menu, Tray, Add, %l_flag_show_splash%, Menu_Toggle_Show_Splash
-	if (flag_show_splash) {
-		Menu, Tray, Check, %l_flag_show_splash%
+	Menu, Tray, Add, %l_splash_enable%, Menu_Toggle_Show_Splash
+	if (splash_enable) {
+		Menu, Tray, Check, %l_splash_enable%
 	}
 
 	Menu, Tray, Add
@@ -1284,8 +1301,8 @@ Menu_Toggle_Show_Borders:
 Menu_Toggle_Show_Splash:
 {
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
-	flag_show_splash := not flag_show_splash
-	IniWrite("flag_show_splash", Config_File, "Flag", flag_show_splash)
+	splash_enable := not splash_enable
+	IniWrite("splash_enable", Config_File, "Splash", splash_enable)
 	return
 }
 

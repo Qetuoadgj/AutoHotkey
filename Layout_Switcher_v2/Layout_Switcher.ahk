@@ -50,7 +50,7 @@ Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.01"
+G_App_Version := "2.0.00"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -66,9 +66,6 @@ G_Force_Update_Cycle := 1
 G_Need_Restart := 0
 
 G_OSWindowsVersion := SubStr(A_OSVersion, 5)
-
-G_ThisHotkey := ""
-G_Initiated_By_HotKey := 0
 
 gosub, CREATE_LOCALIZATION
 gosub, SET_DEFAULTS
@@ -501,27 +498,8 @@ PRELOAD_RESOURCES:
 	return
 }
 
-
-PREVENT_REPETITION_INIT:
-{
-	G_ThisHotkey := RegExReplace(A_ThisHotkey, "^[*$~]+", "")
-	G_Initiated_By_HotKey := 1
-	return
-}
-
-PREVENT_REPETITION_APPLY:
-{
-	; ToolTip, A_ThisHotkey: %A_ThisHotkey% `n G_ThisHotkey: %G_ThisHotkey%
-	While GetKeyState(G_ThisHotkey, "P") {
-		Sleep, 10
-	}
-	G_Initiated_By_HotKey := 0
-	return
-}
-
 SWITCH_KEYBOARD_LAYOUT:
 {
-	gosub, PREVENT_REPETITION_INIT
 	/*
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
 		SoundPlay, %sound_switch_keyboard_layout%
@@ -552,9 +530,8 @@ SWITCH_KEYBOARD_LAYOUT:
 			ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 		}
 	}
-	; Sleep, 50
+	Sleep, 50
 	G_Force_Update_Cycle := 1
-	gosub, PREVENT_REPETITION_APPLY
 	return
 }
 
@@ -564,7 +541,7 @@ SWITCH_KEYBOARD_LAYOUT:
 ~Alt & ~Shift Up::
 ~Alt & ~Shift::
 {
-	if (G_Initiated_By_HotKey or (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
+	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
 		return
 	}
 	Sleep, 50
@@ -595,7 +572,6 @@ SWITCH_KEYBOARD_LAYOUT:
 
 TOGGLE_CURSOR:
 {
-	gosub, PREVENT_REPETITION_INIT
 	/*
 	if (sound_enable and FileExist(sound_toggle_cursor)) {
 		SoundPlay, %sound_toggle_cursor%
@@ -614,14 +590,12 @@ TOGGLE_CURSOR:
 			ToolTip(G_cursor_state ? l_msg_cursor_on : l_msg_cursor_off)
 		}
 	}
-	; Sleep, 50
-	gosub, PREVENT_REPETITION_APPLY
+	Sleep, 50
 	return
 }
 
 TOGGLE_MAGNIFIER:
 {
-	gosub, PREVENT_REPETITION_INIT
 	if FileExist(module_magnifier_long_path) {
 		WinGet, Magnifier_Path, ProcessPath, ahk_pid %Magnifier_Win_PID%
 		if (Magnifier_Path) {
@@ -631,8 +605,7 @@ TOGGLE_MAGNIFIER:
 			gosub, Magnifier_Init
 		}
 	}
-	; Sleep, 50
-	gosub, PREVENT_REPETITION_APPLY
+	Sleep, 50
 	return
 }
 
@@ -692,7 +665,6 @@ SWITCH_TO_NON_LATIN_LAYOUT:
 
 SWITCH_TEXT_CASE:
 {
-	gosub, PREVENT_REPETITION_INIT
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		/*
@@ -706,15 +678,13 @@ SWITCH_TEXT_CASE:
 		Converted_Text := Edit_Text.Convert_Case(Selected_Text, false)
 		Edit_Text.Paste(Converted_Text)
 	}
-	; Sleep, 50
+	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
-	gosub, PREVENT_REPETITION_APPLY
 	return
 }
 
 SWITCH_TEXT_WHITESPACE:
 {
-	gosub, PREVENT_REPETITION_INIT
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		/*
@@ -728,16 +698,14 @@ SWITCH_TEXT_WHITESPACE:
 		Converted_Text := Edit_Text.Convert_Whitespace(Selected_Text, text_whitespace_replacement, text_tab_size)
 		Edit_Text.Paste(Converted_Text)
 	}
-	; Sleep, 50
+	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
-	gosub, PREVENT_REPETITION_APPLY
 	return
 }
 
 ; /*
 SWITCH_TEXT_LAYOUT:
 {
-	gosub, PREVENT_REPETITION_INIT
 	gosub, CLIPBOARD_SAVE
 	gosub, SWITCH_TO_NON_LATIN_LAYOUT
 	if (Selected_Text := Edit_Text.Select()) {
@@ -784,10 +752,9 @@ SWITCH_TEXT_LAYOUT:
 		}
 	}
 	; gosub, FLAG_Update
-	; Sleep, 50
+	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
 	G_Force_Update_Cycle := 1
-	gosub, PREVENT_REPETITION_APPLY
 	return
 }
 ; */

@@ -7,14 +7,8 @@ SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 ListLines, Off	; Disable them as they're only useful for debugging purposes.
 #KeyHistory, 0	; ListLines and #KeyHistory are functions used to "log your keys".
-; SetBatchLines, -1
-SetBatchLines, 20ms
 
 DetectHiddenWindows, On
-
-#MaxThreads, 2
-#MaxThreadsPerHotkey, 1
-#MaxThreadsBuffer, Off
 
 /* Generic optimizations 			; https://autohotkey.com/boards/viewtopic.php?f=6&t=6413
 #NoEnv								; #NoEnv is recommended for all scripts, it disables environment variables.
@@ -31,6 +25,8 @@ SetWinDelay, -1						; SetWinDelay and SetControlDelay may affect performance de
 SetControlDelay, -1					;
 SendMode, Input						; SendInput is the fastest send method. SendEvent (the default one) is 2nd place, SendPlay a far 3rd place (it's the most compatible one though). SendInput does not obey to SetKeyDelay, SetMouseDelay, SetDefaultMouseSpeed; there is no delay between keystrokes in that mode.
 */
+
+gosub, Maximize_Performance
 
 ; Определение классов (для исключения их прямой перезаписи)
 ; new Script		:= c_Script
@@ -116,6 +112,8 @@ OnExit, App_Close
 if (G_Need_Restart == 1) {
 	Reload
 }
+
+gosub, Minimize_Performance
 
 Exit
 
@@ -1502,9 +1500,24 @@ Magnifier_Close:
 
 App_Close:
 {
+	gosub, Maximize_Performance
 	gosub, Magnifier_Close
 	G_cursor_state := SystemCursor("On")
 	ExitApp
+	return
+}
+
+Maximize_Performance:
+{
+	#MaxThreads
+	SetBatchLines, -1
+	return
+}
+
+Minimize_Performance:
+{
+	#MaxThreads, 2
+	SetBatchLines, 20ms
 	return
 }
 

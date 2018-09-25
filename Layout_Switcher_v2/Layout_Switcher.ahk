@@ -1491,7 +1491,8 @@ Magnifier_Close:
 {
 	if (Magnifier_Win_PID) {
 		; MsgBox, %Magnifier_Win_PID%
-		Process, Close, %Magnifier_Win_PID%
+		; Process, Close, %Magnifier_Win_PID%
+		Script.Close_Process(Magnifier_Win_PID)
 		WinWaitClose, ahk_pid %Magnifier_Win_PID%
 		Magnifier_Win_PID := 0
 	}

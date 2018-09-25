@@ -21,7 +21,8 @@ if (NumberOfParameters) {
 		Parameter := %A_Index%
 		if RegExMatch(Parameter, "-app_pid=(.*)", Match) {
 			Process_PID := Match1
-			Process, Close, %Process_PID%
+			; Process, Close, %Process_PID%
+			Script.Close_Process(Process_PID)
 			WinWaitClose, ahk_pid %Process_PID%,,5
 		}
 	}

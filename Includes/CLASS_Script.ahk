@@ -18,6 +18,23 @@
 		}
 		DetectHiddenWindows, % Detect_Hidden_Windows_Tmp
 	}
+	
+	Close_Process(Process_PID)
+	{ ; функция завершения процесса с вызовом сабрутины OnExit
+		static DHW
+		DHW := A_DetectHiddenWindows
+		DetectHiddenWindows, On
+		try {
+			; WinClose, ahk_pid %Confirmed_PID%
+			; WinGet, ID, ID, ahk_pid %Confirmed_PID%
+			PostMessage, 0x111, 65405, 0,, ahk_pid %Process_PID%
+		}
+		catch {
+			Process, Close, %Process_PID%
+		}
+		DetectHiddenWindows, %DHW%
+		return
+	}
 
 	Close_Other_Instances(App_Full_Path)
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
@@ -32,7 +49,8 @@
 			Process_ID := Process_List%Process_Count%
 			if (not Process_ID = Current_ID) {
 				WinGet, Process_PID, PID, % App_Full_Path . " ahk_id " . Process_ID
-				Process, Close, %Process_PID%
+				; Process, Close, %Process_PID%
+				This.Close_Process(Process_PID)
 			}
 			Process_Count += 1
 		}

@@ -46,7 +46,7 @@ Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.03"
+G_App_Version := "2.0.04"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -113,7 +113,7 @@ if (G_Need_Restart == 1) {
 	Reload
 }
 
-gosub, Minimize_Performance
+; gosub, Minimize_Performance
 
 Exit
 
@@ -1501,7 +1501,7 @@ Magnifier_Close:
 
 App_Close:
 {
-	gosub, Maximize_Performance
+	; gosub, Maximize_Performance
 	gosub, Magnifier_Close
 	G_cursor_state := SystemCursor("On")
 	ExitApp

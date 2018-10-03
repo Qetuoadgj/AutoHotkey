@@ -1,4 +1,26 @@
 @echo off
+
+@echo off
+
+call :isAdmin
+if %ErrorLevel% == 0 (
+	echo.Running with admin rights.
+	echo.
+	goto :mainThread
+) else (
+	goto :strtElevated
+)
+exit
+
+:strtElevated
+powershell -command "Start-Process cmd -ArgumentList '/k call ""%~dpnx0"""' -Verb runas"
+exit
+
+:isAdmin
+fsutil dirty query %systemdrive% >nul
+exit /b
+
+:mainThread
 cls
 	cd /d "%~dp0"
 	set "compiler_dir=%SystemDrive%\Program Files\AutoHotkey\Compiler"
@@ -24,4 +46,8 @@ cls
 		"%compiler_dir%\Ahk2Exe.exe" /in "%Updater_Name%.ahk" /out "%Updater_Name%.exe" /icon "%Updater_Name%.ico" /bin "%compiler_dir%\Unicode 32-bit.bin" /mpress 1
 		if exist "%Updater_Name%.exe" (echo.%Updater_Name%.exe)
 	)
-pause
+REM pause
+
+:theEnd
+TIMEOUT 2
+exit

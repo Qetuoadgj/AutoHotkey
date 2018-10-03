@@ -46,7 +46,7 @@ Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.04"
+G_App_Version := "2.0.05"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -60,6 +60,8 @@ G_Splash_Text := ""
 G_Last_Win_ID := 0
 G_Force_Update_Cycle := 1
 G_Need_Restart := 0
+; G_ForceUpdateTime := 5000
+G_LastUpdateTimeDelta := 0
 
 class OS
 {
@@ -180,6 +182,7 @@ SET_DEFAULTS:
 	Defaults.system_run_with_high_priority := 1
 	Defaults.system_check_layout_change_interval := "On" ; 250
 	Defaults.system_minimize_check_cycles_frequency := 1
+	Defaults.system_force_check_delay := 5000
 	Defaults.system_detect_dictionary := 1
 	; Defaults.system_encoding_compatibility_mode := 0
 	Defaults.system_show_tray_icon := 1
@@ -277,6 +280,7 @@ READ_CONFIG_FILE:
 	IniRead, system_run_with_high_priority, %Config_File%, System, system_run_with_high_priority, % Defaults.system_run_with_high_priority
 	IniRead, system_check_layout_change_interval, %Config_File%, System, system_check_layout_change_interval, % Defaults.system_check_layout_change_interval
 	IniRead, system_minimize_check_cycles_frequency, %Config_File%, System, system_minimize_check_cycles_frequency, % Defaults.system_minimize_check_cycles_frequency
+	IniRead, system_force_check_delay, %Config_File%, System, system_force_check_delay, % Defaults.system_force_check_delay
 	IniRead, system_detect_dictionary, %Config_File%, System, system_detect_dictionary, % Defaults.system_detect_dictionary
 	; IniRead, system_encoding_compatibility_mode, %Config_File%, System, system_encoding_compatibility_mode, % Defaults.system_encoding_compatibility_mode
 	IniRead, system_show_tray_icon, %Config_File%, System, system_show_tray_icon, % Defaults.system_show_tray_icon
@@ -435,6 +439,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("system_run_with_high_priority", Config_File, "System", system_run_with_high_priority)
 	IniWrite("system_check_layout_change_interval", Config_File, "System", system_check_layout_change_interval)
 	IniWrite("system_minimize_check_cycles_frequency", Config_File, "System", system_minimize_check_cycles_frequency)
+	IniWrite("system_force_check_delay", Config_File, "System", system_force_check_delay)
 	IniWrite("system_detect_dictionary", Config_File, "System", system_detect_dictionary)
 	; IniWrite("system_encoding_compatibility_mode", Config_File, "System", system_encoding_compatibility_mode)
 	IniWrite("system_show_tray_icon", Config_File, "System", system_show_tray_icon)
@@ -961,11 +966,14 @@ FLAG_Update:
 	if (system_minimize_check_cycles_frequency) {
 		G_Cur_Win_ID := WinExist("A")
 		; if (!GetKeyState("LWin", "P") and G_Cur_Win_ID = G_Last_Win_ID) {
+		; if (!G_Force_Update_Cycle and (G_Cur_Win_ID = G_Last_Win_ID)) {
+		G_Force_Update_Cycle := G_Force_Update_Cycle or (system_force_check_delay and ((A_TickCount - G_LastUpdateTimeDelta) > system_force_check_delay))
 		if (!G_Force_Update_Cycle and (G_Cur_Win_ID = G_Last_Win_ID)) {
 			return
 		}
 		G_Last_Win_ID := G_Cur_Win_ID
 		G_Force_Update_Cycle := 0
+		G_LastUpdateTimeDelta := A_TickCount
 	}
 	; ToolTip, %A_TickCount%
 	if (flag_always_on_top) {

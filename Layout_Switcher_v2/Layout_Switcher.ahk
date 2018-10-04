@@ -26,7 +26,7 @@ SetControlDelay, -1					;
 SendMode, Input						; SendInput is the fastest send method. SendEvent (the default one) is 2nd place, SendPlay a far 3rd place (it's the most compatible one though). SendInput does not obey to SetKeyDelay, SetMouseDelay, SetDefaultMouseSpeed; there is no delay between keystrokes in that mode.
 */
 
-gosub, Maximize_Performance
+; gosub, Maximize_Performance
 
 ; Определение классов (для исключения их прямой перезаписи)
 ; new Script		:= c_Script
@@ -46,7 +46,7 @@ Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.05"
+G_App_Version := "2.0.06 [AHK v1.1.30.00]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -1001,7 +1001,7 @@ FLAG_Update:
 	Last_Layout_Full_Name := Current_Layout_Full_Name
 	; Splash(Current_Layout_Png, 0, 0, flag_width*2, flag_height*2, 1000)
 	; gosub, FLAG_Show_Splash
-	; SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
+	SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
 	return
 }
 

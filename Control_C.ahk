@@ -19,6 +19,8 @@ SCRIPT_NAME := GetScriptName()
 SCRIPT_VERSION := "1.1.6"
 SCRIPT_WIN_TITLE := SCRIPT_NAME . " v" . SCRIPT_VERSION
 
+OnExit, OnAppClose
+
 ; MsgBox, 0, %SCRIPT_WIN_TITLE%, Ready!, 0.5
 
 Ctrl_C := "^{vk43}" . "{Ctrl Up}"
@@ -87,8 +89,24 @@ SetDocumentWindow:
 		WinGet, Npp_WinID, ID
 	}
 
-	EDITOR_PATH := A_ProgramFiles . "\Notepad++\notepad++.exe"
-
+	EDITOR_PATH := ""
+	EDITOR_PATH_ARRAY := []
+	EDITOR_PATH_ARRAY.Push(A_ProgramFiles . "\Notepad++\notepad++.exe")
+	EDITOR_PATH_ARRAY.Push(A_ProgramFiles . " (86)\Notepad++\notepad++.exe")
+	EDITOR_PATH_ARRAY.Push("D:\Program Files\Notepad++\notepad++.exe")
+	Path := ""
+	for Index, Path in EDITOR_PATH_ARRAY {
+		if FileExist(Path) {
+			EDITOR_PATH := Path
+			break
+		}
+	}
+	if (EDITOR_PATH = "") {
+		SoundPlay, *16
+		MsgBox, 0, Error, Can't find notepad++.exe, 1.5
+		ExitApp
+	}
+	
 	If (FileExist(EDITOR_PATH) && FileExist(DOCUMENT_PATH))
 	{
 		If (not Npp_WinID) {
@@ -147,6 +165,8 @@ SC052:: ; Numpad0
 			WinActivate, ahk_id %Chrome_WinID%
 			WinWaitActive, ahk_id %Chrome_WinID%
 		}
+		
+		gosub, BrowserPageActivate
 
 		Clipboard := "" ; Null
 		ControlSend, Chrome_RenderWidgetHostHWND1,  % Ctrl_C, ahk_id %Chrome_WinID%
@@ -159,14 +179,6 @@ SC052:: ; Numpad0
 			Loop, 3
 			{
 				Clipboard := "" ; Null
-				; CoordMode, Mouse, Screen
-				; MouseGetPos, X, Y
-				; CoordMode, Mouse, Client
-				; MouseMove, 10, 110
-				; Send, {Click}
-				; Sleep, 5
-				; Send, {Click}
-				; Sleep, 5
 				WinActivate, ahk_id %Chrome_WinID%
 				WinWaitActive, ahk_id %Chrome_WinID%,,5
 				ControlSend, Chrome_RenderWidgetHostHWND1, % Ctrl_C, ahk_id %Chrome_WinID%
@@ -313,6 +325,23 @@ SC052:: ; Numpad0
 	Return
 }
 
+BrowserPageActivate:
+{
+	; CoordMode, Mouse, Screen
+	; MouseGetPos, X, Y
+	CoordMode, Mouse, Client
+	; MouseMove, 10, 110
+	; Send, {Click}
+	ClickPosX := 10+2
+	ClickPosY := 110+2
+	Click, Right, %ClickPosX%, %ClickPosY%
+	Sleep, 50
+	Send, {Esc}
+	; Sleep, 5
+	;
+	Return
+}
+
 SC04F:: ; Numpad1
 {
 	ControlGet, Bool, Visible,,, %SCRIPT_WIN_TITLE%
@@ -330,6 +359,13 @@ SC04F:: ; Numpad1
 NumpadEnter::
 {
 	Send {Volume_Mute}
+	return
+}
+
+OnAppClose:
+{
+	SoundSet, 0, MASTER, MUTE, 1 ; 0 = Un-Mute ; +1|-1 = Mute
+	ExitApp
 	return
 }
 

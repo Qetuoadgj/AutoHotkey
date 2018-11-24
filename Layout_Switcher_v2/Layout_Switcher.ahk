@@ -46,7 +46,7 @@ Script_Args := Script.Args()
 Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.06 [AHK v1.1.30.00]"
+G_App_Version := "2.0.07 [AHK v1.1.30.01]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -143,6 +143,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_system_copy_text_in_non_latin_layout, %Translation_File%, System, system_copy_text_in_non_latin_layout, % "Improved Copying Of Non-Latin Text (OS < Win 8)"
 
 	; Flag
+	IniRead, l_flag_scale, %Translation_File%, Flag, flag_scale, % "Scale"
 	IniRead, l_flag_show_borders, %Translation_File%, Flag, flag_show_borders, % "Show Borders"
 	IniRead, l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
 	IniRead, l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
@@ -197,6 +198,7 @@ SET_DEFAULTS:
 	Defaults.flag_height := 22
 	Defaults.flag_position_x := A_ScreenWidth - Defaults.flag_width - 156 ;"Center"
 	Defaults.flag_position_y := 1 ;"Center"
+	Defaults.flag_scale := 1
 	Defaults.flag_show_borders := 1
 	Defaults.flag_always_on_top := 1
 	Defaults.flag_fixed_position := 1 ;0
@@ -295,6 +297,7 @@ READ_CONFIG_FILE:
 	IniRead, flag_height, %Config_File%, Flag, flag_height, % Defaults.flag_height
 	IniRead, flag_position_x, %Config_File%, Flag, flag_position_x, % Defaults.flag_position_x
 	IniRead, flag_position_y, %Config_File%, Flag, flag_position_y, % Defaults.flag_position_y
+	IniRead, flag_scale, %Config_File%, Flag, flag_scale, % Defaults.flag_scale
 	IniRead, flag_show_borders, %Config_File%, Flag, flag_show_borders, % Defaults.flag_show_borders
 	IniRead, flag_always_on_top, %Config_File%, Flag, flag_always_on_top, % Defaults.flag_always_on_top
 	IniRead, flag_fixed_position, %Config_File%, Flag, flag_fixed_position, % Defaults.flag_fixed_position
@@ -454,6 +457,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("flag_height", Config_File, "Flag", flag_height)
 	IniWrite("flag_position_x", Config_File, "Flag", flag_position_x)
 	IniWrite("flag_position_y", Config_File, "Flag", flag_position_y)
+	IniWrite("flag_scale", Config_File, "Flag", flag_scale)
 	IniWrite("flag_show_borders", Config_File, "Flag", flag_show_borders)
 	IniWrite("flag_always_on_top", Config_File, "Flag", flag_always_on_top)
 	IniWrite("flag_fixed_position", Config_File, "Flag", flag_fixed_position)
@@ -920,10 +924,20 @@ FLAG_Create_GUI:
 	else {
 		Gui, FLAG_: -Border
 	}
-
 	Gui, FLAG_: Show, w%flag_width% h%flag_height% x%flag_position_x% y%flag_position_y%
 	Gui, FLAG_: +LastFound
 	WinGet, flag_win_id, ID
+	;
+	if (flag_scale) {
+		WinGetPos, ActualX, ActualY, ActualW, ActualH, ahk_id %flag_win_id%
+	}
+	else {
+		WinGetPos, ActualX, ActualY, ActualW, ActualH, ahk_id %flag_win_id%
+		flag_corrected_width := flag_width - (ActualW - flag_width) + 3
+		flag_corrected_height := flag_height - (ActualH - flag_height) + 3
+		Gui, FLAG_: Show, w%flag_corrected_width% h%flag_corrected_height% x%flag_position_x% y%flag_position_y%
+	}
+	;
 	OnMessage(WM_LBUTTONDOWN := 0x201, "FLAG_WM_LBUTTONDOWN") ; Зажата LMB
 	return
 }
@@ -957,7 +971,12 @@ FLAG_Save_Position:
 
 FLAG_Add_Picture:
 {
-	Gui, FLAG_: Add, Picture, x0 y0 w%flag_width% h%flag_height% vFLAG_PICTURE gCAPTURE_GUI_EVENTS
+	if (flag_scale) {
+		Gui, FLAG_: Add, Picture, x0 y0 w%ActualW% h%ActualH% vFLAG_PICTURE gCAPTURE_GUI_EVENTS
+	}
+	else {
+		Gui, FLAG_: Add, Picture, x0 y0 w%flag_width% h%flag_height% vFLAG_PICTURE gCAPTURE_GUI_EVENTS
+	}
 	return
 }
 
@@ -1008,7 +1027,12 @@ FLAG_Update:
 FLAG_Update_Picture:
 {
 	Current_Layout_Png := A_WorkingDir "\images\" Current_Layout_Full_Name ".png"
-	GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%flag_width% *h%flag_height% %Current_Layout_Png%
+	if (flag_scale) {
+		GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%ActualW% *h%ActualH% %Current_Layout_Png%
+	}
+	else {
+		GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%flag_width% *h%flag_height% %Current_Layout_Png%
+	}
 	; ToolTip(Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name)
 	return
 }
@@ -1130,6 +1154,11 @@ FLAG_Customize_Menus:
 	}
 
 	Menu, Tray, Add
+	
+	Menu, Tray, Add, %l_flag_scale%, Menu_Toggle_Scale
+	if (flag_scale) {
+		Menu, Tray, Check, %l_flag_scale%
+	}
 
 	Menu, Tray, Add, %l_flag_show_borders%, Menu_Toggle_Show_Borders
 	if (flag_show_borders) {
@@ -1293,6 +1322,24 @@ Menu_Toggle_Minimize_Check_Cycles_Frequency:
 	return
 }
 
+Menu_Toggle_Scale:
+{
+	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
+	flag_scale := not flag_scale
+	IniWrite("flag_scale", Config_File, "Flag", flag_scale)
+	Reload
+	/*
+	if (flag_scale) {
+		Gui, FLAG_: Show, w%flag_width% h%flag_height%
+	}
+	else {
+		Gui, FLAG_: Show, w%flag_corrected_width% h%flag_corrected_height%
+	}
+	*/
+	return
+}
+
+
 Menu_Toggle_Show_Borders:
 {
 	Menu, Tray, ToggleCheck, %A_ThisMenuItem%
@@ -1304,7 +1351,8 @@ Menu_Toggle_Show_Borders:
 	else {
 		Gui, FLAG_: -Border
 	}
-	Gui, FLAG_: Show, w%flag_width% h%flag_height%
+	; Gui, FLAG_: Show, w%flag_width% h%flag_height%
+	Gui, FLAG_: Show, w%flag_corrected_width% h%flag_corrected_height%
 	return
 }
 

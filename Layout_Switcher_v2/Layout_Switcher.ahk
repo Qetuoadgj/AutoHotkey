@@ -243,7 +243,7 @@ SET_DEFAULTS:
 	; Defaults.key_toggle_fullscreen := "LWin & LButton"
 	
 	; HotKeysExcludeWinTitles
-	Defaults.keys_exclude_win_titles := "ahk_exe Oblivion.exe"
+	Defaults.keys_exclude_win_titles := "ahk_exe Oblivion.exe`n; ahk_class Notepad++"
 
 	; KeyCombos
 	Defaults.combo_switch_layout := "{Blind}{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
@@ -355,7 +355,6 @@ READ_CONFIG_FILE:
 	; HotKeysExcludeWinTitles
 	IniRead, keys_exclude_win_titles, %Config_File%, HotKeysExcludeWinTitles
 	if (keys_exclude_win_titles == "ERROR" or not keys_exclude_win_titles) {
-		IniWrite, % Defaults.keys_exclude_win_titles, %Config_File%, HotKeysExcludeWinTitles
 		keys_exclude_win_titles := Defaults.keys_exclude_win_titles
 	}
 	Loop, Parse, keys_exclude_win_titles, `n, `r
@@ -521,6 +520,9 @@ SAVE_CONFIG_FILE:
 	IniWrite("key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout)
 	IniWrite("key_toggle_cursor", Config_File, "HotKeys", key_toggle_cursor)
 	; IniWrite("key_toggle_fullscreen", Config_File, "HotKeys", key_toggle_fullscreen)
+	
+	; HotKeysExcludeWinTitles
+	IniRefresh(Config_File, keys_exclude_win_titles, "HotKeysExcludeWinTitles", "")
 
 	; KeyCombos
 	IniWrite("combo_switch_layout", Config_File, "KeyCombos", combo_switch_layout)
@@ -1633,6 +1635,7 @@ Minimize_Performance:
 
 #Include ..\Includes\FUNC_Normalize.ahk
 #Include ..\Includes\FUNC_IniWrite.ahk
+#Include ..\Includes\FUNC_IniRefresh.ahk
 #Include ..\Includes\FUNC_ToolTip.ahk
 #Include ..\Includes\FUNC_MenuIcon.ahk
 #Include ..\Includes\FUNC_SystemCursor.ahk

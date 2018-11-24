@@ -1,7 +1,7 @@
 ﻿class Script
 { ; функции управления скриптом
 
-	Force_Single_Instance(File_Names := false)
+	Force_Single_Instance(File_Names := false, WaitCloseSec := 1, Force := 1)
 	{ ; функция автоматического завершения всех копий текущего скрипта (одновременно для .exe и .ahk)
 		static Detect_Hidden_Windows_Tmp
 		static File_Name, Index
@@ -11,48 +11,68 @@
 		#SingleInstance, Off
 		DetectHiddenWindows, On
 		Script_Name := RegExReplace(A_ScriptName, "^(.*)\.(.*)$", "$1")
-		File_Names := File_Names ? File_Names : [ Script_Name . ".exe", Script_Name . ".ahk" ]
+		File_Names := File_Names ? File_Names : [ Script_Name ] ; [ Script_Name . ".exe", Script_Name . ".ahk" ]
 		for Index, File_Name in File_Names {
 			App_Full_Path := A_ScriptDir . "\" . File_Name
-			This.Close_Other_Instances(App_Full_Path . "ahk_class AutoHotkey")
+			This.Close_Other_Instances(App_Full_Path . " ahk_class AutoHotkey", WaitCloseSec := 1, Force := 1) ; This.Close_Other_Instances(App_Full_Path . " ahk_class AutoHotkey")
 		}
 		DetectHiddenWindows, % Detect_Hidden_Windows_Tmp
 	}
 	
-	Close_Process(Process_PID)
+	Close_Process(Process_PID, WaitCloseSec := 1, Force := 1)
 	{ ; функция завершения процесса с вызовом сабрутины OnExit
 		static DHW
 		DHW := A_DetectHiddenWindows
 		DetectHiddenWindows, On
-		try {
-			; WinClose, ahk_pid %Confirmed_PID%
-			; WinGet, ID, ID, ahk_pid %Confirmed_PID%
+		if WinExist("ahk_pid " . Process_PID) {
 			PostMessage, 0x111, 65405, 0,, ahk_pid %Process_PID%
+			if (WaitCloseSec) {
+				; WinWaitClose, ahk_pid %Process_PID%,, %WaitCloseSec%
+				Process, WaitClose, ahk_pid %Process_PID%, %WaitCloseSec%
+			}
 		}
-		catch {
+		if (Force) {
 			Process, Close, %Process_PID%
 		}
 		DetectHiddenWindows, %DHW%
 		return
 	}
-
-	Close_Other_Instances(App_Full_Path)
+	
+	Close_Other_Instances(App_Full_Path, WaitCloseSec := 1, Force := 1)
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
-		static Current_ID, Process_List, Process_Count, Process_ID, Process_PID
+		static Current_ID, Current_PID, Process_List, Process_Count, Process_ID, Process_PID
 		;
 		App_Full_Path := App_Full_Path ? App_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Current_ID, ID, % A_ScriptFullPath . " ahk_class AutoHotkey"
+		WinGet, Current_PID, PID, % A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Process_List, List, % App_Full_Path . " ahk_class AutoHotkey"
 		Process_Count := 1
+		; MsgBox, App_Full_Path: %App_Full_Path%
+		; MsgBox, Process_List: %Process_List%
 		Loop, %Process_List%
 		{
+			; MsgBox, App_Full_Path: %App_Full_Path%
+			; MsgBox, Process_ID: %Process_ID%
 			Process_ID := Process_List%Process_Count%
-			if (not Process_ID = Current_ID) {
+			if (Process_ID and Process_ID != Current_ID) {
 				WinGet, Process_PID, PID, % App_Full_Path . " ahk_id " . Process_ID
 				; Process, Close, %Process_PID%
-				This.Close_Process(Process_PID)
+				This.Close_Process(Process_PID, WaitCloseSec, Force)
 			}
 			Process_Count += 1
+		}
+		;
+		static ProcessObj
+		static Script_Name
+		Script_Name := RegExReplace(A_ScriptFullPath, "^(.*)(_x32|_x64)\..*", "$1")
+		for ProcessObj in ComObjGet("winmgmts:").ExecQuery("Select ProcessId, CommandLine from Win32_Process where name = 'Autohotkey.exe'", "WQL", 0x20 | 0x10 | 0x0) {
+			; MsgBox, % "ProcessObj.CommandLine: " . ProcessObj.CommandLine "`nScript_Name: " Script_Name
+			if InStr(ProcessObj.CommandLine, Script_Name) {
+				; MsgBox, % "processObj.CommandLine: " . processObj.CommandLine
+				if (ProcessObj.ProcessId != Current_PID) {
+					Script.Close_Process(ProcessObj.ProcessId, WaitCloseSec, Force)
+				}
+			}
 		}
 	}
 

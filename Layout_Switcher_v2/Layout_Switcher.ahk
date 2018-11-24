@@ -48,7 +48,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.08 [AHK v1.1.30.01]"
+G_App_Version := "2.0.09 [AHK v1.1.30.01]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -241,6 +241,9 @@ SET_DEFAULTS:
 	Defaults.key_switch_text_layout := "$*NumPad2" ;"$~Break"
 	Defaults.key_toggle_cursor := "$RWin" ;"#c"
 	; Defaults.key_toggle_fullscreen := "LWin & LButton"
+	
+	; HotKeysExcludeWinTitles
+	Defaults.keys_exclude_win_titles := "ahk_exe Oblivion.exe"
 
 	; KeyCombos
 	Defaults.combo_switch_layout := "{Blind}{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
@@ -348,6 +351,24 @@ READ_CONFIG_FILE:
 	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
 	IniRead, key_toggle_cursor, %Config_File%, HotKeys, key_toggle_cursor, % Defaults.key_toggle_cursor
 	; IniRead key_toggle_fullscreen, %Config_File%, HotKeys, key_toggle_fullscreen, % Defaults.key_toggle_fullscreen
+	
+	; HotKeysExcludeWinTitles
+	IniRead, keys_exclude_win_titles, %Config_File%, HotKeysExcludeWinTitles
+	if (keys_exclude_win_titles == "ERROR" or not keys_exclude_win_titles) {
+		IniWrite, % Defaults.keys_exclude_win_titles, %Config_File%, HotKeysExcludeWinTitles
+		keys_exclude_win_titles := Defaults.keys_exclude_win_titles
+	}
+	Loop, Parse, keys_exclude_win_titles, `n, `r
+	{
+		key_exclude_win_title := Trim(A_LoopField)
+		if (key_exclude_win_title = "") {
+			continue
+		}
+		if RegExMatch(key_exclude_win_title, "^[;#]") {
+			continue
+		}
+		GroupAdd, G_KEYS_EXCLUDE_WIN_TITLES_GROUP, %key_exclude_win_title%
+	}
 
 	; KeyCombos
 	IniRead, combo_switch_layout, %Config_File%, KeyCombos, combo_switch_layout, % Defaults.combo_switch_layout
@@ -915,6 +936,7 @@ Get_Binds(Config_File, Section, Prefix := "")
 			Key := Trim(Match1)
 			IniRead, Value, %Config_File%, %Section%, % Prefix . Key
 			if (Value != "ERROR" and IsLabel(Key)) {
+				Hotkey, IfWinNotActive, ahk_group G_KEYS_EXCLUDE_WIN_TITLES_GROUP ; HotKeysExcludeWinTitles
 				Hotkey, %Value%, %Key%, UseErrorLevel
 				; MsgBox, % Key "`n" Value
 			}

@@ -4,10 +4,17 @@ SendMode, Input ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
 ; Определение классов (для исключения их прямой перезаписи)
-new Script			:= c_Script
+; new Script			:= c_Script
 ;
 
-Script.Force_Single_Instance()
+Maximize_Performance:
+{
+	#MaxThreads
+	SetBatchLines, -1
+}
+
+; Script.Force_Single_Instance()
+Script.Force_Single_Instance(false, 1, 1)
 
 Script_Name := Script.Name()
 Config_File := A_ScriptDir "\" "Updater" ".ini"
@@ -22,8 +29,8 @@ if (NumberOfParameters) {
 		if RegExMatch(Parameter, "-app_pid=(.*)", Match) {
 			Process_PID := Match1
 			; Process, Close, %Process_PID%
-			Script.Close_Process(Process_PID)
-			WinWaitClose, ahk_pid %Process_PID%,,5
+			Script.Close_Process(Process_PID, 5, 1) ; Script.Close_Process(Process_PID)
+			; WinWaitClose, ahk_pid %Process_PID%,,5
 		}
 	}
 }

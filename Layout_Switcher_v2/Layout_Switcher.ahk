@@ -26,7 +26,9 @@ SetControlDelay, -1					;
 SendMode, Input						; SendInput is the fastest send method. SendEvent (the default one) is 2nd place, SendPlay a far 3rd place (it's the most compatible one though). SendInput does not obey to SetKeyDelay, SetMouseDelay, SetDefaultMouseSpeed; there is no delay between keystrokes in that mode.
 */
 
-; gosub, Maximize_Performance
+App_PID := DllCall("GetCurrentProcessId")
+
+gosub, Maximize_Performance
 
 ; Определение классов (для исключения их прямой перезаписи)
 ; new Script		:= c_Script
@@ -43,10 +45,10 @@ SendMode, Input						; SendInput is the fastest send method. SendEvent (the defa
 
 Script_Name := Script.Name()
 Script_Args := Script.Args()
-Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
+; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.07 [AHK v1.1.30.01]"
+G_App_Version := "2.0.08 [AHK v1.1.30.01]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -82,6 +84,20 @@ gosub, READ_CONFIG_FILE
 if (system_start_with_admin_rights) {
 	Script.Run_As_Admin(Script_Args)
 }
+/*
+for ProcessObj in ComObjGet("winmgmts:").ExecQuery("Select ProcessId, CommandLine from Win32_Process where name = 'Autohotkey.exe'", "WQL", 0x20 | 0x10 | 0x0) {
+	if InStr(ProcessObj.CommandLine, A_ScriptFullPath) {
+		if (ProcessObj.ProcessId != App_PID) {
+			MsgBox, % ProcessObj.CommandLine "`n" ProcessObj.ProcessId "`n" App_PID
+			Script.Close_Process(ProcessObj.ProcessId, 1, 1)
+		}
+	}
+}
+*/
+; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
+; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"], 1, 1)
+; Script.Force_Single_Instance([Script_Name . ".ahk", Script_Name . ".exe", Script_Name . "_x32.exe", Script_Name . "_x64.exe"], 1, 1)
+Script.Force_Single_Instance(false, 1, 1)
 
 gosub, PRELOAD_RESOURCES
 
@@ -89,7 +105,7 @@ if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(
 	Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
 }
 
-App_PID := DllCall("GetCurrentProcessId")
+; App_PID := DllCall("GetCurrentProcessId")
 if (system_run_with_high_priority) {
 	Process, Priority, %App_PID%, High
 }
@@ -928,15 +944,21 @@ FLAG_Create_GUI:
 	Gui, FLAG_: +LastFound
 	WinGet, flag_win_id, ID
 	;
+	WinGetPos, flag_actual_x, flag_actual_y, flag_actual_width, flag_actual_height, ahk_id %flag_win_id%
 	if (flag_scale) {
-		WinGetPos, ActualX, ActualY, ActualW, ActualH, ahk_id %flag_win_id%
+		flag_gui_width := Ceil(flag_width)
+		flag_gui_height := Ceil(flag_height)
+		flag_picture_width := Ceil(flag_show_borders ? flag_actual_width - 1*2 : flag_actual_width)
+		flag_picture_height := Ceil(flag_show_borders ? flag_actual_height - 1*2 : flag_actual_height)
+		; MsgBox, flag_gui_width: %flag_gui_width%`nflag_gui_height: %flag_gui_height%`nflag_picture_width: %flag_picture_width%`nflag_picture_height: %flag_picture_height%`n
 	}
 	else {
-		WinGetPos, ActualX, ActualY, ActualW, ActualH, ahk_id %flag_win_id%
-		flag_corrected_width := flag_width - (ActualW - flag_width) + 3
-		flag_corrected_height := flag_height - (ActualH - flag_height) + 3
-		Gui, FLAG_: Show, w%flag_corrected_width% h%flag_corrected_height% x%flag_position_x% y%flag_position_y%
+		flag_gui_width := Ceil(flag_width * (flag_width / (flag_show_borders ? flag_actual_width - 1*2 : flag_actual_width)))
+		flag_gui_height := Ceil(flag_height * (flag_height / (flag_show_borders ? flag_actual_height - 1*2 : flag_actual_height)))
+		flag_picture_width := Ceil(flag_width)
+		flag_picture_height := Ceil(flag_height)
 	}
+	Gui, FLAG_: Show, w%flag_gui_width% h%flag_gui_height% x%flag_position_x% y%flag_position_y%
 	;
 	OnMessage(WM_LBUTTONDOWN := 0x201, "FLAG_WM_LBUTTONDOWN") ; Зажата LMB
 	return
@@ -971,12 +993,7 @@ FLAG_Save_Position:
 
 FLAG_Add_Picture:
 {
-	if (flag_scale) {
-		Gui, FLAG_: Add, Picture, x0 y0 w%ActualW% h%ActualH% vFLAG_PICTURE gCAPTURE_GUI_EVENTS
-	}
-	else {
-		Gui, FLAG_: Add, Picture, x0 y0 w%flag_width% h%flag_height% vFLAG_PICTURE gCAPTURE_GUI_EVENTS
-	}
+	Gui, FLAG_: Add, Picture, x0 y0 w%flag_picture_width% h%flag_picture_height% vFLAG_PICTURE gCAPTURE_GUI_EVENTS
 	return
 }
 
@@ -1021,18 +1038,14 @@ FLAG_Update:
 	; Splash(Current_Layout_Png, 0, 0, flag_width*2, flag_height*2, 1000)
 	; gosub, FLAG_Show_Splash
 	SetTimer, %A_ThisLabel%, % system_check_layout_change_interval
+	; ToolTip, ini: %flag_width% x %flag_height%`ngui: %flag_gui_width% x %flag_gui_height%`nact: %flag_actual_width% x %flag_actual_height%`npic: %flag_picture_width% x %flag_picture_height%
 	return
 }
 
 FLAG_Update_Picture:
 {
 	Current_Layout_Png := A_WorkingDir "\images\" Current_Layout_Full_Name ".png"
-	if (flag_scale) {
-		GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%ActualW% *h%ActualH% %Current_Layout_Png%
-	}
-	else {
-		GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%flag_width% *h%flag_height% %Current_Layout_Png%
-	}
+	GuiControl, FLAG_:, FLAG_PICTURE, *x0 *y0 *w%flag_picture_width% *h%flag_picture_height% %Current_Layout_Png%
 	; ToolTip(Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Current_Layout_HKL].Display_Name)
 	return
 }
@@ -1352,7 +1365,7 @@ Menu_Toggle_Show_Borders:
 		Gui, FLAG_: -Border
 	}
 	; Gui, FLAG_: Show, w%flag_width% h%flag_height%
-	Gui, FLAG_: Show, w%flag_corrected_width% h%flag_corrected_height%
+	Gui, FLAG_: Show, w%flag_gui_width% h%flag_gui_height%
 	return
 }
 
@@ -1450,6 +1463,7 @@ Menu_Reload_App:
 
 Menu_Exit_App:
 {
+	; gosub, DoExit
 	ExitApp
 	return
 }
@@ -1548,18 +1562,25 @@ Magnifier_Close:
 	if (Magnifier_Win_PID) {
 		; MsgBox, %Magnifier_Win_PID%
 		; Process, Close, %Magnifier_Win_PID%
-		Script.Close_Process(Magnifier_Win_PID)
-		WinWaitClose, ahk_pid %Magnifier_Win_PID%
+		Script.Close_Process(Magnifier_Win_PID, 1, 1) ; Script.Close_Process(Magnifier_Win_PID, 5, 1) ; Script.Close_Process(Magnifier_Win_PID)
 		Magnifier_Win_PID := 0
 	}
 	return
 }
-
+/*
+DoExit:
+{
+	Script.Close_Process(App_PID, 1, 1)
+	return
+}
+*/
 App_Close:
 {
 	; gosub, Maximize_Performance
 	gosub, Magnifier_Close
 	G_cursor_state := SystemCursor("On")
+	; Sleep, 250
+	; MsgBox, E X I T !!!!!!!!!!!
 	ExitApp
 	return
 }

@@ -953,8 +953,16 @@ FLAG_Create_GUI:
 		; MsgBox, flag_gui_width: %flag_gui_width%`nflag_gui_height: %flag_gui_height%`nflag_picture_width: %flag_picture_width%`nflag_picture_height: %flag_picture_height%`n
 	}
 	else {
+		/*
 		flag_gui_width := Ceil(flag_width * (flag_width / (flag_show_borders ? flag_actual_width - 1*2 : flag_actual_width)))
 		flag_gui_height := Ceil(flag_height * (flag_height / (flag_show_borders ? flag_actual_height - 1*2 : flag_actual_height)))
+		flag_picture_width := Ceil(flag_width)
+		flag_picture_height := Ceil(flag_height)
+		*/
+		flag_gui_width := Ceil(flag_width * (flag_width / (flag_show_borders ? flag_actual_width - 1*2 : flag_actual_width)))
+		flag_gui_height := Ceil(flag_height * (flag_height / (flag_show_borders ? flag_actual_height - 1*2 : flag_actual_height)))
+		flag_gui_width := flag_gui_width != flag_width ? flag_gui_width - 1 : flag_gui_width
+		flag_gui_height := flag_gui_height != flag_height ? flag_gui_height - 1 : flag_gui_height
 		flag_picture_width := Ceil(flag_width)
 		flag_picture_height := Ceil(flag_height)
 	}

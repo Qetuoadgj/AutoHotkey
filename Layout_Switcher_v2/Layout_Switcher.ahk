@@ -48,7 +48,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.09 [AHK v1.1.30.01]"
+G_App_Version := "2.0.10 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -67,9 +67,9 @@ G_LastUpdateTimeDelta := 0
 
 class OS
 {
-	static MajorVersion := DllCall("GetVersion") & 0xFF			; 10
-	static MinorVersion := DllCall("GetVersion") >> 8 & 0xFF	; 0
-	static BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF	; 10532
+	MajorVersion := DllCall("GetVersion") & 0xFF			; 10
+	MinorVersion := DllCall("GetVersion") >> 8 & 0xFF	; 0
+	BuildNumber  := DllCall("GetVersion") >> 16 & 0xFFFF	; 10532
 }
 
 ; G_OS_Version := RegExReplace(A_OSVersion, ".*?(\d+)\..*", "$1")
@@ -132,6 +132,8 @@ if (G_Need_Restart == 1) {
 }
 
 ; gosub, Minimize_Performance
+
+; MsgBox, % Layout.Layouts_List.MaxIndex()
 
 Exit
 
@@ -710,7 +712,7 @@ TOGGLE_FULLSCREEN:
 	return
 }
 */
-
+/*
 CLIPBOARD_SAVE:
 {
 	Clipboard_Tmp := "" ; Null
@@ -723,6 +725,23 @@ CLIPBOARD_RESTORE:
 	Clipboard := "" ; Null
 	Clipboard := Clipboard_Tmp
 	ClipWait, 0.05
+	return
+}
+*/
+
+Clipboard_Save:
+{ ; рутина сохранения текущего буфера обмена в переменную Clipboard_Image
+	Clipboard_Image := ""									; очищаем переменную Clipboard_Image
+	Clipboard_Image := ClipboardAll							; сохраняем двоичные данные из буфера обмена в переменную Clipboard_Image
+	return
+}
+
+Clipboard_Restore:
+{ ; рутина восстановления буфера обмена из переменной Clipboard_Image. (Требует предварительного запуска рутины Clipboard_Save)
+	Clipboard := ""											; очищаем буфер обмена
+	Clipboard := Clipboard_Image							; помещаем в буфер обмена двоичные данные из переменной Clipboard_Image
+	ClipWait, 1.0, 0										; ждем пока данные передадутся в буфер обмена
+	VarSetCapacity(Clipboard_Image, 0)						; удаляем переменную Clipboard_Image из памяти
 	return
 }
 
@@ -882,11 +901,8 @@ SWITCH_TEXT_LAYOUT:
 
 Get_Dictionaries(Config_File, Section, Prefix := "", Skip_Unused := False)
 { ; функция получения словарей из файла настроек
-	static Dictionaries_List
-	static Match
-	static Key
-	static Value
-	;
+	local
+	global Edit_Text, Layout
 	IniRead, Dictionaries_List, %Config_File%, %Section%
 	Edit_Text.Dictionaries := {}
 	; Edit_Text.Dictionaries_Order := []
@@ -910,8 +926,7 @@ Get_Dictionaries(Config_File, Section, Prefix := "", Skip_Unused := False)
 /*
 Remove_Unused_Dictionaries()
 { ; функция удаления словарей, для которых нет раскладки
-	static Dictionary_Name
-	;
+	local
 	for Dictionary_Name in Edit_Text.Dictionaries
 	{
 		if (not Layout.Get_Index_By_Name(Dictionary_Name)) {
@@ -925,12 +940,7 @@ Remove_Unused_Dictionaries()
 
 Get_Binds(Config_File, Section, Prefix := "")
 { ; функция получения назначений клавиш из файла настроек
-	static Binds_List
-	static Match
-	static Match1
-	static Key
-	static Value
-	;
+	local
 	IniRead, Binds_List, %Config_File%, %Section%
 	Loop, Parse, Binds_List, `n, `r
 	{
@@ -993,6 +1003,12 @@ FLAG_Create_GUI:
 	Gui, FLAG_: Show, w%flag_gui_width% h%flag_gui_height% x%flag_position_x% y%flag_position_y%
 	;
 	OnMessage(WM_LBUTTONDOWN := 0x201, "FLAG_WM_LBUTTONDOWN") ; Зажата LMB
+	return
+}
+
+FLAG_GuiClose:
+{
+	ExitApp
 	return
 }
 
@@ -1511,7 +1527,6 @@ CAPTURE_GUI_EVENTS:
 Generate_Dictionaries(Prefix := "")
 { ; функция создания словарей для текущих раскладок
 	local
-	static
 	global Config_File, Layout, system_switch_layouts_by_send, flag_win_id
 	;
 	Keys := ["SC029","SC002","SC003","SC004"
@@ -1538,6 +1553,7 @@ Generate_Dictionaries(Prefix := "")
 	;
 	Win_Title = ahk_id %Gui_Hwnd%
 	;
+	static Edit1_Text
 	Gui, DICT_: Add, Edit, Multi x5 y5 h%Edit_H% w%Edit_W% vEdit1_Text, %A_Space%
 	ControlGet, Edit1_Hwnd, Hwnd,, % "Edit1", %Win_Title%
 	Gui, DICT_: Add, Edit, Multi x5 y5 h0 w0, %A_Space%

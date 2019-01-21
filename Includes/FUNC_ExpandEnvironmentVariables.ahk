@@ -1,7 +1,7 @@
 ﻿ExpandEnvironmentStrings(String)
 { ; функция обработки переменных среды Windows
-  static nSize, Dest, size
-  static NULL := ""
+  local
+  NULL := ""
   ; Find length of dest string:
   nSize := DllCall("ExpandEnvironmentStrings", "Str", string, "Str", NULL, "UInt", 0, "UInt")
   ,VarSetCapacity(Dest, size := (nSize * (1 << !!A_IsUnicode)) + !A_IsUnicode) ; allocate dest string
@@ -11,7 +11,7 @@
 
 ExpandEnvironmentStringsAHK(String)
 { ; функция обработки переменных среды AHK
-  static Line, Match, Match1, Expanded
+  local
   Loop Parse, String, "\:"
   {
     Line := A_LoopField

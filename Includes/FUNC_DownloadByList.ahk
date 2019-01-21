@@ -3,7 +3,7 @@
 ; --------------------------------------------------------------------------------------------
 DownloadByList(RootURL, List, DestDir := False)
 { ; функция загрузки фалов из списка
-	static Line, Location, Download
+	local
 	DestDir := DestDir ? DestDir : A_ScriptDir
 	Loop, Parse, List, `n, `r
 	{

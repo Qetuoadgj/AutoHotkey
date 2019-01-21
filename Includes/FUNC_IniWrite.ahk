@@ -1,7 +1,6 @@
 ﻿IniWrite(Key, File, Section, Value)
 { ; замена стандартного IniWrite (записывает только измененные параметры)
-	static Test_Value
-	;
+	local
 	if (not File) {
 		return
 	}

@@ -5,16 +5,13 @@
 	;
 	Get_Tray_ID()
 	{ ; функция получения ID системного трея Windows
-		static ID
-		;
+		local
 		ID := WinExist("ahk_class Shell_TrayWnd")
 		return ID
 	}
-	
 	Get_Desktop_ID()
 	{ ; функция получения ID рабочего стола Windows
-		static ID
-		;
+		local
 		ID := WinExist("ahk_class WorkerW ahk_exe Explorer.EXE") ; Win 10
 		ID := ID ? ID : WinExist("ahk_class Progman ahk_exe Explorer.EXE") ; Win 7
 		return ID

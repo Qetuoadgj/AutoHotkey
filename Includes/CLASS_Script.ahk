@@ -3,10 +3,7 @@
 
 	Force_Single_Instance(File_Names := false, WaitCloseSec := 1, Force := 1)
 	{ ; функция автоматического завершения всех копий текущего скрипта (одновременно для .exe и .ahk)
-		static Detect_Hidden_Windows_Tmp
-		static File_Name, Index
-		static Script_Name, App_Full_Path
-		;
+		local
 		Detect_Hidden_Windows_Tmp := A_DetectHiddenWindows
 		#SingleInstance, Off
 		DetectHiddenWindows, On
@@ -21,7 +18,7 @@
 	
 	Close_Process(Process_PID, WaitCloseSec := 1, Force := 1)
 	{ ; функция завершения процесса с вызовом сабрутины OnExit
-		static DHW
+		local
 		DHW := A_DetectHiddenWindows
 		DetectHiddenWindows, On
 		if WinExist("ahk_pid " . Process_PID) {
@@ -40,8 +37,7 @@
 	
 	Close_Other_Instances(App_Full_Path, WaitCloseSec := 1, Force := 1)
 	{ ; функция завершения всех копий текущего скрипта (только для указанного файла)
-		static Current_ID, Current_PID, Process_List, Process_Count, Process_ID, Process_PID
-		;
+		local
 		App_Full_Path := App_Full_Path ? App_Full_Path : A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Current_ID, ID, % A_ScriptFullPath . " ahk_class AutoHotkey"
 		WinGet, Current_PID, PID, % A_ScriptFullPath . " ahk_class AutoHotkey"
@@ -62,15 +58,13 @@
 			Process_Count += 1
 		}
 		;
-		static ProcessObj
-		static Script_Name
 		Script_Name := RegExReplace(A_ScriptFullPath, "^(.*)(_x32|_x64)\..*", "$1")
 		for ProcessObj in ComObjGet("winmgmts:").ExecQuery("Select ProcessId, CommandLine from Win32_Process where name = 'Autohotkey.exe'", "WQL", 0x20 | 0x10 | 0x0) {
 			; MsgBox, % "ProcessObj.CommandLine: " . ProcessObj.CommandLine "`nScript_Name: " Script_Name
 			if InStr(ProcessObj.CommandLine, Script_Name) {
 				; MsgBox, % "processObj.CommandLine: " . processObj.CommandLine
 				if (ProcessObj.ProcessId != Current_PID) {
-					Script.Close_Process(ProcessObj.ProcessId, WaitCloseSec, Force)
+					This.Close_Process(ProcessObj.ProcessId, WaitCloseSec, Force)
 				}
 			}
 		}
@@ -88,18 +82,16 @@
 
 	Name()
 	{ ; функция получения имени текущего скрипта
-		static Name
-		;
+		local
 		SplitPath, A_ScriptFullPath,,,, Name
 		return Name
 	}
 
 	Args()
 	{ ; функция получения аргументов коммандной строки в виде текста
-		static ret
+		local
+		global A_Args
 		ret := ""
-		
-		static n, param
 		for n, param in A_Args
 		{
 			ret .= " " param
@@ -110,7 +102,7 @@
 	
 	InArgs(Arg)
 	{ ; функция получения аргументов коммандной строки в виде текста
-		static n, param
+		local
 		for n, param in A_Args
 		{
 			param := Trim(param)

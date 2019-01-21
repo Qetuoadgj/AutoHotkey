@@ -1,6 +1,6 @@
 ObjLen(Obj)
 { ; возвращает длину (кол-во ключей) Object (замена Object.MaxIndex())
-	static k,v,l
+	local
 	for k, v in Obj {
 		l := A_Index
 	}

@@ -15,15 +15,16 @@
 	static Whitespace_Replace_ID := 0
 	;
 	static Dictionaries := {}
-	static Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
-	static Dictionaries.English := "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
-	static Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
+	Dictionaries.Russian := "ё1234567890-=йцукенгшщзхъфывапролджэ\\ячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ//ЯЧСМИТЬБЮ,"
+	Dictionaries.English := "`1234567890-=qwertyuiop[]asdfghjkl;'\\zxcvbnm,./ ~!@#$%^&*()_+QWERTYUIOP{}ASDFGHJKL:""||ZXCVBNM<>?"
+	Dictionaries.Ukrainian := "ё1234567890-=йцукенгшщзхїфівапролджє\ґячсмитьбю. Ё!""№;%:?*()_+ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄ/ҐЯЧСМИТЬБЮ,"
 	;
-	; static Dictionaries_Order := ["English", "Russian", "Ukrainian"]
+	; Dictionaries_Order := ["English", "Russian", "Ukrainian"]
 	;
+	/*
 	Select()
 	{ ; функция получения выделенного текста либо выделения текста влево до первого пробела
-		static Selected_Text
+		local
 		; -----------------------------------------------------------------------------------
 		; Выделение текста / получение уже выделенного, назначение переменной "Selected_Text"
 		; -----------------------------------------------------------------------------------
@@ -111,10 +112,52 @@
 		; ToolTip, '%Selected_Text%'
 		return Selected_Text
 	}
+	*/
+	
+	Copy_To_Clipboard()
+	{ ; рутина сохранения выделенного текста в переменную Selected_Text
+		local
+		Clipboard := ""											; очищаем буфер обмена
+		SendInput, ^c											; нажимаем Ctrl+C
+		ClipWait, 0.05, 0										; ждем пока данные передадутся в буфер обмена
+		Selected_Text := Clipboard								; сохраняем текстовые данные из буфера обмена в переменную Selected_Text
+		;
+		; ToolTip, Selected_Text:`n"%Selected_Text%"
+		return Selected_Text
+	}
+	
+	Select()
+	{ ; рутина выделения ближайшего (слева от курсора) "слова" с сохранением его в переменную Selected_Text
+		local
+		Selected_Text := ""										; "опустошаем" переменную Selected_Text
+		Selected_Text := This.Copy_To_Clipboard()				; сохраняем выделенный текст в переменную Selected_Text
+		if (Selected_Text == "")								; если переменная Selected_Text осталась пустой
+		{ 														; пытаемся выделить ближайшее (слева от курсора) слово
+			Loop, 50											; делаем много циклов выделения "влево" (до начала текста или ближайшего пробела)
+			{
+				SendInput, ^+{Left}								; выполняем продвижение на одно "выделение" влево (Ctrl+Shift+Left)
+				;
+				Selected_Text_Len := StrLen(Selected_Text)		; получаем длину текущего текста (для последующего сравнения)
+				Selected_Text := This.Copy_To_Clipboard()		; еще раз копируем текст в переменную Selected_Text
+				if (Selected_Text_Len == StrLen(Selected_Text)) ; если дины текущего и ранее выделенного текста совпадают, то:
+				{												; достигнуто начало текста
+					VarSetCapacity(Selected_Text_Len, 0)		; удаляем переменную Selected_Text_Len из памяти
+					break										; прекращаем дальнейшее выделение
+				}
+				if RegExMatch(Selected_Text, "\s")				; если в выделение попал пробел, то:
+				{												; достигнут пробел перед словом
+					SendInput, ^+{Right}						; выполняем возврат на одно "выделение" вправо (Ctrl+Shift+Right)
+					Selected_Text := This.Copy_To_Clipboard()	; еще раз копируем текст в переменную Selected_Text
+					break										; прекращаем дальнейшее выделение
+				}
+			}
+		}
+		return Selected_Text
+	}
 
 	Convert_Case(Selected_Text, Force_Case_ID := 0)
 	{ ; функция смены регистра текста
-		static Converted_Text
+		local
 		; -----------------------------------------------------------------------------------
 		; Преобразование регистра текста, назначение переменной "Converted_Text"
 		; -----------------------------------------------------------------------------------
@@ -159,8 +202,7 @@
 
 	Convert_Whitespace(Selected_Text, Replace_With := "_", Tab_Size := 4)
 	{ ; функция смены регистра текста
-		static Converted_Text
-		static Tab
+		local
 		; -----------------------------------------------------------------------------------
 		; Преобразование регистра текста, назначение переменной "Converted_Text"
 		; -----------------------------------------------------------------------------------
@@ -188,9 +230,7 @@
 
 	Dictionary(Selected_Text)
 	{ ; функция сравнения текста со словарями (определение словаря, соответствующего тексту)
-		static Language
-		static Dictionary
-		static Same_Dictionary
+		local
 		; -----------------------------------------------------------------------------------
 		; Определение словаря, полностью соответствующего тексту
 		; -----------------------------------------------------------------------------------
@@ -215,7 +255,7 @@
 
 	Replace_By_Dictionaries(Selected_Text, Current_Dictionary, Next_Dictionary)
 	{ ; функция замены символов одного словаря соответствующими (по порядку) символами другого (смена раскладки текста)
-		static Converted_Text
+		local
 		; -----------------------------------------------------------------------------------
 		; Замена символов словаря "Current_Dictionary" соответствующими символами "Next_Dictionary"
 		; -----------------------------------------------------------------------------------
@@ -259,7 +299,7 @@
 	/*
 	Get_Index_By_Name(Name)
 	{ ; функция получения порядкового номера словаря по полному имени ("English")
-		static Index, Dictionary
+		local
 		;
 		Index := 1
 		for Dictionary in This.Dictionaries

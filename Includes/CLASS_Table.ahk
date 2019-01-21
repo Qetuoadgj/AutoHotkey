@@ -2,8 +2,7 @@
 {
 	Get_Key_Index(Table, Key_Name)
 	{ ; функция получения порядкового номера ключа по его имени
-		static Key, Index
-		;
+		local
 		if not isObject(Table) {
 			return
 		}
@@ -21,8 +20,7 @@
 	
 	Get_Key_Name(Table, Index)
 	{ ; функция получения имени ключа словаря по порядковому номеру
-		static Key
-		;
+		local
 		if not isObject(Table) {
 			return
 		}
@@ -35,8 +33,7 @@
 	
 	Max_Index(Table)
 	{
-		static Key, Index
-		;
+		local
 		if not isObject(Table) {
 			return
 		}

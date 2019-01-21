@@ -1,6 +1,6 @@
 ArrayToList(Array, Delimiter := "`n")
 {
-	static List, Index, Value
+	local
 	List := ""
 	for Index, Value in Array
 	{

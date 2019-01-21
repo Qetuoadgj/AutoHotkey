@@ -12,7 +12,7 @@ GetAbsolutePath(Path, RootPath := "")
 
 ParseList(List, RootPath := "")
 { ; обработка относительных путей в списке
-	static Line, Ret
+	local
 	Ret := ""
 	Loop Parse, List, `n, `r
 	{

@@ -1,7 +1,6 @@
 ﻿In_Array(Array, Value)
 { ; функция проверки наличия значения во множестве
-	static k, v
-	;
+	local
 	if (not isObject(Array)) {
 		return False
 	}

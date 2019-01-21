@@ -1,8 +1,6 @@
 WinWait(WinTitle, TimeOut := 0)
 { ; Альтернатива стандартной функции ожидания окна. Позволяет задать сразу несколько WinTitle ([WinTitle1, WinTitle2, ...], TimeOut)
-	static WinID
-	static TimerStart, TimerEnd
-	;
+	local
 	WinID := false
 	TimerStart := A_TickCount, TimerEnd := TimerStart + TimeOut
 	;

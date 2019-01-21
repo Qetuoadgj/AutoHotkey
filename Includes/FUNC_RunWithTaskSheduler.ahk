@@ -1,6 +1,6 @@
 RunWithTaskSheduler(FileToRun, Arguments, TaskName := "", CP := "CP866")
 {
-	static CmdCommand, BatFile
+	local
 	BatFile := A_Temp . "\RunWithTaskSheduler.bat"
 	TaskName := (TaskName = "") ? "Launch `%FileToRun`%" : TaskName
 	CmdCommand =

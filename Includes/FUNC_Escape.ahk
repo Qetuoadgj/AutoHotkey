@@ -1,6 +1,6 @@
 Escape(String)
 { ; функция преобразования String в RegExp
-	static Index, Char, Escape
+	local
 	Escape := ["\", ".", "*", "?", "+", "[", "]", "{", "}", "|", "(", ")", "^", "$"]
 	for Index, Char in Escape
 	{

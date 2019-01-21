@@ -1,5 +1,5 @@
-ArrayConcat(Arrays) {
-	static Ret, Index, Array, Element
+ArrayConcat(Arrays*) {
+	local
 	Ret := []
 	for Index, Array in Arrays
 	{

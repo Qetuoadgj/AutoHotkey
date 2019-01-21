@@ -1,6 +1,6 @@
 GetOrWriteConfig(ConfigFile, SectionName := "", KeyName := "", DefaultValue := "")
 {
-	static Ret
+	local
 	if (SectionName and KeyName) {
 		IniRead, Ret, %ConfigFile%, %SectionName%, %KeyName%, %A_Space%
 		if (Ret = "") {

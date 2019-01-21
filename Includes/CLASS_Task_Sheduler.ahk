@@ -6,8 +6,7 @@
 	/*
 	Create_Auto_Run_Task(Task_Name, Admin_Rights := False)
 	{ ; функция создания автозагрузки программы в планировщике Windows
-		static Command
-		;
+		local
 		Command = "%A_WinDir%\System32\schtasks.exe" /create /TN "%Task_Name%" /TR """"%A_ScriptFullPath%"""" /SC ONLOGON
 		Command .= Admin_Rights ? " /RL HIGHEST /F" : " /F"
 		RunWait *RunAs %Command%,, Hide
@@ -15,8 +14,7 @@
 
 	Delete_Auto_Run_Task(Task_Name)
 	{ ; функция удаления автозагрузки программы из планировщика Windows
-		static Command
-		;
+		local
 		Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
 		RunWait *RunAs %Command%,, Hide
 	}
@@ -24,8 +22,7 @@
 	
 	Create_Auto_Run_Task(Task_Name, Admin_Rights := False, Delete_Task_XML := 0)
 	{ ; функция создания автозагрузки программы в планировщике Windows
-		static Task_XML
-		;
+		local
 		Task_XML := A_Temp "\" RegExReplace(Task_Name, ".*\\(.*)$", "$1") ".xml"
 		This.Create_Auto_Start_XML(A_ScriptFullPath, Admin_Rights, Task_XML, "PT30S")
 		if FileExist(Task_XML) {
@@ -39,8 +36,7 @@
 	
 	Create_Task_From_XML(Task_Name, Task_XML)
 	{ ; функция создания задания в планировщике Windows (из XML файла)
-		static Command
-		;
+		local
 		Command = schtasks.exe /Create /XML "%Task_XML%" /tn "%Task_Name%"
 		; RunWait, %ComSpec% /k %Command% & pause & exit,, Hide
 		RunWait *RunAs %Command%,, Hide
@@ -49,8 +45,7 @@
 
 	Delete_Task(Task_Name)
 	{ ; функция удаления задания из планировщика Windows
-		static Command
-		;
+		local
 		Command = "%A_WinDir%\System32\schtasks.exe" /delete /TN "%Task_Name%" /F
 		RunWait *RunAs %Command%,, Hide
 		Sleep 1
@@ -58,9 +53,7 @@
 	
 	Create_Auto_Start_XML(Command, Admin_Rights := false, Task_XML := "my_task.xml", Delay := "")
 	{ ; функция создания XML файла задания для планировщика Windows
-		static XML_Text
-		static Registration_Time
-		;
+		local
 		FormatTime Registration_Time,, yyyy-MM-ddThh:mm:ss
 		FormatTime Start_Time,, yyyy-MM-ddThh:mm:00
 		
@@ -128,9 +121,7 @@
 	
 	Task_Exists(Task_Name, Command := 0)
 	{ ; функция проверки наличия задания в планировщике
-		static Task_File
-		static Task_Command
-		;
+		local
 		Task_File := This.Tasks_Dir "\" RegExReplace(Task_Name, "^\\", "")
 		if FileExist(Task_File) {
 			if (Command) {

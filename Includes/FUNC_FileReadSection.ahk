@@ -1,7 +1,6 @@
 FileReadSection(SourceFile, StartString, EndString = "", SkipComments := 1, CommentPattern := "^(\s+)?;", SkipEmptyLines := 1)
 { ; функция для "вырывания" куска текста из файла (ориентируется по заданому начальному и конечному тексту, либо по начальному тексту и последней строке файла)
-	static SectionContains, StartLine, EndLine, CurrentLine
-	;
+	local
 	StartLine := 0, EndLine := 0, CurrentLine := 0
 	SectionContains := ""
 	Loop, Read, %SourceFile%

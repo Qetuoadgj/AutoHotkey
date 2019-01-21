@@ -1,10 +1,10 @@
 ﻿IniRefresh(file, value, section, key := "")
 { ; замена стандартного IniWrite (записывает только измененные параметры)
+	local
 	if (not file) {
 		return
 	}
 	;
-	static testValue
 	if (key == "") {
 		IniRead, testValue, %file%, %section%
 		if (testValue != value) {

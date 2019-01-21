@@ -1,5 +1,6 @@
-ArrayGetIndex(Array, Value) {
-	static k, v
+ArrayGetIndex(Array, Value)
+{
+	local
 	if (not isObject(Array)) {
 		return
 	}

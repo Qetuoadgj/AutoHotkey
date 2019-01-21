@@ -1,8 +1,9 @@
 ; --------------------------------------------------------------------------------------------
 GetUrlStatus(URL, Timeout = -1)
 { ; проверка статуса URL
+	local
 	ComObjError(0)
-	static WinHttpReq := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	WinHttpReq := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	
 	WinHttpReq.Open("HEAD", URL, True)
 	WinHttpReq.Send()

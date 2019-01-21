@@ -1,7 +1,6 @@
 IniRead(Filename, Section := "", Key := "", Default := "ERROR")
 { ; замена стандартного IniRead
-	static Match, Match1, Match2
-	static SectionContains, LineText, KeyName, KeyValue, SectionsList, SectionName
+	local
 	if (Section) { ; секция указана
 		SectionContains := FileReadSection(Filename, "\[" . Section . "\]", "^\[.*?\]", 1, "^(\s+)?[;#]", 1) ; получение содержимого указанной секции
 		if (Key) { ; указан ключ

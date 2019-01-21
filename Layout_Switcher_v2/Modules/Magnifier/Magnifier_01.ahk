@@ -161,8 +161,6 @@ SAVE_CONFIG_FILE:
 Get_Binds(config_file, Section, Prefix := "")
 { ; функция получения назначений клавиш из файла настроек
 	local
-	static Binds_List, Match, Match1, Key, Value
-	;
 	global hotkeys_created
 	;
 	IniRead, Binds_List, %config_file%, %Section%

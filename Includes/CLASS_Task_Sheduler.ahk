@@ -19,12 +19,13 @@
 		RunWait *RunAs %Command%,, Hide
 	}
 	*/
-	
-	Create_Auto_Run_Task(Task_Name, Admin_Rights := False, Delete_Task_XML := 0)
+
+	Create_Auto_Run_Task(Task_Name, Arguments := "", WorkingDir := "", Delay := "PT30S", Admin_Rights := False, Delete_Task_XML := 0)
 	{ ; функция создания автозагрузки программы в планировщике Windows
 		local
 		Task_XML := A_Temp "\" RegExReplace(Task_Name, ".*\\(.*)$", "$1") ".xml"
-		This.Create_Auto_Start_XML(A_ScriptFullPath, Admin_Rights, Task_XML, "PT30S")
+		; This.Create_Auto_Start_XML(A_ScriptFullPath, Admin_Rights, Task_XML, "PT30S")
+		This.Create_Auto_Start_XML(A_ScriptFullPath, Arguments, WorkingDir, Admin_Rights, Task_XML, Delay)
 		if FileExist(Task_XML) {
 			This.Delete_Task(Task_Name)
 			This.Create_Task_From_XML(Task_Name, Task_XML)
@@ -33,7 +34,7 @@
 			}
 		}
 	}
-	
+
 	Create_Task_From_XML(Task_Name, Task_XML)
 	{ ; функция создания задания в планировщике Windows (из XML файла)
 		local
@@ -50,17 +51,17 @@
 		RunWait *RunAs %Command%,, Hide
 		Sleep 1
 	}
-	
-	Create_Auto_Start_XML(Command, Admin_Rights := false, Task_XML := "my_task.xml", Delay := "")
+
+	Create_Auto_Start_XML(Command, Arguments := "", WorkingDir := "", Admin_Rights := false, Task_XML := "my_task.xml", Delay := "")
 	{ ; функция создания XML файла задания для планировщика Windows
 		local
 		FormatTime Registration_Time,, yyyy-MM-ddThh:mm:ss
 		FormatTime Start_Time,, yyyy-MM-ddThh:mm:00
-		
+
 		if FileExist(Task_XML) {
 			FileDelete %Task_XML%
 		}
-		
+
 		Privilege := Admin_Rights ? "HighestAvailable" : "LeastPrivilege"
 
 		XML_Text =
@@ -75,7 +76,7 @@
 		    <LogonTrigger>
 		      <StartBoundary>%Start_Time%</StartBoundary>
 		      <Enabled>true</Enabled>
-			  <Delay>%Delay%</Delay>
+		      <Delay>%Delay%</Delay>
 		    </LogonTrigger>
 		  </Triggers>
 		  <Settings>
@@ -102,6 +103,8 @@
 		  <Actions Context="Author">
 		    <Exec>
 		      <Command>"%Command%"</Command>
+		      <Arguments>%Arguments%</Arguments>
+		      <WorkingDirectory>%WorkingDir%</WorkingDirectory>
 		    </Exec>
 		  </Actions>
 		  <Principals>
@@ -113,12 +116,12 @@
 		  </Principals>
 		</Task>
 		)
-		
+
 		XML_Text := RegExReplace(XML_Text, "m)^\t{2}", "")
-		
+
 		FileAppend %XML_Text%, %Task_XML%
 	}
-	
+
 	Task_Exists(Task_Name, Command := 0)
 	{ ; функция проверки наличия задания в планировщике
 		local
@@ -139,7 +142,7 @@
 						}
 					}
 				}
-			} 
+			}
 			else {
 				return True
 			}

@@ -48,7 +48,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.10 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.11 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -101,8 +101,9 @@ Script.Force_Single_Instance(false, 1, 1)
 
 gosub, PRELOAD_RESOURCES
 
-if (A_IsCompiled and system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
-	Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+if (system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) { ; A_IsCompiled and
+	; Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+	Task_Sheduler.Create_Auto_Run_Task(Task_Name := Auto_Run_Task_Name, Arguments := "", WorkingDir := A_ScriptDir, Delay := "PT30S", Admin_Rights := system_start_with_admin_rights, Delete_Task_XML := True)
 }
 
 ; App_PID := DllCall("GetCurrentProcessId")
@@ -135,6 +136,9 @@ if (G_Need_Restart == 1) {
 
 ; MsgBox, % Layout.Layouts_List.MaxIndex()
 
+StartTime := A_TickCount
+SetTimer, TimerReload, 2000
+
 Exit
 
 CREATE_LOCALIZATION:
@@ -146,6 +150,7 @@ CREATE_LOCALIZATION:
 	; Info
 	IniRead, l_info_app_site, %Translation_File%, Info, info_app_site, % "App Site"
 	IniRead, l_info_app_update, %Translation_File%, Info, info_app_update, % "Update App"
+	IniRead, l_info_app_dir, %Translation_File%, Info, info_app_dir, % "Open App Location Folder"
 
 	; System
 	IniRead, l_system_suspend_hotkeys, %Translation_File%, System, system_suspend_hotkeys, % "Suspend HotKeys"
@@ -166,7 +171,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_flag_always_on_top, %Translation_File%, Flag, flag_always_on_top, % "Always On Top"
 	IniRead, l_flag_fixed_position, %Translation_File%, Flag, flag_fixed_position, % "Fix Position"
 	IniRead, l_flag_hide_in_fullscreen_mode, %Translation_File%, Flag, flag_hide_in_fullscreen_mode, % "Hide In Fullscreen Mode"
-	
+
 	; Splash
 	IniRead, l_splash_enable, %Translation_File%, Splash, splash_enable, % "Show Splash Messages"
 
@@ -178,6 +183,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_app_exit, %Translation_File%, App, app_exit, % "Close App"
 	IniRead, l_app_options, %Translation_File%, App, app_options, % "Open Settings"
 	IniRead, l_app_generate_dictionaries, %Translation_File%, App, app_generate_dictionaries, % "Generate Dictionaries"
+	IniRead, l_app_list_vars, %Translation_File%, Info, app_list_vars, % "List Variables"
 
 	; Msg
 	IniRead, l_msg_cursor_on, %Translation_File%, Msg, msg_cursor_on, % "Cursor: On"
@@ -221,7 +227,7 @@ SET_DEFAULTS:
 	Defaults.flag_always_on_top := 1
 	Defaults.flag_fixed_position := 1 ;0
 	Defaults.flag_hide_in_fullscreen_mode := 1
-	
+
 	; Splash
 	Defaults.splash_enable := 1
 	Defaults.splash_text_color := "Teal"
@@ -243,7 +249,7 @@ SET_DEFAULTS:
 	Defaults.key_switch_text_layout := "$*NumPad2" ;"$~Break"
 	Defaults.key_toggle_cursor := "$RWin" ;"#c"
 	; Defaults.key_toggle_fullscreen := "LWin & LButton"
-	
+
 	; HotKeysExcludeWinTitles
 	Defaults.keys_exclude_win_titles := "ahk_exe Oblivion.exe`n; ahk_class Notepad++"
 
@@ -283,7 +289,7 @@ SET_DEFAULTS:
 READ_CONFIG_FILE:
 {
 	Critical, On
-	
+
 	if (not FileExist(Config_File)) {
 		G_Need_Restart := 1
 	}
@@ -328,15 +334,15 @@ READ_CONFIG_FILE:
 	Normalize("flag_height", Defaults.flag_height)
 	Normalize("flag_position_x", Defaults.flag_position_x)
 	Normalize("flag_position_y", Defaults.flag_position_y)
-	
+
 	; Splash
 	IniRead, splash_enable, %Config_File%, Splash, splash_enable, % Defaults.splash_enable
 	IniRead, splash_text_color, %Config_File%, Splash, splash_text_color, % Defaults.splash_text_color
 	IniRead, splash_scale, %Config_File%, Splash, splash_scale, % Defaults.splash_scale
-	
+
 	Normalize("splash_text_color", Defaults.splash_text_color)
 	Normalize("splash_scale", Defaults.splash_scale)
-	
+
 	; Sound
 	IniRead, sound_enable, %Config_File%, Sound, sound_enable, % Defaults.sound_enable
 	IniRead, sound_switch_keyboard_layout, %Config_File%, Sound, sound_switch_keyboard_layout, % Defaults.sound_switch_keyboard_layout
@@ -353,7 +359,7 @@ READ_CONFIG_FILE:
 	IniRead, key_switch_text_layout, %Config_File%, HotKeys, key_switch_text_layout, % Defaults.key_switch_text_layout
 	IniRead, key_toggle_cursor, %Config_File%, HotKeys, key_toggle_cursor, % Defaults.key_toggle_cursor
 	; IniRead key_toggle_fullscreen, %Config_File%, HotKeys, key_toggle_fullscreen, % Defaults.key_toggle_fullscreen
-	
+
 	; HotKeysExcludeWinTitles
 	IniRead, keys_exclude_win_titles, %Config_File%, HotKeysExcludeWinTitles
 	if (keys_exclude_win_titles == "ERROR" or not keys_exclude_win_titles) {
@@ -435,6 +441,7 @@ READ_CONFIG_FILE:
 	/*
 	if (system_enable_auto_start and not Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)) {
 		Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+		Task_Sheduler.Create_Auto_Run_Task(Task_Name := Auto_Run_Task_Name, Arguments := "", WorkingDir := A_ScriptDir, Delay := "PT30S", Admin_Rights := system_start_with_admin_rights, Delete_Task_XML := True)
 		; system_enable_auto_start := Task_Sheduler.Task_Exists(Auto_Run_Task_Name, A_ScriptFullPath)
 	}
 	*/
@@ -460,9 +467,9 @@ READ_CONFIG_FILE:
 		Normalize(key, value)
 	}
 	*/
-	
+
 	Critical, Off
-	
+
 	return
 }
 
@@ -500,7 +507,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("flag_always_on_top", Config_File, "Flag", flag_always_on_top)
 	IniWrite("flag_fixed_position", Config_File, "Flag", flag_fixed_position)
 	IniWrite("flag_hide_in_fullscreen_mode", Config_File, "Flag", flag_hide_in_fullscreen_mode)
-	
+
 	; Splash
 	IniWrite("splash_enable", Config_File, "Splash", splash_enable)
 	IniWrite("splash_text_color", Config_File, "Splash", splash_text_color)
@@ -522,7 +529,7 @@ SAVE_CONFIG_FILE:
 	IniWrite("key_switch_text_layout", Config_File, "HotKeys", key_switch_text_layout)
 	IniWrite("key_toggle_cursor", Config_File, "HotKeys", key_toggle_cursor)
 	; IniWrite("key_toggle_fullscreen", Config_File, "HotKeys", key_toggle_fullscreen)
-	
+
 	; HotKeysExcludeWinTitles
 	IniRefresh(Config_File, keys_exclude_win_titles, "HotKeysExcludeWinTitles", "")
 
@@ -1139,10 +1146,10 @@ FLAG_Update_Tray_Icon:
 FLAG_Customize_Menus:
 {
 	Menu, Tray, NoStandard
-	
+
 	Menu, Tray, Add, v%G_App_Version%, App_Close
 	Menu, Tray, Disable, v%G_App_Version%
-	
+
 	Menu, Tray, Add
 
 	Menu, Tray, Add, %l_system_suspend_hotkeys%, Menu_Toggle_Suspend
@@ -1196,7 +1203,7 @@ FLAG_Customize_Menus:
 	if (system_switch_layouts_by_send) {
 		Menu, Tray, Check, %l_system_switch_layouts_by_send%
 	}
-	
+
 	Menu, Tray, Add, %l_system_copy_text_in_non_latin_layout%, Menu_Toggle_Copy_Text_In_Non_Latin_Layout
 	if (system_copy_text_in_non_latin_layout) {
 		Menu, Tray, Check, %l_system_copy_text_in_non_latin_layout%
@@ -1215,7 +1222,7 @@ FLAG_Customize_Menus:
 	}
 
 	Menu, Tray, Add
-	
+
 	Menu, Tray, Add, %l_flag_scale%, Menu_Toggle_Scale
 	if (flag_scale) {
 		Menu, Tray, Check, %l_flag_scale%
@@ -1255,6 +1262,8 @@ FLAG_Customize_Menus:
 	; }
 
 	Menu, Tray, Add
+	Menu, Tray, Add, %l_info_app_dir%, Menu_App_Dir
+	MenuIcon("Tray", l_info_app_dir, "Icons\Menu\Folder.ico", 0, 0)
 
 	Menu, Tray, Add, %l_app_generate_dictionaries%, Menu_Generate_Dictionaries
 	Menu, Tray, Add, %l_app_options%, Menu_Options
@@ -1267,6 +1276,7 @@ FLAG_Customize_Menus:
 	MenuIcon("Tray", l_app_restart, "Icons\Menu\Restart.ico", 0, 0)
 	MenuIcon("Tray", l_app_exit, "Icons\Menu\Shutdown.ico", 0, 0)
 
+	Menu, Tray, Add, %l_app_list_vars%, Menu_App_List_Vars
 	return
 }
 
@@ -1286,7 +1296,8 @@ Menu_Toggle_Auto_Start:
 	IniWrite("system_enable_auto_start", Config_File, "System", system_enable_auto_start)
 	; Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
 	if (system_enable_auto_start) {
-		Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+		; Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+		Task_Sheduler.Create_Auto_Run_Task(Task_Name := Auto_Run_Task_Name, Arguments := "", WorkingDir := A_ScriptDir, Delay := "PT30S", Admin_Rights := system_start_with_admin_rights, Delete_Task_XML := True)
 	}
 	else {
 		Task_Sheduler.Delete_Task(Auto_Run_Task_Name)
@@ -1301,7 +1312,8 @@ Menu_Toggle_Admin_Rights:
 	IniWrite("system_start_with_admin_rights", Config_File, "System", system_start_with_admin_rights)
 	if (system_enable_auto_start) {
 		; Auto_Run_Task_Name := "CustomTasks\" "Layout_Switcher" ; Script_Name
-		Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+		; Task_Sheduler.Create_Auto_Run_Task(Auto_Run_Task_Name, system_start_with_admin_rights, True)
+		Task_Sheduler.Create_Auto_Run_Task(Task_Name := Auto_Run_Task_Name, Arguments := "", WorkingDir := A_ScriptDir, Delay := "PT30S", Admin_Rights := system_start_with_admin_rights, Delete_Task_XML := True)
 	}
 	if (system_start_with_admin_rights) {
 		Script.Run_As_Admin()
@@ -1471,6 +1483,18 @@ Menu_App_Site:
 {
 	; Run, %info_app_site%
 	ShellRun(info_app_site)
+	return
+}
+
+Menu_App_Dir:
+{
+	ShellRun(A_ScriptDir)
+	return
+}
+
+Menu_App_List_Vars:
+{
+	ListVars
 	return
 }
 
@@ -1644,6 +1668,22 @@ Minimize_Performance:
 {
 	#MaxThreads, 2
 	SetBatchLines, 20ms
+	return
+}
+
+TimerReload:
+{
+	/*
+	if !A_IsSuspended
+	{
+		Suspend On
+		Suspend Off
+	}
+	*/
+	if (A_IsSuspended) {
+		ElapsedTime := A_TickCount - StartTime
+		MsgBox, 262144, %A_ScriptName%, % "S U S P E N D E D in " . Floor(ElapsedTime/1000/60) . " minutes" ;, 1
+	}
 	return
 }
 

@@ -484,6 +484,7 @@ ZOOM_IN:
 {
 	zoom *= zoom_step
 	zoom := zoom > zoom_max ? zoom_max : zoom
+	gosub, SAVE_CONFIG_FILE
 	; ToolTip, zoom: %zoom% (%zoom_step%)
 	if (processing_mode == 3) {
 		capture_width := display_width / zoom
@@ -498,6 +499,7 @@ ZOOM_OUT:
 {
 	zoom /= zoom_step
 	zoom := zoom < zoom_min ? zoom_min : zoom
+	gosub, SAVE_CONFIG_FILE
 	; ToolTip, zoom: %zoom% (%zoom_step%)
 	if (processing_mode == 3) {
 		capture_width := display_width / zoom

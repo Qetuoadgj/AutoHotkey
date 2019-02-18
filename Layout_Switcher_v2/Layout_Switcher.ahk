@@ -26,6 +26,8 @@ SetControlDelay, -1					;
 SendMode, Input						; SendInput is the fastest send method. SendEvent (the default one) is 2nd place, SendPlay a far 3rd place (it's the most compatible one though). SendInput does not obey to SetKeyDelay, SetMouseDelay, SetDefaultMouseSpeed; there is no delay between keystrokes in that mode.
 */
 
+Thread, NoTimers, true
+
 App_PID := DllCall("GetCurrentProcessId")
 
 gosub, Maximize_Performance
@@ -48,7 +50,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.11 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.12 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -204,7 +206,7 @@ SET_DEFAULTS:
 	Defaults.system_suspend_hotkeys := 0
 	Defaults.system_enable_auto_start := 1 ;0
 	Defaults.system_start_with_admin_rights := 1 ;0
-	Defaults.system_run_with_high_priority := 1
+	Defaults.system_run_with_high_priority := 0 ;1
 	Defaults.system_check_layout_change_interval := "On" ; 250
 	Defaults.system_minimize_check_cycles_frequency := 1
 	Defaults.system_force_check_delay := 5000
@@ -288,7 +290,7 @@ SET_DEFAULTS:
 
 READ_CONFIG_FILE:
 {
-	Critical, On
+	; Critical, On
 
 	if (not FileExist(Config_File)) {
 		G_Need_Restart := 1
@@ -468,7 +470,7 @@ READ_CONFIG_FILE:
 	}
 	*/
 
-	Critical, Off
+	; Critical, Off
 
 	return
 }

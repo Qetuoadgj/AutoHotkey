@@ -4,6 +4,8 @@
 
 #SingleInstance, Ignore
 
+G_App_Version := "1.0.00 [AHK v1.1.30.01 - November 11, 2018]"
+
 OnExit, HANDLE_EXIT
 
 ; OS_MajorVersion := DllCall("GetVersion") & 0xFF                ; 10
@@ -96,8 +98,8 @@ SET_DEFAULTS:
 
 	; HotKeys
 	defaults.key_close_app := "Escape"
-	defaults.key_toggle_follow := "LWin & X" ;"Space"
-	defaults.key_toggle_negative := "LWin & N"
+	defaults.key_toggle_follow := "LWin & X"  . " Up" ;"Space"
+	defaults.key_toggle_negative := "LWin & N" . " Up"
 	defaults.key_zoom_in := "WheelUp"
 	defaults.key_zoom_out := "WheelDown"
 
@@ -105,6 +107,8 @@ SET_DEFAULTS:
 }
 GET_SETTINGS:
 {
+	Critical, On
+	
 	; Params
 	IniRead, zoom, %config_file%, Params, zoom, % defaults.zoom
 	IniRead, zoom_min, %config_file%, Params, zoom_min, % defaults.zoom_min
@@ -124,13 +128,16 @@ GET_SETTINGS:
 	IniRead, key_toggle_negative, %config_file%, HotKeys, key_toggle_negative, % defaults.key_toggle_negative
 	IniRead, key_zoom_in, %config_file%, HotKeys, key_zoom_in, % defaults.key_zoom_in
 	IniRead, key_zoom_out, %config_file%, HotKeys, key_zoom_out, % defaults.key_zoom_out
-
+	
+	Critical, Off
 	return
 }
 ASSIGN_HOTKEYS:
 {
+	Critical, On
 	; HotKeys
 	Get_Binds(config_file, "HotKeys", "key_")
+	Critical, Off
 	return
 }
 #Include D:\Google Диск\AutoHotkey\Includes\FUNC_IniWrite.ahk
@@ -409,6 +416,7 @@ CLOSE_APP:
 LUPE_GuiClose:
 HANDLE_EXIT:
 {
+	Critical, On
 	gosub, CLEAR_MEMORY
 	ExitApp
 }

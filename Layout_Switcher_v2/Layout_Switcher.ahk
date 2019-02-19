@@ -27,6 +27,7 @@ SendMode, Input						; SendInput is the fastest send method. SendEvent (the defa
 */
 
 Thread, NoTimers, true
+; Thread, Interrupt,, 1000
 
 App_PID := DllCall("GetCurrentProcessId")
 
@@ -50,7 +51,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.12 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.13 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -571,6 +572,8 @@ SAVE_CONFIG_FILE:
 
 PRELOAD_RESOURCES:
 {
+	Critical, On
+	;
 	sound_switch_keyboard_layout_data := 0
 	sound_switch_text_case_data := 0
 	sound_switch_text_layout_data := 0
@@ -583,11 +586,13 @@ PRELOAD_RESOURCES:
 	FileRead, sound_toggle_cursor_data, *c %sound_toggle_cursor%
 	FileRead, sound_switch_text_whitespace_data, *c %sound_switch_text_whitespace%
 	;
+	Critical, Off
 	return
 }
 
 SWITCH_KEYBOARD_LAYOUT:
 {
+	Critical, On
 	/*
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
 		SoundPlay, %sound_switch_keyboard_layout%
@@ -620,6 +625,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	}
 	Sleep, 50
 	G_Force_Update_Cycle := 1
+	Critical, Off
 	return
 }
 
@@ -660,6 +666,7 @@ SWITCH_KEYBOARD_LAYOUT:
 
 TOGGLE_CURSOR:
 {
+	Critical, On
 	/*
 	if (sound_enable and FileExist(sound_toggle_cursor)) {
 		SoundPlay, %sound_toggle_cursor%
@@ -679,11 +686,13 @@ TOGGLE_CURSOR:
 		}
 	}
 	Sleep, 50
+	Critical, Off
 	return
 }
 
 TOGGLE_MAGNIFIER:
 {
+	Critical, On
 	if FileExist(module_magnifier_long_path) {
 		WinGet, Magnifier_Path, ProcessPath, ahk_pid %Magnifier_Win_PID%
 		if (Magnifier_Path) {
@@ -694,6 +703,7 @@ TOGGLE_MAGNIFIER:
 		}
 	}
 	Sleep, 50
+	Critical, Off
 	return
 }
 
@@ -756,6 +766,7 @@ Clipboard_Restore:
 
 SWITCH_TO_NON_LATIN_LAYOUT:
 {
+	Critical, On
 	if (system_copy_text_in_non_latin_layout) {
 		Current_Layout_HKL := ""
 		Current_Layout_HKL := Layout.Get_HKL("A")
@@ -765,11 +776,13 @@ SWITCH_TO_NON_LATIN_LAYOUT:
 			Sleep, 10
 		}
 	}
+	Critical, Off
 	return
 }
 
 SWITCH_TEXT_CASE:
 {
+	Critical, On
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		/*
@@ -785,11 +798,13 @@ SWITCH_TEXT_CASE:
 	}
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
+	Critical, Off
 	return
 }
 
 SWITCH_TEXT_WHITESPACE:
 {
+	Critical, On
 	gosub, CLIPBOARD_SAVE
 	if (Selected_Text := Edit_Text.Select()) {
 		/*
@@ -805,12 +820,14 @@ SWITCH_TEXT_WHITESPACE:
 	}
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
+	Critical, Off
 	return
 }
 
 ; /*
 SWITCH_TEXT_LAYOUT:
 {
+	Critical, On
 	gosub, CLIPBOARD_SAVE
 	gosub, SWITCH_TO_NON_LATIN_LAYOUT
 	if (Selected_Text := Edit_Text.Select()) {
@@ -860,6 +877,7 @@ SWITCH_TEXT_LAYOUT:
 	Sleep, 50
 	gosub, CLIPBOARD_RESTORE
 	G_Force_Update_Cycle := 1
+	Critical, Off
 	return
 }
 ; */

@@ -32,6 +32,7 @@ Thread, NoTimers, true
 App_PID := DllCall("GetCurrentProcessId")
 
 gosub, Maximize_Performance
+; #MaxThreads, 2
 
 ; Определение классов (для исключения их прямой перезаписи)
 ; new Script		:= c_Script
@@ -51,7 +52,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.13 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.14 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -246,15 +247,15 @@ SET_DEFAULTS:
 	; Defaults.sound_toggle_fullscreen := "sounds\toggle_fullscreen.mp3"
 
 	; HotKeys
-	Defaults.key_switch_keyboard_layout := "$*NumPad1" ;"CapsLock"
-	Defaults.key_switch_text_case := "$*NumPad0" ;"$~!Break"
-	Defaults.key_switch_text_whitespace := "LWin & S"
-	Defaults.key_switch_text_layout := "$*NumPad2" ;"$~Break"
-	Defaults.key_toggle_cursor := "$RWin" ;"#c"
+	Defaults.key_switch_keyboard_layout := "$*NumPad1" . " Up" ;"CapsLock"
+	Defaults.key_switch_text_case := "$*NumPad0" . " Up" ;"$~!Break"
+	Defaults.key_switch_text_whitespace := "LWin & S" . " Up"
+	Defaults.key_switch_text_layout := "$*NumPad2" . " Up" ;"$~Break"
+	Defaults.key_toggle_cursor := "$RWin" . " Up" ;"#c"
 	; Defaults.key_toggle_fullscreen := "LWin & LButton"
 
 	; HotKeysExcludeWinTitles
-	Defaults.keys_exclude_win_titles := "ahk_exe Oblivion.exe`n; ahk_class Notepad++"
+	Defaults.keys_exclude_win_titles := Trim("; ahk_class Shell_TrayWnd ahk_exe Explorer.EXE`nahk_exe Oblivion.exe`nahk_exe Gothic.exe`nahk_exe Gothic2.exe`nahk_exe GothicMod.exe`nahk_class DARK SOULS`nahk_exe game.exe`n; ahk_class Notepad++")
 
 	; KeyCombos
 	Defaults.combo_switch_layout := "{Blind}{Alt Down}{Shift Down}{Alt Up}{Shift Up}"
@@ -278,11 +279,11 @@ SET_DEFAULTS:
 	; Magnifier
 	Defaults.magnifier_processing_mode := 3 ;(OS_MajorVersion > 6) ? 1 : 0 ; WIN_8+
 	;
-	Defaults.magnifier_key_toggle := "LWin & Z"
+	Defaults.magnifier_key_toggle := "LWin & Z" . " Up"
 	;
 	Defaults.magnifier_key_close_app := "Escape"
-	Defaults.magnifier_key_toggle_follow := "LWin & X" ;"Space"
-	Defaults.magnifier_key_toggle_negative := "LWin & N"
+	Defaults.magnifier_key_toggle_follow := "LWin & X" . " Up" ;"Space"
+	Defaults.magnifier_key_toggle_negative := "LWin & N" . " Up"
 	Defaults.magnifier_key_zoom_in := "WheelUp"
 	Defaults.magnifier_key_zoom_out := "WheelDown"
 
@@ -291,7 +292,7 @@ SET_DEFAULTS:
 
 READ_CONFIG_FILE:
 {
-	; Critical, On
+	Critical, On
 
 	if (not FileExist(Config_File)) {
 		G_Need_Restart := 1
@@ -471,7 +472,7 @@ READ_CONFIG_FILE:
 	}
 	*/
 
-	; Critical, Off
+	Critical, Off
 
 	return
 }
@@ -573,7 +574,6 @@ SAVE_CONFIG_FILE:
 PRELOAD_RESOURCES:
 {
 	Critical, On
-	;
 	sound_switch_keyboard_layout_data := 0
 	sound_switch_text_case_data := 0
 	sound_switch_text_layout_data := 0
@@ -585,7 +585,6 @@ PRELOAD_RESOURCES:
 	FileRead, sound_switch_text_layout_data, *c %sound_switch_text_layout%
 	FileRead, sound_toggle_cursor_data, *c %sound_toggle_cursor%
 	FileRead, sound_switch_text_whitespace_data, *c %sound_switch_text_whitespace%
-	;
 	Critical, Off
 	return
 }
@@ -766,7 +765,7 @@ Clipboard_Restore:
 
 SWITCH_TO_NON_LATIN_LAYOUT:
 {
-	Critical, On
+	; Critical, On
 	if (system_copy_text_in_non_latin_layout) {
 		Current_Layout_HKL := ""
 		Current_Layout_HKL := Layout.Get_HKL("A")
@@ -776,7 +775,7 @@ SWITCH_TO_NON_LATIN_LAYOUT:
 			Sleep, 10
 		}
 	}
-	Critical, Off
+	; Critical, Off
 	return
 }
 
@@ -1668,6 +1667,7 @@ DoExit:
 */
 App_Close:
 {
+	Critical, On
 	; gosub, Maximize_Performance
 	gosub, Magnifier_Close
 	G_cursor_state := SystemCursor("On")

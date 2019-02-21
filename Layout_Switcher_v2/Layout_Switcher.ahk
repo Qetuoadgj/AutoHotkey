@@ -52,7 +52,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.14 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.15 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -68,6 +68,10 @@ G_Force_Update_Cycle := 1
 G_Need_Restart := 0
 ; G_ForceUpdateTime := 5000
 G_LastUpdateTimeDelta := 0
+
+GroupAdd, G_Windows_Tray, ahk_class Shell_TrayWnd
+GroupAdd, G_Windows_Desktop, ahk_class WorkerW ahk_exe Explorer.EXE ; Win 10
+GroupAdd, G_Windows_Desktop, Program Manager ahk_class Progman ahk_exe explorer.exe ; Win 7
 
 class OS
 {
@@ -145,6 +149,19 @@ SetTimer, TimerReload, 2000
 
 Exit
 
+UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY:
+{
+	G_Exclude_Win_ID_Array := []
+	WinGet, G_Exclude_Win_ID_List, List, ahk_group G_Windows_Desktop
+	Loop, %G_Exclude_Win_ID_List%
+	{
+		Exclude_Win_ID := G_Exclude_Win_ID_List%A_Index%
+		G_Exclude_Win_ID_Array.push(Exclude_Win_ID)
+		; MsgBox, %Exclude_Win_ID%
+	}
+	return
+}
+
 CREATE_LOCALIZATION:
 {
 	Translation_Language := Layout.Language_Name("0x" . A_Language, true)
@@ -187,7 +204,7 @@ CREATE_LOCALIZATION:
 	IniRead, l_app_exit, %Translation_File%, App, app_exit, % "Close App"
 	IniRead, l_app_options, %Translation_File%, App, app_options, % "Open Settings"
 	IniRead, l_app_generate_dictionaries, %Translation_File%, App, app_generate_dictionaries, % "Generate Dictionaries"
-	IniRead, l_app_list_vars, %Translation_File%, Info, app_list_vars, % "List Variables"
+	IniRead, l_app_list_vars, %Translation_File%, App, app_list_vars, % "List Variables"
 
 	; Msg
 	IniRead, l_msg_cursor_on, %Translation_File%, Msg, msg_cursor_on, % "Cursor: On"
@@ -592,6 +609,15 @@ PRELOAD_RESOURCES:
 SWITCH_KEYBOARD_LAYOUT:
 {
 	Critical, On
+	if WinActive("ahk_group G_Windows_Tray") {
+		if (Windows_Desktop_ID := WinExist("ahk_group G_Windows_Desktop")) {
+			WinActivate, ahk_id %Windows_Desktop_ID%
+			WinWaitActive, ahk_id %Windows_Desktop_ID%,, 0.5
+		}
+		else {
+			return
+		}
+	}
 	/*
 	if (sound_enable and FileExist(sound_switch_keyboard_layout)) {
 		SoundPlay, %sound_switch_keyboard_layout%
@@ -599,9 +625,6 @@ SWITCH_KEYBOARD_LAYOUT:
 	*/
 	if (sound_enable and sound_switch_keyboard_layout_data) {
 		PlaySound(sound_switch_keyboard_layout_data)
-	}
-	if WinActive("ahk_id " Windows.Tray_ID) {
-		WinActivate, % "ahk_id " Windows.Desktop_ID
 	}
 	Layout.Next("A", system_switch_layouts_by_send)
 	Sleep, 10
@@ -611,7 +634,8 @@ SWITCH_KEYBOARD_LAYOUT:
 	; gosub, FLAG_Update
 	; ToolTip(Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name " - " Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name)
 	gosub, FLAG_Update
-	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
+	gosub, UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY
+	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A", G_Exclude_Win_ID_Array)))) {
 		if (splash_enable) {
 			if (Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name) {
 				G_Splash_Text := Layout.Layouts_List_By_HKL[Layout_HKL].Full_Name . " - " . Layout.Layouts_List_By_HKL[Layout_HKL].Display_Name
@@ -634,7 +658,8 @@ SWITCH_KEYBOARD_LAYOUT:
 ~Alt & ~Shift Up::
 ~Alt & ~Shift::
 {
-	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
+	gosub, UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY
+	if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A", G_Exclude_Win_ID_Array))) {
 		return
 	}
 	Sleep, 50
@@ -675,7 +700,8 @@ TOGGLE_CURSOR:
 		PlaySound(sound_toggle_cursor_data)
 	}
 	G_cursor_state := SystemCursor("Toggle")
-	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
+	gosub, UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY
+	if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A", G_Exclude_Win_ID_Array)))) {
 		if (splash_enable) {
 			G_Splash_Text := G_cursor_state ? l_msg_cursor_on : l_msg_cursor_off
 			gosub, FLAG_Show_Splash
@@ -858,7 +884,8 @@ SWITCH_TEXT_LAYOUT:
 				Next_Layout_Display_Name := Layout.Layouts_List[Next_Layout_Index].Display_Name
 				; ToolTip(Next_Layout_Full_Name " - " Next_Layout_Display_Name)
 				gosub, FLAG_Update
-				if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A")))) {
+				gosub, UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY
+				if (not (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A", G_Exclude_Win_ID_Array)))) {
 					if (splash_enable) {
 						if (Next_Layout_Full_Name) {
 							G_Splash_Text := Next_Layout_Full_Name . " - " . Next_Layout_Display_Name
@@ -1087,7 +1114,8 @@ FLAG_Update:
 	}
 	; ToolTip, %A_TickCount%
 	if (flag_always_on_top) {
-		if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A"))) {
+		gosub, UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY
+		if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A", G_Exclude_Win_ID_Array))) {
 			; Gui, FLAG_: -AlwaysOnTop
 			WinSet, Bottom,, ahk_id %flag_win_id%
 		}
@@ -1296,6 +1324,8 @@ FLAG_Customize_Menus:
 	MenuIcon("Tray", l_app_exit, "Icons\Menu\Shutdown.ico", 0, 0)
 
 	Menu, Tray, Add, %l_app_list_vars%, Menu_App_List_Vars
+	MenuIcon("Tray", l_app_list_vars, "Icons\Menu\Code.ico", 0, 0)
+	
 	return
 }
 
@@ -1726,7 +1756,7 @@ TimerReload:
 
 #Include ..\Includes\CLASS_Script.ahk
 #Include ..\Includes\CLASS_Task_Sheduler.ahk ; требует FUNC_hexToDecimal.ahk
-#Include ..\Includes\CLASS_Windows.ahk
+; #Include ..\Includes\CLASS_Windows.ahk
 #Include ..\Includes\CLASS_Window.ahk
 #Include ..\Includes\CLASS_Layout.ahk
 #Include ..\Includes\CLASS_EditText.ahk

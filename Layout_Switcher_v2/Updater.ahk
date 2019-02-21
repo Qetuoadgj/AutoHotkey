@@ -91,6 +91,7 @@ START_UPDATE:
 		info_download_from=https://raw.githubusercontent.com/Qetuoadgj/AutoHotkey/master/Layout_Switcher_v2/
 		info_run_x32=Layout_Switcher_x32.exe
 		info_run_x64=Layout_Switcher_x64.exe
+		
 		[x86]
 		; ICONS
 		Icons\English.ico
@@ -100,7 +101,9 @@ START_UPDATE:
 		Icons\Menu\Home.ico
 		Icons\Menu\Update.ico
 		;
+		Icons\Menu\Code.ico
 		Icons\Menu\Dictionaries.ico
+		Icons\Menu\Folder.ico
 		Icons\Menu\Restart.ico
 		Icons\Menu\Settings.ico
 		Icons\Menu\Shutdown.ico
@@ -117,16 +120,19 @@ START_UPDATE:
 		Translations\Russian.ini
 		; MAGNIFIER
 		Modules\Magnifier\Magnifier.ini
+		
 		[x32]
 		; MAIN
 		Layout_Switcher_x32.exe
 		; MAGNIFIER
 		Modules\Magnifier\Magnifier_x32.exe
+		
 		[x64]
 		; MAIN
 		Layout_Switcher_x64.exe
 		; MAGNIFIER
 		Modules\Magnifier\Magnifier_x64.exe
+		
 		)
 		;
 		FileAppend, %default_text%, %Config_File%

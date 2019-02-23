@@ -6,7 +6,7 @@ SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 #Warn, ClassOverwrite, Off
 
 ListLines, Off	; Disable them as they're only useful for debugging purposes.
-#KeyHistory, 0	; ListLines and #KeyHistory are functions used to "log your keys".
+; #KeyHistory, 0	; ListLines and #KeyHistory are functions used to "log your keys".
 
 DetectHiddenWindows, On
 
@@ -52,7 +52,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.15 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.16 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -72,6 +72,8 @@ G_LastUpdateTimeDelta := 0
 GroupAdd, G_Windows_Tray, ahk_class Shell_TrayWnd
 GroupAdd, G_Windows_Desktop, ahk_class WorkerW ahk_exe Explorer.EXE ; Win 10
 GroupAdd, G_Windows_Desktop, Program Manager ahk_class Progman ahk_exe explorer.exe ; Win 7
+
+G_Windows_Desktop_Win_ID := Get_Windows_Desktop_ID()
 
 class OS
 {
@@ -149,16 +151,27 @@ SetTimer, TimerReload, 2000
 
 Exit
 
+Get_Windows_Desktop_ID()
+{
+	local
+	GroupAdd, Windows_Desktop, ahk_class WorkerW ahk_exe Explorer.EXE ; Win 10
+	GroupAdd, Windows_Desktop, Program Manager ahk_class Progman ahk_exe explorer.exe ; Win 7
+	WinGet, Windows_Desktop_ID_List, List, ahk_group Windows_Desktop
+	Loop, %Windows_Desktop_ID_List%
+	{
+		ID := Windows_Desktop_ID_List%A_Index%
+		WinGet, Win_Stlye, Style, ahk_id %ID%
+		if (Win_Stlye = "0x96000000") { ; Win Desktop
+			return ID
+		}
+	}
+}
+
 UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY:
 {
-	G_Exclude_Win_ID_Array := []
-	WinGet, G_Exclude_Win_ID_List, List, ahk_group G_Windows_Desktop
-	Loop, %G_Exclude_Win_ID_List%
-	{
-		Exclude_Win_ID := G_Exclude_Win_ID_List%A_Index%
-		G_Exclude_Win_ID_Array.push(Exclude_Win_ID)
-		; MsgBox, %Exclude_Win_ID%
-	}
+	G_Windows_Desktop_Win_ID := WinExist(G_Windows_Desktop_Win_ID) ? G_Windows_Desktop_Win_ID : Get_Windows_Desktop_ID()
+	G_Exclude_Win_ID_Array := [G_Windows_Desktop_Win_ID]
+	; MsgBox, %G_Windows_Desktop_Win_ID%
 	return
 }
 
@@ -610,9 +623,10 @@ SWITCH_KEYBOARD_LAYOUT:
 {
 	Critical, On
 	if WinActive("ahk_group G_Windows_Tray") {
-		if (Windows_Desktop_ID := WinExist("ahk_group G_Windows_Desktop")) {
-			WinActivate, ahk_id %Windows_Desktop_ID%
-			WinWaitActive, ahk_id %Windows_Desktop_ID%,, 0.5
+		G_Windows_Desktop_Win_ID := WinExist(G_Windows_Desktop_Win_ID) ? G_Windows_Desktop_Win_ID : Get_Windows_Desktop_ID()
+		if WinExist("ahk_id " . G_Windows_Desktop_Win_ID) {
+			WinActivate, ahk_id %G_Windows_Desktop_Win_ID%
+			WinWaitActive, ahk_id %G_Windows_Desktop_Win_ID%,, 0.5
 		}
 		else {
 			return

@@ -52,7 +52,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.17 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.18 [AHK v1.1.30.01 - November 11, 2018]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -686,7 +686,7 @@ SWITCH_KEYBOARD_LAYOUT:
 	; gosub, UPDATE_EXCLUDE_FULLSCREEN_WIN_ARRAY
 	; if (flag_hide_in_fullscreen_mode and (G_IsFullscreen := Window.Is_Full_Screen("A", G_Exclude_Win_ID_Array))) {
 	gosub, UPDATE_FULL_SCREEN_STATE
-	if (not G_HideFlag) {
+	if (G_HideFlag) {
 		return
 	}
 	Sleep, 50

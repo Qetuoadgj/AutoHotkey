@@ -52,7 +52,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.18 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "2.0.19 [AHK v1.1.32.00 - November 24, 2019]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -147,8 +147,8 @@ if (G_Need_Restart == 1) {
 
 ; MsgBox, % Layout.Layouts_List.MaxIndex()
 
-StartTime := A_TickCount
-SetTimer, TimerReload, 2000
+;~ StartTime := A_TickCount
+;~ SetTimer, TimerReload, 2000
 
 Exit
 
@@ -1754,21 +1754,21 @@ Minimize_Performance:
 	return
 }
 
-TimerReload:
-{
-	/*
-	if !A_IsSuspended
-	{
-		Suspend On
-		Suspend Off
-	}
-	*/
-	if (A_IsSuspended) {
-		ElapsedTime := A_TickCount - StartTime
-		MsgBox, 262144, %A_ScriptName%, % "S U S P E N D E D in " . Floor(ElapsedTime/1000/60) . " minutes" ;, 1
-	}
-	return
-}
+;~ TimerReload:
+;~ {
+	;~ /*
+	;~ if !A_IsSuspended
+	;~ {
+		;~ Suspend On
+		;~ Suspend Off
+	;~ }
+	;~ */
+	;~ if (A_IsSuspended) {
+		;~ ElapsedTime := A_TickCount - StartTime
+		;~ MsgBox, 262144, %A_ScriptName%, % "S U S P E N D E D in " . Floor(ElapsedTime/1000/60) . " minutes" ;, 1
+	;~ }
+	;~ return
+;~ }
 
 #Include ..\Includes\FUNC_PlaySound.ahk
 

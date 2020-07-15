@@ -4,7 +4,7 @@
 
 #SingleInstance, Ignore
 
-G_App_Version := "1.0.00 [AHK v1.1.30.01 - November 11, 2018]"
+G_App_Version := "1.0.00 [AHK v1.1.33.01 - July 13, 2020]"
 
 OnExit, HANDLE_EXIT
 

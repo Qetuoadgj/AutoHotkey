@@ -3,7 +3,7 @@
 SendMode, Input ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir, %A_ScriptDir% ; Ensures a consistent starting directory.
 
-#Warn, ClassOverwrite, Off
+; #Warn, ClassOverwrite, Off
 
 ListLines, Off	; Disable them as they're only useful for debugging purposes.
 ; #KeyHistory, 0	; ListLines and #KeyHistory are functions used to "log your keys".
@@ -52,7 +52,7 @@ Script_Args := Script.Args()
 ; Script.Force_Single_Instance([RegExReplace(Script_Name, "_x(32|64)", "") . "*"])
 ; Script.Run_As_Admin(Script_Args)
 
-G_App_Version := "2.0.19 [AHK v1.1.32.00 - November 24, 2019]"
+G_App_Version := "2.0.20 [AHK v1.1.33.01 - July 13, 2020]"
 
 Config_File := A_ScriptDir . "\" . "Layout_Switcher" . ".ini"
 Auto_Run_Task_Name := "CustomTasks" . "\" . "Layout_Switcher" ; Script_Name
@@ -162,7 +162,7 @@ Get_Windows_Desktop_ID()
 	{
 		ID := Windows_Desktop_ID_List%A_Index%
 		WinGet, Win_Stlye, Style, ahk_id %ID%
-		if (Win_Stlye = "0x96000000") { ; Win Desktop
+		if (Win_Stlye == "0x96000000") { ; Win Desktop
 			return ID
 		}
 	}
@@ -411,7 +411,7 @@ READ_CONFIG_FILE:
 	Loop, Parse, keys_exclude_win_titles, `n, `r
 	{
 		key_exclude_win_title := Trim(A_LoopField)
-		if (key_exclude_win_title = "") {
+		if (key_exclude_win_title == "") {
 			continue
 		}
 		if RegExMatch(key_exclude_win_title, "^[;#]") {
@@ -822,7 +822,7 @@ SWITCH_TO_NON_LATIN_LAYOUT:
 {
 	; Critical, On
 	if (system_copy_text_in_non_latin_layout) {
-		Current_Layout_HKL := ""
+		; Current_Layout_HKL := ""
 		Current_Layout_HKL := Layout.Get_HKL("A")
 		if (Non_Latin_Layout_Index := Layout.Get_Index_By_Name(system_non_latin_layout)) {
 			Non_Latin_Layout_HKL := Layout.Layouts_List[Non_Latin_Layout_Index].HKL
@@ -883,6 +883,7 @@ SWITCH_TEXT_LAYOUT:
 {
 	Critical, On
 	gosub, CLIPBOARD_SAVE
+	Current_Layout_HKL := false ; ""
 	gosub, SWITCH_TO_NON_LATIN_LAYOUT
 	if (Selected_Text := Edit_Text.Select()) {
 		/*
@@ -1133,10 +1134,10 @@ FLAG_Update:
 {
 	if (system_minimize_check_cycles_frequency) {
 		G_Cur_Win_ID := WinExist("A")
-		; if (!GetKeyState("LWin", "P") and G_Cur_Win_ID = G_Last_Win_ID) {
-		; if (!G_Force_Update_Cycle and (G_Cur_Win_ID = G_Last_Win_ID)) {
+		; if (!GetKeyState("LWin", "P") and G_Cur_Win_ID == G_Last_Win_ID) {
+		; if (!G_Force_Update_Cycle and (G_Cur_Win_ID == G_Last_Win_ID)) {
 		G_Force_Update_Cycle := G_Force_Update_Cycle or (system_force_check_delay and ((A_TickCount - G_LastUpdateTimeDelta) > system_force_check_delay))
-		if (!G_Force_Update_Cycle and (G_Cur_Win_ID = G_Last_Win_ID)) {
+		if (!G_Force_Update_Cycle and (G_Cur_Win_ID == G_Last_Win_ID)) {
 			return
 		}
 		G_Last_Win_ID := G_Cur_Win_ID
@@ -1156,13 +1157,12 @@ FLAG_Update:
 			Gui, FLAG_: +AlwaysOnTop
 		}
 	}
-	Current_Layout_HKL := Layout.Get_HKL("A")
-	if (not Current_Layout_HKL) {
+	if not (Current_Layout_HKL := Layout.Get_HKL("A")) {
 		return
 	}
 	; Current_Layout_Full_Name := Layout.Language_Name(Current_Layout_HKL, True)
 	Current_Layout_Full_Name := Layout.Layouts_List_By_HKL[Current_Layout_HKL].Full_Name
-	if (Current_Layout_Full_Name = Last_Layout_Full_Name) {
+	if (Current_Layout_Full_Name == Last_Layout_Full_Name) {
 		return
 	}
 	gosub, FLAG_Update_Picture
@@ -1676,7 +1676,7 @@ Generate_Dictionaries(Prefix := "")
 				Layout.Change(Layout_Data.HKL, Win_Title, system_switch_layouts_by_send := 1)
 				Sleep, 50
 			}
-			if (Layout.Get_HKL(Win_Title) = Layout_Data.HKL) {
+			if (Layout.Get_HKL(Win_Title) == Layout_Data.HKL) {
 				Dictionary_Name := Prefix . Layout_Data.Full_Name
 				StringLower, Dictionary_Name, Dictionary_Name
 				ControlSendRaw,, %Dictionary_Name%=, %Edit1_Title%
